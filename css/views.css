@@ -1,0 +1,1029 @@
+/* ==========================================================================
+   Loading & Portrait Warnings
+   ========================================================================== */
+#loading-overlay {
+    position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh;
+    background-color: var(--bg-primary); display: flex; flex-direction: column; 
+    justify-content: center; align-items: center; z-index: 10000; 
+    transition: opacity 0.6s ease-out, visibility 0.6s;
+}
+
+.spinner {
+    width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.1);
+    border-left-color: var(--accent); border-radius: 50%;
+    animation: spin 1s linear infinite; margin-bottom: 24px;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+.loading-title { font-family: 'Outfit', sans-serif; color: var(--text-primary); font-size: 32px; font-weight: 700; letter-spacing: 1px; margin: 0; }
+.loading-subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 8px; }
+
+#portrait-warning {
+    display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh;
+    background-color: rgba(15, 23, 42, 0.98); backdrop-filter: blur(5px);
+    z-index: 20000; color: white; flex-direction: column; 
+    justify-content: center; align-items: center; text-align: center;
+}
+
+.rotate-icon { font-size: 48px; margin-bottom: 16px; animation: tilt 2s infinite ease-in-out; }
+@keyframes tilt { 0%, 100% { transform: rotate(0deg); } 50% { transform: rotate(-90deg); } }
+
+/*
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   Truth Table & Waveform HTML5 View
+   ========================================================================== */
+#truthtable-container, #kmap-container, #svg-circuit-container, #simulation-container, #verilog-container, #solution-container {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    box-sizing: border-box;
+    padding: 20px;
+    background-color: var(--bg-primary);
+    z-index: 8;
+    overflow: hidden;
+}
+
+/* Each view container already declares its own correct display value
+   (grid, flex, block) above. JS only needs to toggle this class to hide
+   a view — it should never set an inline display value, since that would
+   override (and can silently drift out of sync with) the type declared
+   here. */
+.view-hidden {
+    display: none !important;
+}
+
+#truthtable-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+#kmap-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+#solution-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.solution-panel {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.solution-content-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 16px;
+    font-family: 'Outfit', sans-serif;
+    line-height: 1.6;
+    background: rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    margin-top: 12px;
+    border: 1px solid var(--border);
+}
+
+.solution-empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.tt-panel, .wave-panel, .verilog-panel, .kmap-panel, .kmap-analysis-panel, .solution-panel {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+    overflow: hidden;
+    box-sizing: border-box;
+    contain: layout style paint;
+}
+
+.panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-shrink: 0;
+}
+
+.kmap-solutions-wrapper {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 2px;
+}
+
+.panel-header h2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.action-btn-secondary {
+    background-color: var(--accent-light);
+    border: 1px solid rgba(37, 99, 235, 0.2);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-btn-secondary:hover {
+    background-color: var(--accent);
+    color: white;
+}
+
+.table-scroll-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 0;
+    /* center a narrow table (few variables) instead of letting it hug the
+       left edge once it's no longer stretched to fill the wrapper */
+    display: flex;
+    justify-content: center;
+    contain: content;
+    will-change: scroll-position;
+}
+
+.wave-scroll-wrapper {
+    flex-grow: 1;
+    /* Desktop: the canvas is always sized to fit this box exactly (see
+       renderHTMLWaveform in app.js), so this never needs to scroll -
+       hidden instead of auto means no scrollbar ever appears here. Mobile
+       restores overflow-y: auto below, since it still enforces a 40px-
+       per-signal floor that can outgrow the box on tall variable counts. */
+    overflow-y: hidden;
+    overflow-x: hidden; /* Lock horizontal to fit */
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 8px;
+    contain: content;
+    will-change: scroll-position;
+}
+
+/* Truth Table CSS */
+#html-truth-table {
+    /* Maximize into the available width instead of sizing to content and
+       centering - the wrapper still scrolls horizontally if a table with
+       many variables ends up wider than the panel. */
+    width: 100%;
+    min-width: 320px;
+    margin: 0 auto;
+    border-collapse: separate;
+    border-spacing: 0;
+    /* Same family/weight/tracking as the algebraic proof's .alg-expr
+       lines, instead of the old monospace data-table look. */
+    font-family: 'Outfit', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+#html-truth-table th {
+    background-color: var(--bg-secondary);
+    color: var(--text-secondary);
+    padding: 11px 20px;
+    /* Headers are labels, not data - the UI sans font (instead of the
+       data rows' monospace) makes that distinction clear at a glance. */
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    border-bottom: 2px solid var(--border);
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+#html-truth-table th:first-child { border-top-left-radius: 9px; }
+#html-truth-table th:last-child { border-top-right-radius: 9px; }
+
+/* Visually separate the input variable columns from the derived Out /
+   Minterm columns instead of leaving all columns looking identical */
+#html-truth-table th.tt-out-col,
+#html-truth-table td.output-cell {
+    border-left: 1px solid var(--border);
+}
+
+#html-truth-table td {
+    padding: 9px 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    min-width: 20px;
+}
+
+#html-truth-table tbody tr:nth-child(even) td:not(.output-cell) {
+    background-color: rgba(255, 255, 255, 0.015);
+}
+
+
+#html-truth-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Output cells styling - Reddish for 0, Greenish for 1, Neutral for X */
+.output-cell {
+    cursor: pointer;
+    font-weight: bold;
+    user-select: none;
+    transition: var(--transition-fast);
+}
+
+.output-cell.out-zero {
+    background-color: var(--error-light) !important;
+    color: var(--error) !important;
+}
+
+.output-cell.out-zero:hover {
+    background-color: rgba(239, 68, 68, 0.25) !important;
+}
+
+.output-cell.out-one {
+    background-color: var(--success-light) !important;
+    color: var(--success) !important;
+}
+
+.output-cell.out-one:hover {
+    background-color: rgba(16, 185, 129, 0.25) !important;
+}
+
+.output-cell.out-dontcare {
+    background-color: rgba(148, 163, 184, 0.15) !important;
+    color: var(--text-secondary) !important;
+}
+
+.output-cell.out-dontcare:hover {
+    background-color: rgba(148, 163, 184, 0.25) !important;
+}
+
+/* Waveform Canvas */
+#waveform-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    min-height: 250px;
+}
+
+/* Verilog Code Panels View */
+#verilog-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--bg-primary);
+    z-index: 8;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.code-scroll-wrapper {
+    flex-grow: 1;
+    overflow-y: auto;
+    overflow-x: auto;
+    background: var(--bg-primary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 18px;
+    box-sizing: border-box;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+    cursor: default;
+}
+
+.code-scroll-wrapper:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.1);
+}
+
+/* Sleek custom scrollbars globally (matches Verilog code boxes) */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+.code-scroll-wrapper pre {
+    margin: 0;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    cursor: text;
+}
+
+.code-scroll-wrapper code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    white-space: pre;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+    cursor: text;
+    display: block;
+}
+
+.code-line {
+    display: flex;
+    align-items: flex-start;
+    line-height: 1.6;
+}
+
+.line-num {
+    display: inline-block;
+    min-width: 32px;
+    padding-right: 12px;
+    margin-right: 12px;
+    color: var(--text-muted);
+    text-align: right;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    border-right: 1px solid var(--border);
+    flex-shrink: 0;
+    font-size: 12px;
+    opacity: 0.65;
+}
+
+.line-text {
+    flex: 1;
+    white-space: pre;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+
+.panel-actions {
+    display: flex;
+    gap: 8px;
+}
+
+/* Borderless action links with SVGs and text labels */
+.action-link-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px 8px;
+    border-radius: 6px;
+    transition: var(--transition-fast);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.action-link-btn:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.06);
+}
+
+.action-link-btn svg {
+    color: inherit;
+    display: inline-block;
+    vertical-align: middle;
+    flex-shrink: 0;
+}
+
+.action-link-btn span {
+    font-family: var(--font-sans);
+    line-height: 1;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* SVG Circuit Diagram Styles */
+#svg-circuit-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--bg-primary);
+    z-index: 8;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#simulation-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--bg-primary);
+    z-index: 8;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.circuit-panel {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-shadow: var(--shadow-md, 0 4px 6px rgba(0,0,0,0.1));
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.circuit-scroll-wrapper {
+    flex-grow: 1;
+    overflow: hidden;
+    position: relative;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    padding: 0;
+    display: block;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    /* Must be set on the exact pinch-target element, not just an ancestor -
+       iOS Safari can still let native page-zoom engage on the first pinch
+       otherwise, which is what caused the blur (a real native viewport zoom,
+       not a rendering artifact) until something else forced a reflow. */
+    touch-action: none;
+}
+
+.circuit-scroll-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.zoom-content-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform-origin: 0 0;
+    pointer-events: none;
+}
+
+/* The plain circuit diagram (original/simplified-circuit-scroll) has no SVG
+   filters at all - it's just plain vector strokes - so it deliberately does
+   NOT get the GPU layer-promotion hints below. Forcing a 3D compositing
+   context onto content that doesn't need it was subtly degrading its stroke
+   anti-aliasing (visible as slight pixelation) once scaled down small. */
+#original-sim-scroll .zoom-content-wrapper,
+#simplified-sim-scroll .zoom-content-wrapper {
+    /* Filtered gate shapes (plastic-3d / silkscreen) get rasterized to a bitmap
+       on first paint. Without a promoted layer, pinch-zoom's rapid transform
+       updates just stretch that stale bitmap -> blur. will-change + a 3D
+       transform on every applied frame (see applyZoom in app.js) forces the
+       browser to keep re-rasterizing at the live scale during the gesture. */
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    perspective: 1000px;
+    -webkit-perspective: 1000px;
+}
+
+.zoom-content-wrapper svg {
+    pointer-events: auto;
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.circuit-svg {
+    display: block;
+}
+
+.circuit-wire {
+    fill: none;
+    stroke: var(--text-primary);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.2s, stroke-width 0.2s;
+}
+
+.circuit-wire:hover {
+    stroke: var(--accent);
+    stroke-width: 4;
+}
+
+.gate-shape {
+    fill: none;
+    stroke: var(--text-primary);
+    stroke-width: 2.5;
+}
+
+.gate-text {
+    font-family: var(--font-family);
+    font-size: 14px;
+    fill: var(--text-primary);
+    font-weight: 600;
+    pointer-events: none;
+}
+
+.var-node {
+    fill: none;
+    stroke: var(--text-primary);
+    stroke-width: 2.5;
+}
+
+.var-text {
+    font-family: var(--font-family);
+    font-size: 16px;
+    font-weight: 700;
+    fill: var(--text-primary);
+    pointer-events: none;
+}
+
+/* Floating Zoom Controls */
+.zoom-controls {
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.zoom-btn {
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    box-shadow: var(--shadow-sm);
+}
+
+.zoom-btn:hover {
+    background-color: var(--accent-light);
+    color: var(--accent);
+    border-color: rgba(37, 99, 235, 0.3);
+}
+
+.zoom-btn svg {
+    pointer-events: none;
+}
+
+/* Panel Fullscreen Overlay */
+.panel-fs-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+    animation: panelFsIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes panelFsIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.panel-fs-inner {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.panel-fs-scroll-wrapper {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    background: rgba(0, 0, 0, 0.05);
+    touch-action: none;
+}
+
+.panel-fs-controls {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border);
+}
+
+.panel-fs-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 18px;
+}
+
+.panel-fs-exit-btn {
+    background: var(--error-light);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: var(--error);
+}
+
+.panel-fs-exit-btn:hover {
+    background: var(--error);
+    color: #fff;
+    border-color: var(--error);
+}
+.kmap-table { border-collapse: collapse; margin: 20px auto; width: auto; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12); }
+.kmap-cell { border: 1px solid var(--border); width: 60px; height: 60px; min-width: 60px; min-height: 60px; text-align: center; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s; font-family: monospace; font-size: 1.2rem; box-sizing: border-box; }  
+@media (hover: hover) and (pointer: fine) {
+    .kmap-cell:hover { background-color: var(--accent-light); }
+}
+.kmap-table th { padding: 10px; font-weight: bold; background: var(--bg-primary); min-width: 60px; height: 60px; text-align: center; vertical-align: middle; box-sizing: border-box; } 
+
+/* Rounded outer corners for the K-map grid. border-collapse merges adjacent
+   cell borders into shared lines, so the radius has to be applied to the
+   four outermost cells themselves (not the <table>) or the collapsed
+   border would still draw a hard square corner underneath the clip. */
+.kmap-table tr:first-child th.kmap-corner { border-top-left-radius: 14px; }
+.kmap-table tr:first-child th:last-child { border-top-right-radius: 14px; }
+.kmap-table tr:last-child th:first-child { border-bottom-left-radius: 14px; }
+.kmap-table tr:last-child td.kmap-cell:last-child { border-bottom-right-radius: 14px; }
+
+.kmap-small { border-radius: 10px; }
+.kmap-small.kmap-table,
+.kmap-small .kmap-table { border-radius: 10px; }
+.kmap-small.kmap-table tr:first-child th.kmap-corner,
+.kmap-small .kmap-table tr:first-child th.kmap-corner { border-top-left-radius: 10px; }
+.kmap-small.kmap-table tr:first-child th:last-child,
+.kmap-small .kmap-table tr:first-child th:last-child { border-top-right-radius: 10px; }
+.kmap-small.kmap-table tr:last-child th:first-child,
+.kmap-small .kmap-table tr:last-child th:first-child { border-bottom-left-radius: 10px; }
+.kmap-small.kmap-table tr:last-child td.kmap-cell:last-child,
+.kmap-small .kmap-table tr:last-child td.kmap-cell:last-child { border-bottom-right-radius: 10px; }
+  
+#kmap-visual-wrapper { position: relative; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%; }  
+#kmap-svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; } 
+
+/* 3D KMap CSS — a real WebGL cube lattice, one cube per K-map cell */
+#kmap-3d-container { position: relative; width: 100%; height: 100%; min-height: 380px; }
+
+.kmap-3d-canvas-wrap {
+    width: 100%; height: 100%; min-height: 380px;
+    display: flex; align-items: center; justify-content: center;
+    box-sizing: border-box;
+}
+.kmap-3d-canvas-wrap canvas { display: block; }
+
+.kmap-3d-toolbar { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; z-index: 50; }
+.kmap-3d-tbtn {
+    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+    background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px;
+    color: var(--text-secondary); cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+@media (hover: hover) and (pointer: fine) {
+    .kmap-3d-tbtn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
+}
+.kmap-3d-tbtn.active { background: var(--accent); color: #fff; border-color: var(--accent-hover); }
+.kmap-3d-tbtn svg { width: 15px; height: 15px; }
+
+.kmap-3d-legend {
+    position: absolute; top: 8px; left: 8px; z-index: 50;
+    display: flex; gap: 12px;
+    background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px;
+    padding: 6px 10px; font-size: 0.78em; color: var(--text-secondary);
+}
+.kmap-3d-legend span { display: flex; align-items: center; gap: 5px; }
+.kmap-3d-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+
+.kmap-3d-controls { text-align: center; margin-top: 10px; font-size: 0.8em; color: var(--text-secondary); }
+.kmap-3d-controls .ctrl-hint { opacity: 0.85; }
+
+/* K-Map fullscreen toggle - sits bottom-right so it never collides with the
+   3D toolbar (top-right) or legend (top-left) in any view mode. */
+.kmap-panel {
+    position: relative;
+}
+
+.kmap-controls {
+    position: absolute;
+    bottom: 14px;
+    right: 14px;
+    display: flex;
+    gap: 8px;
+    z-index: 55;
+}
+
+.kmap-fs-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.kmap-fs-btn:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.kmap-fs-btn.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent-hover);
+}
+
+.kmap-fs-btn svg {
+    width: 16px;
+    height: 16px;
+}
+
+/* Fullscreen state: the K-Map panel expands to cover the viewport so multi-
+   plane K-Maps have real room to breathe, with scrolling for anything that
+   still doesn't fit. */
+.kmap-panel.kmap-panel-fullscreen {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    z-index: 1500;
+    border-radius: 0;
+    overflow: auto;
+}
+
+/* Detach the controls from the scrolling content so they always stay on screen */
+.kmap-panel.kmap-panel-fullscreen .kmap-controls {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1501;
+}
+
+.kmap-panel.kmap-panel-fullscreen .kmap-fs-btn {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+/* ── K-Map Analysis Board ─────────────────────────────────────────────────
+   Cards mirror the Solution tab's .qm-section pattern (small uppercase
+   label + colored icon badge) so the K-map tab reads as part of the same
+   product instead of the old ad-hoc inline-styled headers. */
+.kmap-analysis-board { display: flex; flex-direction: column; gap: 12px; }
+
+.kmap-analysis-section {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+}
+
+.kmap-analysis-section[open] .kmap-chevron {
+    transform: rotate(180deg);
+}
+
+.kmap-analysis-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+}
+
+.kmap-analysis-header::-webkit-details-marker {
+    display: none;
+}
+
+.kmap-analysis-header::marker {
+    content: '';
+}
+
+.kmap-chevron {
+    margin-left: auto;
+    color: var(--text-muted);
+    transition: transform var(--transition-fast);
+    flex-shrink: 0;
+}
+
+.kmap-analysis-body {
+    padding-top: 12px;
+}
+
+.kmap-analysis-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    flex-grow: 1;
+}
+
+.kmap-analysis-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 2px 6px;
+    flex-shrink: 0;
+}
+
+.kmap-analysis-subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin: -4px 0 10px 0;
+}
+
+.kmap-analysis-empty {
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 12.5px;
+    padding: 2px 0;
+}
+
+.empty-msg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 80px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+}
+
+.term-boxes-container { display: flex; flex-wrap: wrap; gap: 6px; }
+.term-box { display: inline-flex; align-items: center; justify-content: center; padding: 4px 9px; border-radius: 6px; background: var(--bg-tertiary); border: 1px solid var(--border); font-family: 'Fira Code', monospace; font-size: 12.5px; font-weight: 600; color: var(--text-primary); }
+.kmap-analysis-section .term-box { background: var(--bg-primary); }
+
+/* Analysis board: Minimal Expression + Essential Prime Implicant boxes are
+   clickable — selecting one filters the K-map (every view mode) down to
+   just that implicant's group, using the same color the box already has. */
+.term-box.selectable-implicant {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.term-box.selectable-implicant:hover {
+    transform: translateY(-1px);
+}
+.term-box.selectable-implicant.selected {
+    box-shadow: 0 0 0 2px currentColor, 0 2px 8px rgba(0, 0, 0, 0.25);
+    font-weight: 700;
+}
+.term-box.selectable-implicant.dimmed {
+    opacity: 0.35;
+}
+
+.kmap-plane-wrapper { display: flex; flex-direction: column; align-items: center; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--border); border-radius: 8px; padding: 12px; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); }
+
+.kmap-small .kmap-cell, .kmap-small .kmap-table th { width: 45px; height: 45px; font-size: 14px; padding: 0; }
+.kmap-small .kmap-plane-wrapper { padding: 8px; margin: 0; }
+.kmap-small .kmap-table th { width: 40px; height: 40px; font-size: 12px; }
+
+.kmap-table { border-collapse: collapse; margin: 20px auto; width: auto; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12); }
+
+.kmap-table th.kmap-corner, .kmap-corner { 
+    position: relative; 
+    z-index: 5;
+    min-width: 50px; 
+    height: 50px; 
+    padding: 0; 
+    box-sizing: border-box; 
+    background: var(--bg-primary) !important; 
+    overflow: visible !important;
+}
+
+.kmap-corner svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden !important;
+    border-top-left-radius: inherit;
+    z-index: 1;
+}
+
+.kmap-corner-col { 
+    position: absolute; 
+    top: 4px; 
+    left: 20px; 
+    font-size: 0.9em; 
+    font-weight: bold; 
+    line-height: 1; 
+    text-align: left; 
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.kmap-corner-row { 
+    position: absolute; 
+    bottom: 4px; 
+    left: 4px; 
+    font-size: 0.9em; 
+    font-weight: bold; 
+    line-height: 1; 
+    text-align: left; 
+    white-space: nowrap;
+    z-index: 10;
+}
+.kmap-table tr:first-child th:not(.kmap-corner) { 
+    vertical-align: bottom; 
+    padding-bottom: 2px; 
+    height: 40px; 
+    box-sizing: border-box; 
+}
+
+.kmap-table tr:not(:first-child) th { 
+    text-align: right; 
+    padding-right: 4px; 
+    width: 40px; 
+    box-sizing: border-box; 
+}
+
+.kmap-table th { font-size: 1em; font-weight: normal; color: var(--text-secondary); min-width: 30px; }
+.kmap-cell { position: relative; width: 80px; height: 80px; min-width: 80px; min-height: 80px; font-size: 32px; font-weight: 500; text-align: center; vertical-align: middle; }
+.kmap-cell.val-0 { color: #ff453a !important; }
+.kmap-cell.val-1 { color: #30d158 !important; }
+.kmap-cell.val-X { color: #8e8e93 !important; }
+.kmap-minterm-label { position: absolute; top: 3px; left: 4px; font-size: 12px; color: var(--text-muted); opacity: 0.7; pointer-events: none; font-weight: normal; }
+

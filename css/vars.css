@@ -1,0 +1,132 @@
+/* ==========================================================================
+   Mantiq Premium Modern Design System & Style overrides
+   ========================================================================== */
+
+:root {
+    /* Colors */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #0f172ab0;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-light: rgba(37, 99, 235, 0.15);
+    --accent-rgb: 37, 99, 235;
+    --border: #334155;
+    --border-focus: #475569;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --success: #10b981;
+    --success-light: rgba(16, 185, 129, 0.15);
+    --error: #ef4444;
+    --error-light: rgba(239, 68, 68, 0.15);
+    --sop-color: #2563eb;
+    --pos-color: #7c3aed;
+    
+    /* Layout Sizes */
+    --sidebar-width: 85px;
+    --topbar-height: auto;
+    --footer-height: 35px;
+    
+    /* Transitions */
+    --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Light Mode Support */
+@media (prefers-color-scheme: light) {
+    :root {
+        --bg-primary: #f8fafc; /* Slate 50 */
+        --bg-secondary: #ffffff;
+        --bg-tertiary: rgba(255, 255, 255, 0.9);
+        --accent: #2563eb;
+        --accent-hover: #1d4ed8;
+        --accent-light: rgba(37, 99, 235, 0.1);
+        --accent-rgb: 37, 99, 235;
+        --border: #e2e8f0;
+        --border-focus: #cbd5e1;
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #64748b;
+        --success: #059669;
+        --success-light: rgba(16, 185, 129, 0.1);
+        --error: #dc2626;
+        --error-light: rgba(239, 68, 68, 0.1);
+        
+        /* Specific element shadows / adjustments for light mode */
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+}
+
+body.light-mode {
+    --bg-primary: #f8fafc;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: rgba(255, 255, 255, 0.9);
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-light: rgba(37, 99, 235, 0.1);
+    --accent-rgb: 37, 99, 235;
+    --border: #e2e8f0;
+    --border-focus: #cbd5e1;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    --success: #059669;
+    --success-light: rgba(16, 185, 129, 0.1);
+    --error: #dc2626;
+    --error-light: rgba(239, 68, 68, 0.1);
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Explicit dark override — re-asserts the same values as the :root default.
+   Needed because @media (prefers-color-scheme: light) above rewrites :root
+   itself based purely on the OS/browser setting, with no awareness of the
+   in-app toggle. Without a class this specific, a user whose OS prefers
+   light had no way to actually reach dark mode — clicking "Dark" removed
+   .light-mode, but :root's own values were already light, so nothing
+   visibly changed. body.dark-mode outranks the :root media-query override
+   for any element under body, so the toggle can now force real dark mode
+   regardless of OS preference. */
+body.dark-mode {
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #0f172ab0;
+    --accent: #2563eb;
+    --accent-hover: #1d4ed8;
+    --accent-light: rgba(37, 99, 235, 0.15);
+    --accent-rgb: 37, 99, 235;
+    --border: #334155;
+    --border-focus: #475569;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --success: #10b981;
+    --success-light: rgba(16, 185, 129, 0.15);
+    --error: #ef4444;
+    --error-light: rgba(239, 68, 68, 0.15);
+}
+
+/* Base resets & box sizing */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Outfit', sans-serif;
+    width: 100vw;
+    height: 100dvh;
+    overflow: hidden;
+    position: fixed;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}

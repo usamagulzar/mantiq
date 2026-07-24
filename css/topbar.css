@@ -1,0 +1,819 @@
+/* ==========================================================================
+   Main Workspace & Topbar Morph Layout
+   ========================================================================== */
+#main-workspace {
+    display: flex;
+    flex-direction: column;
+    grid-column: 2;
+    grid-row: 2;
+    height: 100%;
+    width: 100%;
+    min-width: 0;
+    position: relative;
+    transition: opacity 0.15s ease-in-out;
+}
+
+#main-workspace.fade-out {
+    opacity: 0;
+}
+
+#app-root.landing #main-workspace,
+#app-root.showing-examples #main-workspace {
+    /* #main-workspace's base rule (above) always places it at grid-column:2
+       grid-row:2 for the normal (sidebar + content) 2-column/2-row grid.
+       Landing/showing-examples mode collapses #app-root down to a single
+       real column (and, on mobile, a single real row) - so that "2" no
+       longer points at an actual track. Without pinning it back to 1/-1
+       here, the grid has to invent a phantom extra column+row just to
+       satisfy the stale placement, and everything that's supposed to span
+       and center across the *real* track (like #topbar's `1 / -1`) ends up
+       measured against that phantom track too, visibly skewing the
+       centered landing content off to one side.
+    */
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-primary);
+    height: 100%;
+    width: 100%;
+}
+
+#topbar {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    background-color: var(--bg-tertiary);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 8px 12px 8px 24px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    z-index: 20;
+}
+
+/* Topbar in landing mode */
+#app-root.landing #topbar,
+#app-root.showing-examples #topbar {
+    grid-column: 1 / -1;
+    grid-row: 1 / -1;
+    justify-self: center;
+    align-self: center;
+    background: transparent;
+    backdrop-filter: none;
+    border-bottom: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: min(640px, 90vw);
+    margin: 0;
+    margin-bottom: 52px; /* Centers topbar in the space above the 52px tall footer */
+    padding: 0;
+    gap: 0;
+}
+
+@media (max-width: 768px) {
+    #app-root.landing #topbar,
+    #app-root.showing-examples #topbar {
+        /* On mobile, the footer is now just two lines (credit, and links). Height is ~64px. 
+           Adding 64px margin-bottom centers the main content perfectly in the space above it. */
+        margin-bottom: 64px;
+    }
+}
+
+
+/* Landing Page Top-Left Install App Button */
+#landing-install-app-btn {
+    display: none;
+}
+
+#app-root.landing #landing-install-app-btn {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+#landing-install-app-btn svg {
+    color: currentColor;
+}
+
+@media all and (display-mode: standalone) {
+    #landing-install-app-btn,
+    #app-root.landing #landing-install-app-btn {
+        display: none !important;
+    }
+}
+
+/* Hero logo - visible in center on landing, top-left on active */
+#hero-logo-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 0;
+    cursor: pointer;
+    position: relative;
+    z-index: 50;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#app-root.landing #hero-logo-wrap {
+    flex-direction: column;
+    margin-bottom: 32px;
+    gap: 16px;
+}
+
+#hero-logo {
+    width: 64px;
+    height: 64px;
+    filter: none;
+}
+
+#app-root.landing #hero-logo {
+    width: 220px;
+    height: 220px;
+    filter: none;
+}
+
+/* Search Area Wrap */
+.topbar-search-area {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    flex-grow: 1;
+    margin-left: 24px;
+    margin-right: 12px;
+    width: auto;
+    min-width: 0;
+}
+
+#app-root.landing .topbar-search-area {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    flex-direction: column;
+    gap: 0;
+    flex-grow: 0;
+}
+
+.input-row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+}
+
+/* Topbar Actions (Right aligned) */
+.topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+    height: 40px; /* Match input box height */
+}
+
+#app-root.landing .topbar-actions {
+    position: absolute;
+    top: 24px;
+    right: 32px;
+}
+
+#app-root.landing #sop-pos-pill,
+#app-root.showing-examples #sop-pos-pill {
+    display: none;
+}
+
+/* Pill Toggle Styles */
+.pill-toggle {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    overflow: hidden;
+    user-select: none; /* Prevent highlighting on hold */
+    height: 100%;
+}
+
+.pill-slider {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    height: calc(100% - 6px);
+    width: calc(50% - 3px);
+    background-color: var(--accent);
+    border-radius: 16px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.pill-toggle[data-state="pos"] .pill-slider,
+.pill-toggle[data-state="light"] .pill-slider,
+.pill-toggle[data-state="wrap"] .pill-slider,
+.pill-toggle[data-state="3d"] .pill-slider,
+.pill-toggle[data-state="no-tb"] .pill-slider,
+.pill-toggle[data-state="qm"] .pill-slider {
+    transform: translateX(100%);
+}
+
+.pill-option {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 11.5px;
+    font-weight: 600;
+    font-family: 'Inter', sans-serif;
+    padding: 6px 16px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.theme-toggle .pill-option {
+    padding: 6px 12px;
+}
+
+.verilog-tb-toggle .pill-option {
+    min-width: 100px;
+}
+
+.pill-option.active {
+    color: #fff;
+}
+
+#app-root.landing #result-row,
+#app-root.landing #error-feedback,
+#app-root.showing-examples #result-row,
+#app-root.showing-examples #error-feedback {
+    display: none !important;
+}
+
+/* Input Wrapper & Text Bar */
+.input-wrapper {
+    position: relative;
+    flex-grow: 1;
+    width: 100%;
+}
+
+.search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+/* Solutions Drag Carousel */
+.draggable-carousel {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    cursor: grab;
+    align-items: center;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    max-width: calc(100vw - 300px); /* Leave room for sidebar */
+    padding-bottom: 4px; /* Optional, for grab area */
+    min-width: 0;
+}
+.draggable-carousel::-webkit-scrollbar {
+    display: none;
+}
+.draggable-carousel:active {
+    cursor: grabbing;
+}
+
+.solution-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 12px;
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    transition: background-color 0.2s ease;
+}
+
+.solution-card:hover {
+    background-color: var(--bg-tertiary);
+}
+
+.solution-card.selected-solution {
+    border-color: var(--success);
+    background-color: var(--bg-tertiary);
+    box-shadow: none;
+}
+
+.solution-card .expr-text {
+    font-family: 'STIX Two Text', 'Outfit', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.solution-card.selected-solution .expr-text {
+    color: var(--success) !important;
+}
+
+.solution-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.solution-card .action-icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.solution-card .action-icon-btn:hover {
+    background: transparent !important;
+    color: var(--text-muted) !important;
+}
+
+.exceeded-msg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    color: var(--text-muted);
+    font-size: 15px;
+    font-weight: 500;
+    text-align: center;
+    padding: 24px;
+    box-sizing: border-box;
+}
+
+.nav-btn.disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+#expression-input {
+    width: 100%;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-family: 'STIX Two Text', 'Outfit', serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.2px;
+    padding: 11px 76px 11px 24px;
+    border-radius: 24px;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+#expression-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: var(--bg-secondary);
+}
+
+#app-root.landing #expression-input {
+    border-radius: 28px;
+    padding: 16px 86px 16px 28px;
+    font-size: 18px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#app-root.landing #expression-input:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+#app-root.landing #expression-input:focus {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* Clear Input button inside Search Bar */
+#clear-input-btn {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 20px;
+    font-weight: 300;
+    cursor: pointer;
+    width: 24px;
+    height: 24px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+    line-height: 1;
+}
+
+#clear-input-btn:hover {
+    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+#app-root.landing #clear-input-btn {
+    right: 22px;
+}
+
+/* Expression Status button (error / share) - sits just left of the clear (x) button */
+#expr-status-btn {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+    padding: 0;
+}
+
+#expr-status-btn svg {
+    display: none;
+    flex-shrink: 0;
+}
+
+#app-root.landing #expr-status-btn {
+    right: 58px;
+}
+
+#expr-status-btn.state-error {
+    color: var(--error);
+}
+
+#expr-status-btn.state-error:hover {
+    color: var(--error);
+    background-color: rgba(255, 255, 255, 0.08); /* Matches clear-btn */
+}
+
+#expr-status-btn.state-error #expr-status-icon-error {
+    display: block;
+}
+
+#expr-status-btn.state-share {
+    color: var(--text-muted);
+}
+
+#expr-status-btn.state-share:hover {
+    color: var(--accent);
+    background-color: rgba(255, 255, 255, 0.08);
+}
+
+#expr-status-btn.state-share #expr-status-icon-share {
+    display: block;
+}
+
+/* Share Popup */
+.modal.sm.share-modal {
+    height: auto;
+    min-height: unset;
+    max-height: 90vh;
+}
+
+.share-note {
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+.share-link-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#share-link-input {
+    flex-grow: 1;
+    min-width: 0;
+    background-color: var(--bg-tertiary, var(--bg-primary));
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 13px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    outline: none;
+}
+
+#share-copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: var(--transition-fast);
+}
+
+#share-copy-btn:hover {
+    background-color: var(--accent-hover);
+}
+
+#share-copy-btn.copied {
+    background-color: var(--success);
+}
+
+/* Bottom links on landing */
+.topbar-bottom-links {
+    display: none;
+    gap: 12px;
+    margin-top: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#app-root.landing .topbar-bottom-links {
+    display: flex;
+}
+
+.quick-presets-group,
+.landing-links-group {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.quick-presets-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    letter-spacing: 0.3px;
+    margin-right: 2px;
+}
+
+.quick-presets-divider {
+    width: 1px;
+    height: 14px;
+    background-color: var(--border);
+    margin: 0 4px;
+    display: inline-block;
+}
+
+@media (max-width: 640px) {
+    .topbar-bottom-links {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .quick-presets-divider {
+        display: none !important;
+    }
+}
+
+.landing-link-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: var(--transition-fast);
+    border-radius: 18px;
+    border: 1px solid var(--border);
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.landing-link-btn:hover {
+    color: var(--accent);
+    background-color: var(--accent-light);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+/* Format Guide Modal Styles */
+.format-modal {
+    max-width: 650px;
+    height: 80%;
+    max-height: 700px;
+}
+
+.format-guide-body {
+    padding: 24px;
+    gap: 28px;
+}
+
+.guide-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.guide-section h3 {
+    font-size: 16px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.guide-section p {
+    font-size: 13.5px;
+    color: var(--text-secondary);
+    margin-bottom: 14px;
+    line-height: 1.5;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg-tertiary);
+}
+
+.guide-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13.5px;
+}
+
+.guide-table th {
+    background-color: rgba(255,255,255,0.03);
+    padding: 10px 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+.guide-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-primary);
+    line-height: 1.6;
+    vertical-align: top;
+}
+
+.guide-table tr:last-child td {
+    border-bottom: none;
+}
+
+.guide-table code {
+    background-color: var(--bg-primary);
+    padding: 3px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    white-space: pre-wrap;
+    word-break: break-word;
+    display: inline-block;
+    margin: 2px 0;
+}
+
+/* SOP/POS toggle button style */
+.toggle-btn {
+    padding: 0 16px;
+    height: 42px;
+    border-radius: 21px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: var(--transition-fast);
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+.toggle-btn.sop {
+    background-color: var(--sop-color);
+    color: white;
+}
+
+.toggle-btn.sop:hover {
+    background-color: #1d4ed8;
+}
+
+.toggle-btn.pos {
+    background-color: var(--pos-color);
+    color: white;
+}
+
+.toggle-btn.pos:hover {
+    background-color: #6d28d9;
+}
+
+/* Result Row Display */
+#result-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    box-shadow: none;
+    min-width: 0;
+}
+
+#simplified-label {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text-muted);
+    padding: 0 4px;
+    user-select: none;
+}
+
+#simplified-display {
+    font-family: 'Fira Code', 'JetBrains Mono', monospace;
+    font-size: 18px;
+    color: var(--success);
+    font-weight: 500;
+    word-break: break-all;
+}
+
+.action-icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 6px;
+    border-radius: 6px;
+    transition: var(--transition-fast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.action-icon-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+.link-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: underline;
+    transition: var(--transition-fast);
+    padding: 4px 8px;
+}
+
+.link-btn:hover {
+    color: #60a5fa;
+}
+
+.error-text {
+    color: var(--error);
+    font-size: 14px;
+    font-weight: 500;
+}
+

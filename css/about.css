@@ -1,0 +1,313 @@
+/* ==========================================================================
+   About Mantiq — In-App About / Info Modal
+   Triggered from the Help FAB. Student & user-facing overview of the app.
+   ========================================================================== */
+
+.about-modal {
+    max-width: 720px;
+    height: 85%;
+    max-height: 780px;
+}
+
+.about-body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* ---------- Hero ---------- */
+.about-hero {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 28px 28px 22px;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, var(--accent-light) 0%, transparent 100%);
+}
+
+.about-logo {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md, 0 4px 6px -1px rgba(0,0,0,0.1));
+    border: 1px solid var(--border);
+}
+
+.about-logo img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.about-hero-text h1 {
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+}
+
+.about-hero-text .about-tagline {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+}
+
+/* ---------- Scrollable content ---------- */
+.about-scroll {
+    padding: 24px 28px 28px;
+    overflow-y: auto;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+}
+
+.about-lede {
+    font-size: 14.5px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+}
+
+.about-lede b {
+    color: var(--text-primary);
+}
+
+/* ---------- Badge row ---------- */
+.about-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.about-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+}
+
+.about-badge svg {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    color: var(--accent);
+}
+
+.about-badge.accent {
+    color: var(--accent);
+    border-color: rgba(var(--accent-rgb), 0.35);
+    background-color: var(--accent-light);
+}
+
+/* ---------- Section headings ---------- */
+.about-section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+/* ---------- Feature grid ---------- */
+.about-feature-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.about-feature-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-tertiary);
+    transition: var(--transition-fast);
+}
+
+.about-feature-card:hover {
+    border-color: rgba(var(--accent-rgb), 0.35);
+    background-color: var(--accent-light);
+}
+
+.about-feature-icon {
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--accent-light);
+    color: var(--accent);
+}
+
+.about-feature-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.about-feature-copy h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 2px;
+}
+
+.about-feature-copy p {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+}
+
+/* ---------- Steps ---------- */
+.about-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.about-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.about-step-num {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: var(--accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.about-step-copy {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+    padding-top: 2px;
+}
+
+.about-step-copy b {
+    color: var(--text-primary);
+}
+
+/* ---------- Audience callout ---------- */
+.about-callout {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px dashed rgba(var(--accent-rgb), 0.4);
+    background-color: var(--accent-light);
+}
+
+.about-callout svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--accent);
+    margin-top: 1px;
+}
+
+.about-callout p {
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-secondary);
+}
+
+.about-callout p b {
+    color: var(--text-primary);
+}
+
+/* ---------- Footer meta ---------- */
+.about-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 18px;
+    border-top: 1px solid var(--border);
+}
+
+.about-footer-meta {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.about-footer-meta span {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.about-footer-links {
+    display: flex;
+    gap: 8px;
+}
+
+.about-footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 13px;
+    border-radius: 18px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.about-footer-link svg {
+    width: 13px;
+    height: 13px;
+}
+
+.about-footer-link:hover {
+    color: var(--accent);
+    border-color: rgba(var(--accent-rgb), 0.35);
+    background-color: var(--accent-light);
+}
+
+@media (max-width: 640px) {
+    .about-feature-grid {
+        grid-template-columns: 1fr;
+    }
+    .about-hero {
+        padding: 22px 20px 18px;
+    }
+    .about-scroll {
+        padding: 20px 20px 24px;
+    }
+    .about-footer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

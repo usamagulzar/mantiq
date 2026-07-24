@@ -1,0 +1,255 @@
+
+/* App Grid Layout */
+#app-root {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+#app-root.landing,
+#app-root.showing-examples {
+    grid-template-columns: 0px minmax(0, 1fr);
+    grid-template-rows: auto 1fr;
+}
+
+#app-root.landing #sidebar,
+#app-root.showing-examples #sidebar {
+    display: none;
+}
+
+#app-root.landing #workspace-footer,
+#app-root.showing-examples #workspace-footer {
+    display: none;
+}
+
+/* Belt-and-suspenders: while on the landing screen, force every
+   main-workspace view container hidden regardless of the view-hidden
+   class JS happens to have set. This prevents a startup/clear-input
+   race (mantiq_setView firing before the landing class settles) from
+   leaving simulation/circuit/etc. panels visible behind the hero. */
+#app-root.landing #canvas,
+#app-root.landing #truthtable-container,
+#app-root.landing #kmap-container,
+#app-root.landing #solution-container,
+#app-root.landing #verilog-container,
+#app-root.landing #svg-circuit-container,
+#app-root.landing #simulation-container {
+    display: none !important;
+}
+
+/* ==========================================================================
+   Sidebar Navigation — fixed icon-only strip
+   ========================================================================== */
+#sidebar {
+    grid-column: 1;
+    grid-row: 2;
+    background: var(--bg-tertiary);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 0;
+    z-index: 10;
+    overflow: visible;
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 100%;
+    align-items: center;
+    flex-grow: 1;
+    padding: 0 8px;
+}
+
+.nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    width: 54px;
+    height: 46px;
+    border-radius: 14px;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+}
+
+.nav-icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 36px;
+    border-radius: 12px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.nav-btn svg {
+    width: 20px;
+    height: 20px;
+    transition: transform var(--transition-fast);
+}
+
+.nav-btn:hover .nav-icon-wrapper {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+}
+
+.nav-btn:hover svg {
+    transform: scale(1.08);
+}
+
+.nav-btn.active .nav-icon-wrapper {
+    background-color: var(--accent-light);
+    color: var(--accent);
+}
+
+.nav-btn.active svg {
+    stroke-width: 2.2px;
+}
+
+/* Tooltips */
+.nav-btn .tooltip {
+    position: absolute;
+    left: calc(100% + 10px);
+    top: 50%;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 6px 11px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) translateX(-4px);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    z-index: 1000;
+}
+
+.nav-btn:hover .tooltip,
+.nav-btn:active .tooltip,
+.nav-btn.show-tooltip .tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+
+/* ==========================================================================
+   Landing Page Footer
+   ========================================================================== */
+#landing-footer {
+    display: none;
+}
+
+#app-root.landing #landing-footer {
+    display: flex;
+    position: absolute;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 13px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    text-align: center;
+    pointer-events: auto;
+    width: auto;
+}
+
+.footer-credit b {
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.footer-divider {
+    color: var(--border);
+    opacity: 0.5;
+    font-weight: 300;
+}
+
+.footer-links, .footer-bug {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.footer-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.footer-link svg {
+    transition: transform var(--transition-fast);
+}
+
+.footer-link:hover {
+    color: var(--accent);
+    background-color: var(--accent-light);
+}
+
+.footer-link:hover svg {
+    transform: scale(1.1);
+}
+
+.bug-link:hover {
+    color: var(--error) !important;
+    background-color: rgba(239, 68, 68, 0.08) !important;
+}
+
+/* Mobile responsive layout */
+@media (max-width: 768px) {
+    #app-root.landing #landing-footer {
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px 12px;
+        bottom: 16px;
+        font-size: 11.5px;
+        width: 100%;
+        padding: 0 16px;
+    }
+    
+    #app-root.landing #landing-footer .footer-divider {
+        display: none;
+    }
+    
+    #app-root.landing .footer-credit {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 2px;
+    }
+    
+    .footer-links, .footer-bug {
+        gap: 8px;
+    }
+    
+    .footer-link {
+        padding: 4px 6px;
+    }
+}
+
+

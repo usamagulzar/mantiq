@@ -1,0 +1,1062 @@
+@media (max-width: 768px) {
+    #solution-split-view:has(~ #solution-mobile-tabs.alg-unavailable) #panel-alg {
+        display: none !important;
+    }
+    #solution-split-view:has(~ #solution-mobile-tabs.alg-unavailable) #panel-qm {
+        display: flex !important;
+    }
+}
+
+.mobile-bottom-tabs .pill-toggle {
+    width: 100%;
+}
+
+/* Higher specificity than the generic ".pill-toggle .pill-option" compact
+   override further down (meant for the SOP/POS and theme pills) — without
+   this, "Algebraic Proof" / "Quine-McCluskey" were being silently shrunk to
+   10.5px (9.5px under 480px) instead of the size intended here, since that
+   generic rule wins any tie by being declared later. */
+.mobile-bottom-tabs .pill-toggle .pill-option {
+    flex: 1;
+    font-size: 12.5px;
+    padding: 6px 6px;
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+}
+
+.solution-split-view > .solution-panel {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+/* K-Map panel with no header — let the visual area use the full card */
+.kmap-panel-noheader { padding: 12px; }
+.kmap-panel-noheader #kmap-visual-wrapper { flex: 1; min-height: 0; }
+
+/* Wrap view: the loop-group SVG overlay is larger than the visible viewport
+   (it draws into off-screen tiles that get scrolled into view via transform).
+   Without overflow:visible, anything outside the initial box gets clipped
+   and the group boxes silently fail to render once you pan. */
+#kmap-wrap-svg-overlay { overflow: visible; }
+
+/* Algebraic Proof Steps
+   Expression and reason are stacked on their own lines rather than sharing
+   one flex row - a long expression can wrap freely on any width without
+   ever crowding, colliding with, or reflowing under the reason pill. */
+.algebraic-step {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--border);
+    margin: 0;
+}
+
+.algebraic-step:last-child {
+    border-bottom: none;
+}
+
+.algebraic-step:hover {
+    background-color: var(--bg-primary);
+}
+
+.alg-expr {
+    font-family: 'STIX Two Text', 'Outfit', serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: 0.01em;
+    width: 100%;
+}
+
+.alg-reason {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    align-self: flex-end;
+    margin-left: 0;
+    flex-shrink: 0;
+}
+
+.alg-by {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.alg-rule {
+    font-family: 'Outfit', sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+/* ==========================================================================
+   Mobile / Responsive Enhancements
+   Auto-detected via @media queries — no manual toggle needed.
+   ========================================================================== */
+
+/* Smaller pill toggles (Theme changer + SOP/POS) at every screen size */
+.pill-toggle {
+    padding: 2px;
+    border-radius: 16px;
+}
+
+.pill-toggle .pill-option {
+    font-size: 10.5px;
+    padding: 5px 12px;
+    border-radius: 14px;
+}
+
+.pill-toggle .pill-slider {
+    border-radius: 14px;
+}
+
+.theme-toggle .pill-option {
+    padding: 5px 9px;
+}
+
+.theme-toggle .pill-option svg {
+    width: 12px;
+    height: 12px;
+}
+
+/* Let native touch-scrolling work inside internally-scrollable regions,
+   overriding the app-wide touch-action:none used for canvas/circuit gestures */
+.table-scroll-wrapper,
+.wave-scroll-wrapper,
+.code-scroll-wrapper,
+.circuit-scroll-wrapper,
+.solution-content-wrapper,
+.kmap-solutions-wrapper,
+#kmap-implicants-list,
+#empty-state,
+.modal-body,
+.draggable-carousel,
+#sidebar {
+    touch-action: pan-x pan-y; /* Allow horizontal swiping */
+}
+
+/* ==========================================================================
+   Tablet & Mobile Breakpoint (auto-detected)
+   ========================================================================== */
+@media (max-width: 900px) {
+
+    /* --- App shell: sidebar becomes a bar docked under the workspace --- */
+    #app-root,
+    #app-root.sidebar-expanded {
+        /* minmax(0, 1fr), not a bare 1fr - see the base #app-root rule for
+           why a plain 1fr track refuses to shrink below its content's
+           min-content width.
+           Three explicit rows now (header / workspace / bottom bar) - a
+           previous two-row version left #topbar on its base grid-row:1
+           with #main-workspace ALSO pinned to row 1 below, so the two
+           silently shared one grid cell: the workspace's full-height
+           glass-panel background rendered behind/around the header's
+           actual content instead of below it. */
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows: auto minmax(0, 1fr) auto;
+    }
+
+    #app-root:not(.landing):not(.showing-examples) #topbar {
+        grid-row: 1;
+    }
+
+    #app-root.landing,
+    #app-root.showing-examples {
+        grid-template-rows: 100%;
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    #app-root:not(.landing):not(.showing-examples) #main-workspace {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    #sidebar {
+        grid-column: 1;
+        grid-row: 3;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 60px;
+        padding: 0 6px;
+        border-right: none;
+        overflow-x: visible;
+        overflow-y: visible;
+    }
+
+    /* The hamburger/expand affordance and version footer don't apply once
+       the sidebar has collapsed into a compact bottom bar */
+    #sidebar .sidebar-header,
+    #sidebar .sidebar-footer {
+        display: none;
+    }
+
+    #sidebar .nav-links {
+        flex-direction: row;
+        flex-grow: 0;
+        width: auto;
+        gap: 4px;
+        padding: 0;
+    }
+
+    #sidebar .nav-btn {
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
+        position: relative;
+    }
+
+    #sidebar .nav-btn .tooltip {
+        display: block;
+        position: absolute;
+        bottom: 54px;
+        left: 50%;
+        top: auto;
+        transform: translate(-50%, 4px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        z-index: 200;
+        pointer-events: none;
+    }
+
+    #sidebar .nav-btn:hover .tooltip,
+    #sidebar .nav-btn:active .tooltip,
+    #sidebar .nav-btn.show-tooltip .tooltip {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+
+    /* --- Header: logo + both toggles share line 1, input is its own
+       full-width line 2. .topbar-search-area and .input-row are collapsed
+       with display:contents so their children (logo, toggles, input,
+       result/error rows) become direct flex items of #topbar itself —
+       no HTML changes needed to reorder across the old nesting. --- */
+    #topbar {
+        padding: 8px 10px;
+        flex-wrap: wrap;
+        align-items: center;
+        column-gap: 8px;
+        row-gap: 8px;
+    }
+
+    /* Scoped to the active workspace only — the landing/empty-state screen
+       has its own centered column layout (handled elsewhere) and must not
+       be affected by this restructuring. */
+    #app-root:not(.landing):not(.showing-examples) #topbar .topbar-search-area,
+    #app-root:not(.landing):not(.showing-examples) #topbar .input-row {
+        display: contents;
+    }
+
+    #app-root:not(.landing):not(.showing-examples) #hero-logo-wrap {
+        order: 1;
+        flex-shrink: 0;
+        margin-bottom: 0;
+    }
+
+    #app-root:not(.landing):not(.showing-examples) .topbar-actions {
+        order: 2;
+        margin-left: auto;
+        gap: 8px;
+    }
+
+    #app-root:not(.landing):not(.showing-examples) .input-wrapper {
+        order: 3;
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    #app-root:not(.landing):not(.showing-examples) #result-row {
+        order: 4;
+        flex: 1 1 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    #app-root:not(.landing):not(.showing-examples) #error-feedback {
+        order: 5;
+        flex: 1 1 100%;
+    }
+
+    #hero-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    /* --- Landing screen scales down --- */
+    #app-root.landing #hero-logo-wrap {
+        margin-bottom: 20px;
+    }
+
+    #app-root.landing #hero-logo {
+        width: 140px;
+        height: 140px;
+    }
+
+    /* On desktop these pills float at a fixed corner of the screen, out of
+       the way of the centered search bar. On a phone that corner placement
+       reads as disconnected/floating and can crowd the edge of the screen
+       (or the logo, on short/landscape viewports) - bring them back into
+       normal flow as a small centered row under the search bar instead.
+       input-row stays a flex row (for the active-workspace layout above),
+       so it needs to wrap for topbar-actions to actually land on its own
+       line rather than squeezing in beside the input. */
+    #app-root.landing .input-row {
+        flex-wrap: wrap;
+    }
+
+    #app-root.landing .topbar-actions {
+        position: static;
+        flex: 1 0 100%;
+        margin-top: 14px;
+        justify-content: center;
+    }
+
+    /* Landing centers its content vertically via flexbox with no scroll
+       fallback - on a short viewport (landscape phones, or a phone
+       keyboard eating half the screen) that silently clips content at
+       the top/bottom instead of letting the user scroll to it. */
+    #app-root.landing #main-workspace {
+        overflow-y: auto;
+        padding: 24px 16px;
+    }
+
+    .empty-state-examples {
+        grid-template-columns: 1fr;
+        gap: 28px;
+    }
+
+    #empty-state {
+        padding: 20px;
+    }
+
+    /* --- All 2-panel horizontal layouts become 2 stacked vertical panels --- */
+    #truthtable-container,
+    #svg-circuit-container,
+    #simulation-container,
+    #verilog-container {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: 1fr 1fr;
+        gap: 12px;
+        padding: 12px;
+        overflow-y: auto;
+    }
+
+    /* Grid items default to min-height:auto, which is their content's
+       intrinsic minimum - not 0. The waveform canvas below has a fixed
+       min-height, and without this override that min-height bubbles all
+       the way up through the flex chain and inflates this panel's grid
+       row past its fair 1fr share, breaking the equal split and pushing
+       the whole container into an unwanted scroll. */
+    #truthtable-container > .tt-panel,
+    #truthtable-container > .wave-panel,
+    #svg-circuit-container > .circuit-panel,
+    #simulation-container > .circuit-panel,
+    #verilog-container > .verilog-panel {
+        min-height: 0;
+    }
+
+    #html-truth-table {
+        min-width: 0;
+        font-size: 12px;
+    }
+
+    #html-truth-table th {
+        padding: 8px 12px;
+        font-size: 9.5px;
+    }
+
+    #html-truth-table td {
+        padding: 7px 12px;
+    }
+
+    /* When there's no original circuit/simulation to show (only the
+       simplified side), the hidden panel shouldn't leave an empty row
+       behind - let the visible panel use the full height. */
+    #svg-circuit-container.single-panel-view,
+    #simulation-container.single-panel-view {
+        grid-template-rows: 1fr;
+    }
+
+    /* The waveform's own layout logic (renderHTMLWaveform) fits everything
+       to whatever space the canvas actually gets, so it doesn't need a
+       large reserved minimum on small screens - the desktop-sized 250px
+       floor was forcing this panel to overflow its half of a mobile
+       screen. */
+    #waveform-canvas {
+        min-height: 140px;
+    }
+
+    /* Unlike desktop, mobile keeps a 40px-per-signal floor in JS to avoid
+       unreadably squished rows, so the canvas can still legitimately grow
+       past the wrapper here - restore scrolling for that case. */
+    .wave-scroll-wrapper {
+        overflow-y: auto;
+    }
+
+    /* Smaller Verilog code font so more of each line fits on screen */
+    .code-scroll-wrapper code {
+        font-size: 11.5px;
+        line-height: 1.5;
+    }
+
+    /* The top "solution" carousel was reserving 300px for the desktop
+       sidebar even though mobile's sidebar docks under the workspace
+       instead of beside it - that made the carousel (and the solution
+       cards inside it) far too narrow and cropped on the right edge. */
+    .draggable-carousel {
+        max-width: 100%;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .solution-split-view {
+        flex-direction: column;
+        gap: 12px;
+        flex: 1;
+        min-height: 0;
+    }
+
+    #solution-container {
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Show tabs and dynamically hide the inactive panel */
+    .mobile-bottom-tabs {
+        display: flex;
+    }
+
+    #solution-split-view[data-active-tab="alg"] #panel-qm,
+    #solution-split-view[data-active-tab="qm"] #panel-alg {
+        display: none !important;
+    }
+
+    /* Mobile K-Map container */
+    #kmap-container {
+        display: grid;
+        grid-template-columns: 1fr;
+        /* Flat 50/50 split, same pattern as #truthtable-container above -
+           each row gets exactly half the container no matter how much (or
+           how little) content is inside it. This is also what makes the
+           board and analysis card render at all on mobile: 1fr is a
+           DEFINITE size the moment the container's own height is known, so
+           height:100% on the descendants below (visual wrapper, grid/svg)
+           has something real to resolve against instead of collapsing to
+           0 while waiting on content that itself waits on a resolved
+           height (the old fit-content(50%) row created exactly that
+           circular dependency). */
+        grid-template-rows: 1fr 1fr;
+        gap: 12px;
+        padding: 12px;
+        overflow-y: auto;
+    }
+
+    /* K-Map visual box: exactly fills whatever height row 1 resolved to
+       above. overflow:hidden (not auto/scroll) is deliberate - the board
+       never shows a scrollbar because renderHTMLKMap()/render2DKMap()
+       measure this box's actual rendered size and transform:scale() the
+       table down to fit inside it, so nothing should ever need to
+       overflow in the first place. */
+    #kmap-container .kmap-panel {
+        height: 100%;
+        min-height: 120px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Analysis panel takes remaining space */
+    #kmap-container .kmap-analysis-panel {
+        height: 100%;
+        min-height: 200px;
+        overflow-y: auto;
+    }
+
+    .kmap-panel-noheader #kmap-visual-wrapper {
+        width: 100%;
+        height: 100%;
+        min-height: 100px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .kmap-solutions-wrapper {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .kmap-analysis-section {
+        padding: 11px;
+        border-radius: 9px;
+    }
+
+    .kmap-analysis-board {
+        gap: 10px;
+    }
+
+    /* Tighter panel chrome to fit small screens */
+    .tt-panel, .wave-panel, .verilog-panel, .kmap-panel, .kmap-analysis-panel,
+    .solution-panel, .circuit-panel {
+        padding: 12px;
+        border-radius: 12px;
+    }
+
+    .panel-header h2 {
+        font-size: 15px;
+    }
+
+    .zoom-controls {
+        bottom: 14px;
+        right: 14px;
+    }
+}
+
+/* ==========================================================================
+   Small Phones
+   ========================================================================== */
+@media (max-width: 480px) {
+    #topbar {
+        padding: 6px 8px;
+    }
+
+    .topbar-search-area {
+        margin-left: 6px;
+        margin-right: 4px;
+    }
+
+    .pill-toggle .pill-option {
+        font-size: 9.5px;
+        padding: 4px 9px;
+    }
+
+    .mobile-bottom-tabs .pill-toggle .pill-option {
+        font-size: 11px;
+        padding: 5px 4px;
+    }
+
+    .theme-toggle .pill-option {
+        padding: 4px 7px;
+    }
+
+    .theme-toggle .pill-option svg {
+        width: 11px;
+        height: 11px;
+    }
+
+    #sidebar .nav-btn {
+        width: 42px;
+        height: 42px;
+    }
+
+    #sidebar .nav-btn svg {
+        width: 19px;
+        height: 19px;
+    }
+
+    #app-root.landing #hero-logo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .empty-card-header h2 {
+        font-size: 20px;
+    }
+
+    .modal {
+        width: 94%;
+        height: 86%;
+    }
+
+    /* Compress the Learn Formats table on small phones */
+    .guide-table {
+        font-size: 11px;
+    }
+    
+    .guide-table th, .guide-table td {
+        padding: 8px 6px;
+    }
+    
+    .guide-table code {
+        font-size: 9.5px;
+        padding: 2px 4px;
+        letter-spacing: -0.3px;
+    }
+}
+
+/* ==========================================================================
+   Dark Mode K-Map Color Swap
+   ========================================================================== */
+body:not(.light-mode) .kmap-table th {
+    background: var(--bg-secondary);
+}
+
+body:not(.light-mode) .kmap-table th.kmap-corner,
+body:not(.light-mode) .kmap-corner,
+body:not(.light-mode) #wrap-top-header,
+body:not(.light-mode) #wrap-left-header {
+    background: var(--bg-secondary) !important;
+}
+
+body:not(.light-mode) .kmap-cell {
+    background-color: var(--bg-primary);
+}
+
+/* Ensure hover effect is maintained for the new cell color */
+@media (hover: hover) and (pointer: fine) {
+    body:not(.light-mode) .kmap-cell:hover {
+        background-color: var(--accent-light);
+    }
+}
+
+/* ============================================================
+   Tutorial & Pro-Tips System
+   Consumes existing design tokens only — no new theme logic.
+   ============================================================ */
+
+.tour-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 9998;
+    pointer-events: none;
+    /* Box shadow is set dynamically in JS */
+}
+
+.tour-tooltip {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    color: var(--text-primary);
+    position: absolute;
+    z-index: 9999;
+    padding: 16px;
+    border-radius: 8px;
+    width: 300px;
+}
+
+.tour-progress-dots {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+}
+.tour-progress-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+}
+.tour-progress-dots span.active {
+    background: var(--accent);
+}
+
+.concept-info-btn {
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    background: transparent;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 8px;
+    padding: 0;
+}
+.concept-info-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.concept-popover {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    position: absolute;
+    z-index: 1000;
+    width: 300px;
+    padding: 16px;
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
+.view-tip-banner {
+    background: var(--accent-light);
+    border: 1px solid var(--accent);
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 12px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-primary);
+}
+
+.help-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+}
+.help-fab > button {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+.help-fab-menu {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+}
+.help-fab-menu button {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    text-align: right;
+    padding: 10px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+}
+.help-fab-menu button:hover {
+    background: var(--bg-primary);
+}
+
+.tips-modal-list .tips-category h4 {
+    color: var(--text-secondary);
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.tips-modal-item {
+    border-bottom: 1px solid var(--border);
+    padding: 8px 0;
+        font-size: 20px;
+    }
+
+    .modal {
+        width: 94%;
+        height: 86%;
+    }
+
+    /* Compress the Learn Formats table on small phones */
+    .guide-table {
+        font-size: 11px;
+    }
+    
+    .guide-table th, .guide-table td {
+        padding: 8px 6px;
+    }
+    
+    .guide-table code {
+        font-size: 9.5px;
+        padding: 2px 4px;
+        letter-spacing: -0.3px;
+    }
+}
+
+/* ==========================================================================
+   Dark Mode K-Map Color Swap
+   ========================================================================== */
+body:not(.light-mode) .kmap-table th {
+    background: var(--bg-secondary);
+}
+
+body:not(.light-mode) .kmap-table th.kmap-corner,
+body:not(.light-mode) .kmap-corner,
+body:not(.light-mode) #wrap-top-header,
+body:not(.light-mode) #wrap-left-header {
+    background: var(--bg-secondary) !important;
+}
+
+body:not(.light-mode) .kmap-cell {
+    background-color: var(--bg-primary);
+}
+
+/* Ensure hover effect is maintained for the new cell color */
+@media (hover: hover) and (pointer: fine) {
+    body:not(.light-mode) .kmap-cell:hover {
+        background-color: var(--accent-light);
+    }
+}
+
+/* ============================================================
+   Tutorial & Pro-Tips System
+   Consumes existing design tokens only — no new theme logic.
+   ============================================================ */
+
+.tour-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: 9998;
+    pointer-events: none;
+    /* Box shadow is set dynamically in JS */
+}
+
+.tour-tooltip {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    color: var(--text-primary);
+    position: absolute;
+    z-index: 9999;
+    padding: 16px;
+    border-radius: 8px;
+    width: 300px;
+}
+
+.tour-progress-dots {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+}
+.tour-progress-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--border);
+}
+.tour-progress-dots span.active {
+    background: var(--accent);
+}
+
+.panel-title-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.concept-info-btn {
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    background: transparent;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    margin-left: 0;
+    padding: 0;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.concept-info-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-light);
+}
+
+.concept-popover {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-lg);
+    position: absolute;
+    z-index: 1000;
+    width: 300px;
+    padding: 16px;
+    border-radius: 8px;
+    color: var(--text-primary);
+}
+
+
+/* FAB is only shown on the landing screen */
+.help-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: none;
+}
+
+#app-root.landing ~ .help-fab,
+body:has(#app-root.landing) .help-fab {
+    display: block;
+}
+.help-fab > button {
+    background: var(--accent);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: none;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: inherit;
+}
+.help-fab-menu {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 160px;
+}
+.help-fab-menu button {
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    text-align: right;
+    padding: 10px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+}
+.help-fab-menu button:hover {
+    background: var(--bg-primary);
+}
+
+.tips-modal-list .tips-category h4 {
+    color: var(--text-secondary);
+    margin-top: 16px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.tips-modal-item {
+    border-bottom: 1px solid var(--border);
+    padding: 8px 0;
+}
+.tips-modal-item:last-child {
+    border-bottom: none;
+}
+
+body.tour-active {
+    overflow: hidden; 
+}
+body.tour-active #app-root {
+    pointer-events: none;
+}
+body.tour-active #sidebar {
+    z-index: 999999 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    border-color: transparent !important;
+}
+body.tour-active #sidebar .nav-btn:not(.tour-target),
+body.tour-active #sidebar .help-btn:not(.tour-target) {
+    opacity: 0.1 !important;
+    pointer-events: none !important;
+}
+
+body.tour-active #sidebar .nav-btn.tour-target {
+    opacity: 1 !important;
+    z-index: 999999 !important;
+    position: relative;
+}
+
+body.tour-active #sidebar .nav-btn.tour-target .nav-icon-wrapper {
+    background-color: var(--accent) !important;
+    color: #ffffff !important;
+    box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.8), 0 0 4px var(--accent) !important;
+    transform: scale(1.15);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body.tour-active #sidebar .nav-btn.tour-target svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+    stroke-width: 2.2px !important;
+    filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.9)) !important;
+}
+
+body.tour-active .zoom-btn-fullscreen,
+body.tour-active #kmap-fullscreen-btn,
+body.tour-active #export-csv-btn,
+body.tour-active #export-wave-btn,
+body.tour-active #export-circuit-png-orig,
+body.tour-active #export-circuit-png-simp,
+body.tour-active #copy-gate-btn,
+body.tour-active #save-gate-btn,
+body.tour-active #copy-dataflow-btn,
+body.tour-active #save-dataflow-btn {
+    pointer-events: none !important;
+    opacity: 0.5 !important;
+}
+
+body.tour-active .zoom-btn-fullscreen,
+body.tour-active .kmap-view-toggle,
+body.tour-active .clear-expr-btn {
+    pointer-events: none !important;
+}
+
+.tour-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    background: var(--bg-primary);
+    border-top: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 999999;
+    box-sizing: border-box;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
+}
+
+.tour-bottom-nav button {
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.tour-bottom-nav button:not([disabled]):hover {
+    filter: brightness(1.1);
+}
+
+.tour-target {
+    /* pointer-events: auto is deliberately removed; no clicking allowed during tour */
+}
+.tour-tooltip {
+    pointer-events: auto;
+}
