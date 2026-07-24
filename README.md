@@ -71,22 +71,22 @@ Mantiq is also a fully installable **Progressive Web App**, so it keeps working 
 
 <br/>
 
-## ✨ Features
+## Features
 
 | | |
 |---|---|
-| 🧮 **Boolean Minimization** | Reduce any expression to its minimal SOP or POS form using the Quine–McCluskey algorithm, with all alternative minimal solutions listed side by side. |
-| 📐 **Algebraic Proofs** | A guided, step-by-step derivation naming every law used — Idempotent, Absorption, Distribution, De Morgan's, Consensus, and more. |
-| 🗺️ **Karnaugh Maps** | Auto-grouped, color-coded K-Maps for 2 to 5 variables, with prime implicant and don't-care highlighting. |
-| 📋 **Truth Tables** | Instantly generated, fully interactive truth tables with minterm/maxterm indices. |
-| 🔌 **Circuit Diagrams** | A clean, auto-routed logic gate schematic generated straight from your expression. |
-| ⚡ **Live Simulation** | Flip input switches and watch signal states and output LEDs update in real time through the actual gate network. |
-| 💻 **Verilog Export** | Generate ready-to-drop-in Verilog HDL from your simplified logic in one click. |
-| 🌓 **Light & Dark Mode** | A polished interface that adapts to your system theme, with a manual override. |
-| 📱 **Installable PWA** | Add Mantiq to your home screen and use it completely offline — no server round-trips, ever. |
-| 🔗 **Shareable State** | Generate a link that reproduces your exact expression and result for classmates, colleagues, or your future self. |
-| 🎓 **Guided Onboarding** | A built-in product tour, a format guide, and a curated example library for first-time users. |
-| 🔒 **Private by Design** | 100% client-side computation. Nothing you type is ever sent anywhere. |
+| **Boolean Minimization** | Reduce any expression to its minimal SOP or POS form using the Quine–McCluskey algorithm, with all alternative minimal solutions listed side by side. |
+| **Algebraic Proofs** | A guided, step-by-step derivation naming every law used — Idempotent, Absorption, Distribution, De Morgan's, Consensus, and more. |
+| **Karnaugh Maps** | Auto-grouped, color-coded K-Maps for 2 to 5 variables, with prime implicant and don't-care highlighting. |
+| **Truth Tables** | Instantly generated, fully interactive truth tables with minterm/maxterm indices. |
+| **Circuit Diagrams** | A clean, auto-routed logic gate schematic generated straight from your expression. |
+| **Live Simulation** | Flip input switches and watch signal states and output LEDs update in real time through the actual gate network. |
+| **Verilog Export** | Generate ready-to-drop-in Verilog HDL from your simplified logic in one click. |
+| **Light & Dark Mode** | A polished interface that adapts to your system theme, with a manual override. |
+| **Installable PWA** | Add Mantiq to your home screen and use it completely offline — no server round-trips, ever. |
+| **Shareable State** | Generate a link that reproduces your exact expression and result for classmates, colleagues, or your future self. |
+| **Guided Onboarding** | A built-in product tour, a format guide, and a curated example library for first-time users. |
+| **Private by Design** | 100% client-side computation. Nothing you type is ever sent anywhere. |
 
 <br/>
 
@@ -116,30 +116,6 @@ More screenshots are available in the [`/screenshots`](screenshots) directory.
 The fastest way to try Mantiq is to open the hosted app in your browser:
 
 **→ [usamagulzar.github.io/mantiq](https://usamagulzar.github.io/mantiq)**
-
-*(Replace this link once the project is deployed — see [Deployment](#deployment) below.)*
-
-### Run It Locally
-
-Mantiq is a fully static site — no build step, no bundler, no package manager required to run
-it. All you need is a local web server, since the app loads its WebAssembly module and Service
-Worker via `fetch`, which most browsers block on the `file://` protocol.
-
-```bash
-# Clone the repository
-git clone https://github.com/usamagulzar/mantiq.git
-cd mantiq
-
-# Serve the directory with any static file server, for example:
-python3 -m http.server 8080
-# or
-npx serve .
-
-# Then open:
-# http://localhost:8080
-```
-
-That's it — no dependencies to install.
 
 ### Install as an App (PWA)
 
@@ -314,15 +290,6 @@ offline, or anywhere in between.
 
 <br/>
 
-## 🗺 Roadmap
-
-- [ ] Multi-output expression support (combinational logic with several outputs at once)
-- [ ] Sequential logic primitives (flip-flops, latches, basic FSM support)
-- [ ] Exportable circuit diagrams (SVG/PNG)
-- [ ] Additional HDL export targets (VHDL)
-- [ ] Localized UI (i18n)
-- [ ] Classroom/shared-session mode
-
 Have an idea? [Open a feature request](../../issues/new?template=feature_request.md) — see
 [Contributing](#-contributing) below.
 
@@ -335,19 +302,6 @@ Contributions, bug reports, and feature suggestions are genuinely welcome. Pleas
 request process before opening one, and note that this project follows a
 [Code of Conduct](CODE_OF_CONDUCT.md).
 
-Quick start for contributors:
-
-```bash
-git clone https://github.com/usamagulzar/mantiq.git
-cd mantiq
-python3 -m http.server 8080   # or any static server
-```
-
-No build tooling is required — edit HTML/CSS/JS directly and refresh. Changes to the WASM
-logic engine itself require the (separate) C++ source and an Emscripten toolchain; see
-[CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-<br/>
 
 ## 🔐 Security
 
@@ -367,17 +321,13 @@ Yes — after your first visit, the Service Worker caches everything needed to r
 offline, including the WebAssembly engine.
 
 **How many variables are supported?**
-The Karnaugh map view supports 2–5 variables; expression simplification and simulation support
+The Karnaugh map view supports 2–6 variables; expression simplification and simulation support
 larger variable counts, limited by practical readability of the output.
 
 **Is this suitable for coursework?**
 Yes — Mantiq is designed with students in mind, with step-by-step proofs that show *why* a
 simplification is valid, not just the final answer. Always confirm with your course's specific
 requirements before submitting generated proofs as your own work.
-
-**Can I self-host Mantiq?**
-Yes. It's a static site — see [Run It Locally](#run-it-locally). Deploy the contents of this
-repository to GitHub Pages, Netlify, Vercel, or any static host.
 
 <br/>
 
