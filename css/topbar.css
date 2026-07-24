@@ -627,6 +627,10 @@
     border-radius: 18px;
     border: 1px solid var(--border);
     background-color: rgba(255, 255, 255, 0.02);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 .landing-link-btn:hover {

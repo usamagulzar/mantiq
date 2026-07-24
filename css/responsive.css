@@ -22,6 +22,10 @@
     padding: 6px 6px;
     white-space: nowrap;
     letter-spacing: -0.01em;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .solution-split-view > .solution-panel {
@@ -114,6 +118,10 @@
     font-size: 10.5px;
     padding: 5px 12px;
     border-radius: 14px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .pill-toggle .pill-slider {
@@ -898,6 +906,7 @@ html:not(.light-mode) .kmap-cell {
     padding: 0;
     flex-shrink: 0;
     transition: all 0.2s ease;
+    line-height: 1;
 }
 .concept-info-btn:hover {
     color: var(--accent);
