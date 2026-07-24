@@ -1,3 +1,7 @@
+/* Global Resets */
+button, input, select, textarea {
+    font-family: inherit;
+}
 
 /* App Grid Layout */
 #app-root {
