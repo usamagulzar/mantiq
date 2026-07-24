@@ -74,11 +74,20 @@ function _calcFitStyle(panelType, w, h) {
 
 // Call at the start of a drag/pinch/wheel gesture to cache metrics for its duration.
 function _beginGesture(panelType) {
-    return _measureMetrics(panelType);
+    const m = _measureMetrics(panelType);
+    if (m && m.contentEl) {
+        m.contentEl.classList.add('is-zooming');
+        m.contentEl.style.willChange = 'transform';
+    }
+    return m;
 }
 
 // Call when a gesture ends so the next one measures fresh (handles resizes etc).
 function _endGesture(panelType) {
+    const m = _metricsCache[panelType];
+    if (m && m.contentEl) {
+        m.contentEl.classList.remove('is-zooming');
+    }
     delete _metricsCache[panelType];
 }
 
@@ -164,7 +173,7 @@ function _forceCrispRepaint(el) {
     // rAFs guarantee a real paint happens in between before we re-promote.
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            el.style.willChange = prevWillChange || 'transform';
+            el.style.willChange = el.classList.contains('is-zooming') ? 'transform' : '';
         });
     });
 }

@@ -60,7 +60,7 @@
     }
 }
 
-body.light-mode {
+html.light-mode {
     --bg-primary: #f8fafc;
     --bg-secondary: #ffffff;
     --bg-tertiary: rgba(255, 255, 255, 0.9);
@@ -91,7 +91,7 @@ body.light-mode {
    visibly changed. body.dark-mode outranks the :root media-query override
    for any element under body, so the toggle can now force real dark mode
    regardless of OS preference. */
-body.dark-mode {
+html.dark-mode {
     --bg-primary: #0f172a;
     --bg-secondary: #1e293b;
     --bg-tertiary: #0f172ab0;

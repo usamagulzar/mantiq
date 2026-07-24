@@ -281,7 +281,7 @@ function renderSolutionView() {
             stepCounter++;
             const stepText = trimmed.replace(/^\d+\.\s*/, '');
             appendHtml(`
-                <details class="qm-step" open>
+                <details class="qm-step">
                     <summary class="qm-step-summary">
                         <span class="qm-step-num">${stepCounter}</span>
                         <span class="qm-step-title">${escapeHtml(stepText)}</span>

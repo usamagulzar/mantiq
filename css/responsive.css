@@ -261,6 +261,7 @@
         order: 1;
         flex-shrink: 0;
         margin-bottom: 0;
+        padding-left: 10px;
     }
 
     #app-root:not(.landing):not(.showing-examples) .topbar-actions {
@@ -598,24 +599,24 @@
 /* ==========================================================================
    Dark Mode K-Map Color Swap
    ========================================================================== */
-body:not(.light-mode) .kmap-table th {
+html:not(.light-mode) .kmap-table th {
     background: var(--bg-secondary);
 }
 
-body:not(.light-mode) .kmap-table th.kmap-corner,
-body:not(.light-mode) .kmap-corner,
-body:not(.light-mode) #wrap-top-header,
-body:not(.light-mode) #wrap-left-header {
+html:not(.light-mode) .kmap-table th.kmap-corner,
+html:not(.light-mode) .kmap-corner,
+html:not(.light-mode) #wrap-top-header,
+html:not(.light-mode) #wrap-left-header {
     background: var(--bg-secondary) !important;
 }
 
-body:not(.light-mode) .kmap-cell {
+html:not(.light-mode) .kmap-cell {
     background-color: var(--bg-primary);
 }
 
 /* Ensure hover effect is maintained for the new cell color */
 @media (hover: hover) and (pointer: fine) {
-    body:not(.light-mode) .kmap-cell:hover {
+    html:not(.light-mode) .kmap-cell:hover {
         background-color: var(--accent-light);
     }
 }
@@ -675,6 +676,7 @@ body:not(.light-mode) .kmap-cell {
     cursor: pointer;
     margin-left: 8px;
     padding: 0;
+    line-height: 1;
 }
 .concept-info-btn:hover {
     color: var(--accent);
@@ -711,22 +713,40 @@ body:not(.light-mode) .kmap-cell {
     bottom: 20px;
     right: 20px;
     z-index: 9999;
+    display: none;
+}
+#app-root.landing ~ .help-fab,
+body:has(#app-root.landing) .help-fab {
+    display: block;
 }
 .help-fab > button {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: var(--shadow-md);
-    width: 50px;
-    height: 50px;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
-    border: none;
-    font-size: 24px;
-    font-weight: bold;
+    font-size: 18px;
+    font-weight: 500;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: inherit;
+    transition: var(--transition-fast, all 0.2s ease);
+    line-height: 1;
+}
+.help-fab > button:hover {
+    color: var(--text-primary);
+    background: var(--bg-tertiary);
+}
+
+@media (max-width: 900px) {
+    .help-fab {
+        bottom: 74px; /* clears the 60px sidebar/footer */
+        right: 12px;
+    }
 }
 .help-fab-menu {
     background: var(--bg-secondary);
@@ -793,24 +813,24 @@ body:not(.light-mode) .kmap-cell {
 /* ==========================================================================
    Dark Mode K-Map Color Swap
    ========================================================================== */
-body:not(.light-mode) .kmap-table th {
+html:not(.light-mode) .kmap-table th {
     background: var(--bg-secondary);
 }
 
-body:not(.light-mode) .kmap-table th.kmap-corner,
-body:not(.light-mode) .kmap-corner,
-body:not(.light-mode) #wrap-top-header,
-body:not(.light-mode) #wrap-left-header {
+html:not(.light-mode) .kmap-table th.kmap-corner,
+html:not(.light-mode) .kmap-corner,
+html:not(.light-mode) #wrap-top-header,
+html:not(.light-mode) #wrap-left-header {
     background: var(--bg-secondary) !important;
 }
 
-body:not(.light-mode) .kmap-cell {
+html:not(.light-mode) .kmap-cell {
     background-color: var(--bg-primary);
 }
 
 /* Ensure hover effect is maintained for the new cell color */
 @media (hover: hover) and (pointer: fine) {
-    body:not(.light-mode) .kmap-cell:hover {
+    html:not(.light-mode) .kmap-cell:hover {
         background-color: var(--accent-light);
     }
 }
@@ -898,77 +918,6 @@ body:not(.light-mode) .kmap-cell {
 }
 
 
-/* FAB is only shown on the landing screen */
-.help-fab {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-    display: none;
-}
-
-#app-root.landing ~ .help-fab,
-body:has(#app-root.landing) .help-fab {
-    display: block;
-}
-.help-fab > button {
-    background: var(--accent);
-    color: #fff;
-    box-shadow: var(--shadow-md);
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: none;
-    font-size: 24px;
-    font-weight: bold;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: inherit;
-}
-.help-fab-menu {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    position: absolute;
-    bottom: 60px;
-    right: 0;
-    border-radius: 8px;
-    box-shadow: var(--shadow-lg);
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 160px;
-}
-.help-fab-menu button {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    text-align: right;
-    padding: 10px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 14px;
-}
-.help-fab-menu button:hover {
-    background: var(--bg-primary);
-}
-
-.tips-modal-list .tips-category h4 {
-    color: var(--text-secondary);
-    margin-top: 16px;
-    margin-bottom: 8px;
-    font-size: 14px;
-}
-.tips-modal-item {
-    border-bottom: 1px solid var(--border);
-    padding: 8px 0;
-}
-.tips-modal-item:last-child {
-    border-bottom: none;
-}
 
 body.tour-active {
     overflow: hidden; 

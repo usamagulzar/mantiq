@@ -113,7 +113,7 @@ function renderHTMLWaveform(data) {
     const areaY = pad;
     
     // Draw background grid lines
-    const isDark = document.body.classList.contains('dark-mode') || !document.body.classList.contains('light-mode');
+    const isDark = document.documentElement.classList.contains('dark-mode') || !document.documentElement.classList.contains('light-mode');
     const borderClr = getComputedStyle(document.body).getPropertyValue('--border').trim() || (isDark ? '#334155' : '#e2e8f0');
     ctx.strokeStyle = borderClr + '44'; // Subtle grid opacity
     ctx.lineWidth = 1;

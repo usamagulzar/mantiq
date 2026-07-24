@@ -82,6 +82,7 @@
     justify-content: center;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     padding: 0;
+    line-height: 1;
 }
 
 .nav-icon-wrapper {
@@ -99,15 +100,18 @@
     width: 20px;
     height: 20px;
     transition: transform var(--transition-fast);
+    display: block;
 }
 
-.nav-btn:hover .nav-icon-wrapper {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: var(--text-primary);
-}
+@media (hover: hover) and (pointer: fine) {
+    .nav-btn:hover .nav-icon-wrapper {
+        background-color: rgba(255, 255, 255, 0.08);
+        color: var(--text-primary);
+    }
 
-.nav-btn:hover svg {
-    transform: scale(1.08);
+    .nav-btn:hover svg {
+        transform: scale(1.08);
+    }
 }
 
 .nav-btn.active .nav-icon-wrapper {
@@ -140,7 +144,12 @@
     z-index: 1000;
 }
 
-.nav-btn:hover .tooltip,
+@media (hover: hover) and (pointer: fine) {
+    .nav-btn:hover .tooltip {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+}
 .nav-btn:active .tooltip,
 .nav-btn.show-tooltip .tooltip {
     opacity: 1;

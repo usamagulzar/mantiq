@@ -257,8 +257,8 @@ function setSavedTheme(theme) {
 
 function applyTheme(theme) {
     const isDark = (theme === 'dark');
-    document.body.classList.toggle('dark-mode', isDark);
-    document.body.classList.toggle('light-mode', !isDark);
+    document.documentElement.classList.toggle('dark-mode', isDark);
+    document.documentElement.classList.toggle('light-mode', !isDark);
 
     if (elements.themePill) {
         elements.themePill.setAttribute('data-state', isDark ? 'dark' : 'light');

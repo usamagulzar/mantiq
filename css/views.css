@@ -3,21 +3,66 @@
    ========================================================================== */
 #loading-overlay {
     position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh;
-    background-color: var(--bg-primary); display: flex; flex-direction: column; 
+    background-color: var(--bg-primary);
+    display: flex; flex-direction: column; 
     justify-content: center; align-items: center; z-index: 10000; 
     transition: opacity 0.6s ease-out, visibility 0.6s;
 }
 
-.spinner {
-    width: 48px; height: 48px; border: 4px solid rgba(255,255,255,0.1);
-    border-left-color: var(--accent); border-radius: 50%;
-    animation: spin 1s linear infinite; margin-bottom: 24px;
+.loading-logo {
+    width: 90px;
+    height: 90px;
+    margin-bottom: 24px;
+    animation: pulseLogo 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1));
 }
 
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+@keyframes pulseLogo {
+    0%, 100% { transform: scale(1); filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.1)); }
+    50% { transform: scale(1.05); filter: drop-shadow(0 8px 24px var(--accent-light)); }
+}
 
 .loading-title { font-family: 'Outfit', sans-serif; color: var(--text-primary); font-size: 32px; font-weight: 700; letter-spacing: 1px; margin: 0; }
-.loading-subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 8px; }
+.loading-subtitle { 
+    color: var(--text-secondary); 
+    font-size: 15px; 
+    margin-top: 0; 
+    letter-spacing: 0.5px;
+    animation: fadeInOut 2s infinite ease-in-out;
+}
+
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+.led-loader {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+}
+.led-loader span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    animation: ledPulse 1.4s infinite ease-in-out both;
+}
+.led-loader span:nth-child(1) { animation-delay: -0.32s; }
+.led-loader span:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes ledPulse {
+    0%, 80%, 100% { 
+        background: var(--border); 
+        box-shadow: none; 
+        transform: scale(0.8); 
+    }
+    40% { 
+        background: var(--accent); 
+        box-shadow: 0 0 10px var(--accent); 
+        transform: scale(1.2); 
+    }
+}
 
 #portrait-warning {
     display: none; position: absolute; top: 0; left: 0; width: 100vw; height: 100dvh;
@@ -537,16 +582,15 @@
    anti-aliasing (visible as slight pixelation) once scaled down small. */
 #original-sim-scroll .zoom-content-wrapper,
 #simplified-sim-scroll .zoom-content-wrapper {
-    /* Filtered gate shapes (plastic-3d / silkscreen) get rasterized to a bitmap
-       on first paint. Without a promoted layer, pinch-zoom's rapid transform
-       updates just stretch that stale bitmap -> blur. will-change + a 3D
-       transform on every applied frame (see applyZoom in app.js) forces the
-       browser to keep re-rasterizing at the live scale during the gesture. */
-    will-change: transform;
+    /* will-change applied dynamically via JS to save memory */
     backface-visibility: hidden;
     -webkit-backface-visibility: hidden;
     perspective: 1000px;
     -webkit-perspective: 1000px;
+}
+
+.is-zooming {
+    pointer-events: none !important;
 }
 
 .zoom-content-wrapper svg {
@@ -627,10 +671,12 @@
     box-shadow: var(--shadow-sm);
 }
 
-.zoom-btn:hover {
-    background-color: var(--accent-light);
-    color: var(--accent);
-    border-color: rgba(37, 99, 235, 0.3);
+@media (hover: hover) and (pointer: fine) {
+    .zoom-btn:hover {
+        background-color: var(--accent-light);
+        color: var(--accent);
+        border-color: rgba(37, 99, 235, 0.3);
+    }
 }
 
 .zoom-btn svg {

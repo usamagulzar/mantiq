@@ -759,6 +759,7 @@ function initPanAndZoom(containerId, panelType) {
     container.addEventListener('mousedown', (e) => {
         if (e.target.closest('.zoom-controls')) return;
         isDragging = true;
+        _beginGesture(panelType);
         container.style.cursor = 'grabbing';
         startX = e.clientX;
         startY = e.clientY;
@@ -767,11 +768,19 @@ function initPanAndZoom(containerId, panelType) {
     });
     
     container.addEventListener('mouseleave', () => {
+        if (isDragging) {
+            _endGesture(panelType);
+            const wrap = container.querySelector('.zoom-content-wrapper');
+            _forceCrispRepaint(wrap);
+        }
         isDragging = false;
         container.style.cursor = 'default';
     });
     
     container.addEventListener('mouseup', () => {
+        if (isDragging) {
+            _endGesture(panelType);
+        }
         isDragging = false;
         container.style.cursor = 'default';
         const wrap = container.querySelector('.zoom-content-wrapper');
@@ -792,6 +801,7 @@ function initPanAndZoom(containerId, panelType) {
     let _wheelSettleTimer = null;
     container.addEventListener('wheel', (e) => {
         e.preventDefault();
+        _beginGesture(panelType);
         const rect = container.getBoundingClientRect();
         const px = e.clientX - rect.left;
         const py = e.clientY - rect.top;
@@ -802,6 +812,7 @@ function initPanAndZoom(containerId, panelType) {
         // we're not left showing a GPU-stretched bitmap from mid-scroll.
         clearTimeout(_wheelSettleTimer);
         _wheelSettleTimer = setTimeout(() => {
+            _endGesture(panelType);
             _forceCrispRepaint(container.querySelector('.zoom-content-wrapper'));
         }, 120);
     }, { passive: false });
@@ -813,6 +824,7 @@ function initPanAndZoom(containerId, panelType) {
     let containerRect = null;
     container.addEventListener('touchstart', (e) => {
         if (e.target.closest('.zoom-controls')) return;
+        _beginGesture(panelType);
         if (e.touches.length === 1) {
             isDragging = true;
             startX = e.touches[0].clientX;
@@ -839,15 +851,14 @@ function initPanAndZoom(containerId, panelType) {
     }, { passive: false });
     
     container.addEventListener('touchend', (e) => {
-        isDragging = false;
-        // A pinch or drag just ended. Continuous touchmove updates use
-        // smooth=false for responsiveness, which leaves the SVG on a
-        // GPU-stretched raster from mid-gesture — force a fresh, crisp
-        // rasterization at the final settled scale now that it's done.
         if (touchStartDist > 0 && e.touches.length < 2) {
             touchStartDist = 0;
         }
-        _forceCrispRepaint(container.querySelector('.zoom-content-wrapper'));
+        if (e.touches.length === 0) {
+            isDragging = false;
+            _endGesture(panelType);
+            _forceCrispRepaint(container.querySelector('.zoom-content-wrapper'));
+        }
     });
     
     container.addEventListener('touchmove', (e) => {
