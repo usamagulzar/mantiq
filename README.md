@@ -28,7 +28,7 @@ truth tables, interactive circuit simulation, and Verilog export, all in your br
 ## Overview
 
 **Mantiq** is a client-side digital logic design tool built for students, educators, and
-engineers. Type a Boolean expression — or describe a Karnaugh map directly — and Mantiq
+engineers. Type a Boolean expression (or describe a Karnaugh map directly) and Mantiq
 instantly gives you:
 
 - the **minimized expression** (Sum of Products or Product of Sums),
@@ -36,15 +36,15 @@ instantly gives you:
 - an auto-grouped, color-coded **Karnaugh map**,
 - a complete **truth table** with minterm/maxterm callouts,
 - an auto-generated, **interactive logic circuit diagram** you can simulate live, and
-- clean, ready-to-use **Verilog HDL** output.
+- clean, ready-to-use **Verilog** output.
 
-Everything runs **entirely on-device**. There is no backend, no account, and no telemetry —
+Everything runs **entirely on-device**. There is no backend, no account, and no telemetry;
 your expressions never leave your browser. The core simplification engine (Quine–McCluskey
 minimization, algebraic proof search, and code generation) is written in C++ and compiled to
 **WebAssembly** for near-native performance, wrapped in a lightweight, dependency-free
 vanilla JavaScript UI.
 
-Mantiq is also a fully installable **Progressive Web App**, so it keeps working — Wi-Fi or not.
+Mantiq is also a fully installable **Progressive Web App**, so it keeps working, Wi-Fi or not.
 
 <br/>
 
@@ -54,7 +54,6 @@ Mantiq is also a fully installable **Progressive Web App**, so it keeps working 
 - [Screenshots](#-screenshots)
 - [Getting Started](#-getting-started)
   - [Use It Online](#use-it-online)
-  - [Run It Locally](#run-it-locally)
   - [Install as an App](#install-as-an-app-pwa)
 - [How to Use Mantiq](#-how-to-use-mantiq)
   - [Input Formats](#input-formats)
@@ -62,7 +61,6 @@ Mantiq is also a fully installable **Progressive Web App**, so it keeps working 
 - [Project Structure](#-project-structure)
 - [Tech Stack](#-tech-stack)
 - [Progressive Web App](#-progressive-web-app)
-- [Roadmap](#-roadmap)
 - [Contributing](#-contributing)
 - [Security](#-security)
 - [FAQ](#-faq)
@@ -170,20 +168,20 @@ Mantiq is intentionally dependency-light and framework-free:
 
 ```
 ┌──────────────────────────────┐
-│           index.html          │   Static shell, views, and modals
+│           index.html         │   Static shell, views, and modals
 ├──────────────────────────────┤
-│     css/ (design system)      │   Themeable CSS custom-property tokens
+│     css/ (design system)     │   Themeable CSS custom-property tokens
 ├──────────────────────────────┤
-│   js/ (vanilla JS UI layer)   │   Rendering, interaction, state, tutorials
-│   ├─ app-core / ui-core       │
-│   ├─ circuit / simulation     │
-│   ├─ kmap / truth-table       │
-│   ├─ solution-renderer        │
-│   └─ worker-bridge            │──┐
+│   js/ (vanilla JS UI layer)  │   Rendering, interaction, state, tutorials
+│   ├─ app-core / ui-core      │
+│   ├─ circuit / simulation    │
+│   ├─ kmap / truth-table      │
+│   ├─ solution-renderer       │
+│   └─ worker-bridge           │──┐
 ├──────────────────────────────┤  │  postMessage bridge
-│      wasm/ (logic engine)     │◄─┘
-│  C++ → Emscripten → WASM      │   Expression parsing, Quine–McCluskey
-│  running inside a Web Worker  │   minimization, proof search, codegen
+│      wasm/ (logic engine)    │◄─┘
+│  C++ → Emscripten → WASM     │   Expression parsing, Quine–McCluskey
+│  running inside a Web Worker │   minimization, proof search, codegen
 └──────────────────────────────┘
 ```
 
