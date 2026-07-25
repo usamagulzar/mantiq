@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mantiq-cache-v2.1.0';
+const CACHE_NAME = 'mantiq-cache-v2.2.0';
 
 const urlsToCache = [
   './',

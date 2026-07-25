@@ -35,7 +35,14 @@ const _state = {
     verilogDataflow:      '',
     addTestbenchGate:     true,
     addTestbenchDataflow: true,
-    currentView:          0
+    currentView:          0,
+    // Which expression the CACHED computed fields (kMapJSON/truthTableJSON/...)
+    // actually correspond to. Unlike _state.expression (which is updated the
+    // instant setExpression is called, before the worker has done anything),
+    // this only ever advances when a real snapshot comes back from the worker.
+    // Views must check this before trusting the cache, or they'll render
+    // stale data from a still-in-flight request.
+    computedForExpr:      ''
 };
 
 /** Monotonically-increasing sequence counter for latest-wins. */
@@ -81,7 +88,7 @@ const VIEW_FIELDS_JS = {
 const _freshFields = new Set();
 
 /** Spawn the worker that hosts the WASM engine. */
-const _worker = new Worker('wasm/mantiq-worker.js?v=1.3.0');
+const _worker = new Worker('wasm/mantiq-worker.js?v=1.4.0');
 
 _worker.onmessage = function (event) {
     const msg = event.data;
@@ -128,6 +135,10 @@ _worker.onerror = function (e) {
 function _applySnapshot(snap) {
     if (!snap) return;
     Object.assign(_state, snap);
+    // snap.expression (from buildLightFields()) is always the expression the
+    // worker just finished computing against — safe to trust as "cache is
+    // fresh as of this expression."
+    if (snap.expression !== undefined) _state.computedForExpr = snap.expression;
     // computedFields lists which heavy fields (truthTableJSON/kMapJSON/circuitJSON/
     // verilogGate/verilogDataflow) this snapshot actually refreshed. A field left out
     // of the snapshot keeps whatever was cached before — it belongs to a different

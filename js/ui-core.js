@@ -482,8 +482,17 @@ function sortBooleanExpression(expr) {
         window.history.replaceState(null, null, ' ');
     }
 
-    // Update active views only if we have a valid result to prevent jittering
-    if (hasResult) {
+    // Update active views only if we have a valid result to prevent jittering,
+    // AND only once the cached computed fields (kMapJSON/truthTableJSON/etc.)
+    // actually correspond to the expression currently in the box. Right after
+    // a K-map/Truth-table cell click, updateFrontend() runs synchronously
+    // before the debounced worker round trip has finished -- re-rendering
+    // here with the still-stale cache would revert the just-clicked cell and
+    // cause a rapid follow-up click to compute its toggle from the wrong
+    // baseline, silently dropping earlier clicks in the burst. The later,
+    // async updateFrontend() call (triggered once the worker's snapshot
+    // actually arrives) is what performs the real render.
+    if (hasResult && _state.computedForExpr === expr) {
         const activeBtn = document.querySelector('.nav-btn.active');
         if (activeBtn) {
             const viewMode = activeBtn.getAttribute('data-view');
