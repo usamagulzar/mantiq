@@ -347,7 +347,7 @@ function openPanelFullscreen(panelType) {
     // Show overlay
     overlay.style.display = 'flex';
     document.body.style.overflow = 'hidden';
-    _enterFsLandscape(overlay);
+    // _enterFsLandscape(overlay);
 
     // Fit after layout settles
     requestAnimationFrame(() => {
@@ -398,7 +398,7 @@ function _refreshFsContent() {
 function closePanelFullscreen() {
     const overlay = document.getElementById('panel-fullscreen-overlay');
     if (!overlay) return;
-    _exitFsLandscape();
+    // _exitFsLandscape();
     overlay.style.display = 'none';
     document.body.style.overflow = '';
     document.getElementById('panel-fs-scroll').innerHTML = '';
