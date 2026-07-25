@@ -3,13 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"/>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' blob: data:; worker-src 'self' blob:; connect-src 'self';">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' blob: data: https://www.google-analytics.com https://www.googletagmanager.com; worker-src 'self' blob:; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com;">
     
     <!-- PWA & Meta Tags -->
-    <meta name="description" content="An advanced and intuitive logic circuit visualizer, simulator, and Boolean algebra solver. Master K-Maps, logic gates, Verilog, and beyond.">
+    <meta name="description" content="Mantiq is a free online Boolean algebra simplifier and digital logic simulator. Instantly generate K-Maps, truth tables, circuit diagrams, and Verilog code from any logic expression — 100% offline in your browser.">
+    <meta name="keywords" content="boolean algebra simplifier, karnaugh map generator, k-map solver, truth table generator, logic circuit simulator, digital logic design, quine-mccluskey calculator, verilog generator, logic gate simulator, sop pos converter, boolean expression solver">
+    <meta name="author" content="Usama Gulzar">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#135494">
     <link rel="manifest" href="manifest.json">
-    <title>Mantiq - Turn Your Logic into Life</title>
+    <title>Mantiq – Free Boolean Algebra Simplifier, K-Map & Logic Circuit Simulator</title>
 
     <!-- Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
@@ -17,21 +20,69 @@
     <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
     <link rel="shortcut icon" href="icons/icon.svg">
 
+    <!-- Apple iOS PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Mantiq">
+    <meta name="mobile-web-app-capable" content="yes">
+
     <link rel="canonical" href="https://usamagulzar.github.io/mantiq/">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://usamagulzar.github.io/mantiq/">
-    <meta property="og:title" content="Mantiq - Turn Your Logic into Life">
-    <meta property="og:description" content="An advanced and intuitive logic circuit visualizer, simulator, and Boolean algebra solver. Master K-Maps, logic gates, Verilog, and beyond.">
+    <meta property="og:site_name" content="Mantiq">
+    <meta property="og:locale" content="en_US">
+    <meta property="og:title" content="Mantiq – Free Boolean Algebra Simplifier, K-Map & Logic Circuit Simulator">
+    <meta property="og:description" content="Simplify Boolean expressions and generate K-Maps, truth tables, circuit diagrams, and Verilog code instantly, right in your browser — free and offline-first.">
     <meta property="og:image" content="https://usamagulzar.github.io/mantiq/banner.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Mantiq digital logic workbench showing a simplified Boolean expression, Karnaugh map, and circuit diagram">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://usamagulzar.github.io/mantiq/">
-    <meta property="twitter:title" content="Mantiq - Turn Your Logic into Life">
-    <meta property="twitter:description" content="An advanced and intuitive logic circuit visualizer, simulator, and Boolean algebra solver. Master K-Maps, logic gates, Verilog, and beyond.">
+    <meta property="twitter:title" content="Mantiq – Free Boolean Algebra Simplifier, K-Map & Logic Circuit Simulator">
+    <meta property="twitter:description" content="Simplify Boolean expressions and generate K-Maps, truth tables, circuit diagrams, and Verilog code instantly, right in your browser — free and offline-first.">
     <meta property="twitter:image" content="https://usamagulzar.github.io/mantiq/banner.jpg">
+    <meta property="twitter:image:alt" content="Mantiq digital logic workbench showing a simplified Boolean expression, Karnaugh map, and circuit diagram">
+
+    <!-- Structured Data: WebApplication / SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": ["WebApplication", "SoftwareApplication"],
+      "name": "Mantiq",
+      "alternateName": "Mantiq Logic Workbench",
+      "url": "https://usamagulzar.github.io/mantiq/",
+      "description": "An offline-first digital logic workbench that simplifies Boolean expressions and generates K-Maps, truth tables, circuit diagrams, and Verilog code in the browser.",
+      "applicationCategory": ["EducationalApplication", "DeveloperApplication"],
+      "applicationSubCategory": "Digital Logic Design Tool",
+      "operatingSystem": "Any (Web Browser)",
+      "browserRequirements": "Requires JavaScript and WebAssembly support",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Boolean expression simplification (SOP/POS)",
+        "Karnaugh Map (K-Map) generation for 2-5 variables",
+        "Truth table generation",
+        "Quine-McCluskey algebraic proofs",
+        "Interactive logic circuit diagrams and simulation",
+        "Verilog HDL export (gate-level and dataflow)"
+      ],
+      "author": {
+        "@type": "Person",
+        "name": "Usama Gulzar",
+        "url": "https://www.linkedin.com/in/usamagulzarpk/"
+      },
+      "softwareVersion": "2.0.0",
+      "license": "https://github.com/usamagulzar/mantiq/blob/main/LICENSE"
+    }
+    </script>
 
     <!-- Initialize theme immediately before CSS loads to prevent flash of wrong theme -->
     <script>
@@ -45,6 +96,33 @@
       })();
     </script>
 
+    <link rel="preconnect" href="https://www.googletagmanager.com">
+    <link rel="preconnect" href="https://www.google-analytics.com">
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L19VRWY17T"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-L19VRWY17T');
+    </script>
+
+    <style>
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+    </style>
+
     <link rel="stylesheet" href="css/fonts.css?v=2.0.1">
     <link rel="stylesheet" href="css/vars.css?v=2.0.1">
     <link rel="stylesheet" href="css/layout.css?v=2.0.1">
@@ -57,17 +135,15 @@
     <link rel="stylesheet" href="css/responsive.css?v=2.0.1">
   </head>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-L19VRWY17T"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-L19VRWY17T');
-</script>
-
   <body>
+
+    <noscript>
+      <div style="max-width:640px;margin:60px auto;padding:24px;font-family:sans-serif;line-height:1.6;">
+        <h1>Mantiq – Boolean Algebra Simplifier &amp; Digital Logic Circuit Simulator</h1>
+        <p>Mantiq is a free, offline-capable digital logic workbench for students, educators, and engineers. Type a Boolean expression and get a minimized SOP/POS solution, a step-by-step algebraic and Quine-McCluskey proof, a Karnaugh map (K-Map) for 2-5 variables, a full truth table, an interactive simulated circuit diagram, and exportable gate-level or dataflow Verilog HDL code.</p>
+        <p>This app requires JavaScript and WebAssembly to run. Please enable JavaScript in your browser to use Mantiq.</p>
+      </div>
+    </noscript>
 
     <!-- Loading Overlay -->
     <div id="loading-overlay">
@@ -188,7 +264,10 @@
                     </g>
                 </svg>
             </div>
-            
+
+            <h1 class="sr-only">Mantiq: Free Online Boolean Algebra Simplifier, Karnaugh Map (K-Map) Generator &amp; Digital Logic Circuit Simulator</h1>
+            <p class="sr-only">Type any Boolean expression, minterm list, or K-Map size to instantly get a simplified SOP/POS result, a step-by-step algebraic and Quine-McCluskey proof, an auto-generated Karnaugh map, a full truth table, an interactive simulated circuit diagram, and exportable gate-level or dataflow Verilog code — all free, offline-capable, and running entirely in your browser.</p>
+
             <div class="topbar-search-area">
                 <div class="input-row">
                     <div class="input-wrapper" style="position: relative;">
@@ -259,7 +338,7 @@
         </header>
 
         <!-- Main Workspace -->
-        <div id="main-workspace">
+        <main id="main-workspace">
 
                 <!-- Empty State overlay when no expression exists -->
                 <div id="empty-state" style="display: none;"></div>

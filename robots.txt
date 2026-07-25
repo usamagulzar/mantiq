@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://usamagulzar.github.io/mantiq/sitemap.xml
