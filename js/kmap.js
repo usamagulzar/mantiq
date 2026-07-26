@@ -31,10 +31,32 @@ const WRAP_CELL_SIZE = 44;
 // nothing is recolored, only filtered. null means "show everything" (default).
 let _selectedImplicantTerm = null;
 
+// Cached parameters from the most recent successful render, used by the
+// fast SVG-only redraw path so term selection never rebuilds the DOM.
+let _lastSVGDrawParams = null;
+
+/** Redraw only the SVG loop overlay using cached render parameters. */
+function _redrawSVGOnly() {
+    if (!_lastSVGDrawParams) { renderHTMLKMap(); return; }
+    const { solution, numVars, rowsBits, colsBits, rowGray, colGray, numPlanes, zGray, scale } = _lastSVGDrawParams;
+    const svgOverlay = document.getElementById('kmap-svg-overlay');
+    if (!svgOverlay) return;
+    svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
+    svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
+    svgOverlay.innerHTML = '';
+    if (numPlanes > 1) {
+        for (let z = 0; z < numPlanes; z++) {
+            drawSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGray, true, zGray[z], scale);
+        }
+    } else {
+        drawSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGray, false, '', scale);
+    }
+}
+
 /** Toggle selection of an implicant's K-map group from the analysis board. */
 function selectImplicantGroup(term) {
     _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
-    renderHTMLKMap();
+    _redrawSVGOnly();
 }
 window.selectImplicantGroup = selectImplicantGroup;
 
@@ -253,6 +275,7 @@ function render2DKMap(numVars, variables, minterms, dontCares, activeSolution, i
         if (showLoops && activeSolution && activeSolution.length > 0) {
             drawSVGLoops(activeSolution, numVars, rowsBits, colsBits, rowGray, colGray, false, '', scale);
         }
+        _lastSVGDrawParams = { solution: activeSolution, numVars, rowsBits, colsBits, rowGray, colGray, numPlanes: 1, zGray: null, scale };
     });
 }
 
@@ -687,43 +710,40 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
     }
     container.innerHTML = html;
 
-    // On mobile the browser hasn't reflowed after innerHTML is set, so a
-    // synchronous getBoundingClientRect() returns stale/zero dimensions and
-    // produces a bad scale.  Wait one rAF for layout to settle, apply the
-    // scale, then wait a second rAF for the CSS transform to be composited
-    // before measuring cell positions for the SVG loop overlay.  This is the
-    // same double-rAF pattern used elsewhere in the codebase and is the
-    // minimal fix for the visible glitch when tapping a term on mobile.
     const wrapper = document.getElementById('kmap-visual-wrapper');
     const isMobileKMap = window.innerWidth <= 900;
 
-    requestAnimationFrame(() => {
-        const rect = container.getBoundingClientRect();
-        const pad = isMobileKMap ? 24 : 40;
-        const availW = wrapper.clientWidth - pad;
-        const availH = wrapper.clientHeight - pad;
-        let scale = Math.min(availW / rect.width, availH / rect.height);
-        if (!isFinite(scale) || scale <= 0) scale = 1;
-        if (isMobileKMap) {
-            scale = Math.min(scale, 1); // never enlarge past default size on mobile
-        } else if (scale > 1.6) {
-            scale = 1.6;
-        }
+    // Reading offsetWidth forces the browser to flush pending layout so the
+    // subsequent getBoundingClientRect reflects the new innerHTML immediately,
+    // with no rAF delay and no visible intermediate frame.
+    void container.offsetWidth;
 
-        container.style.transform = `scale(${scale})`;
-        container.style.transformOrigin = 'center center';
+    const rect = container.getBoundingClientRect();
+    const pad = isMobileKMap ? 24 : 40;
+    const availW = wrapper.clientWidth - pad;
+    const availH = wrapper.clientHeight - pad;
+    let scale = Math.min(availW / rect.width, availH / rect.height);
+    if (!isFinite(scale) || scale <= 0) scale = 1;
+    if (isMobileKMap) {
+        scale = Math.min(scale, 1);
+    } else if (scale > 1.6) {
+        scale = 1.6;
+    }
 
-        // Second rAF: the transform is now applied; cell rects are correct.
-        requestAnimationFrame(() => {
-            svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
-            svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
-            svgOverlay.innerHTML = '';
-            for (let z = 0; z < numPlanes; z++) {
-                const zPrefix = zGray[z];
-                drawSVGLoops(activeSolution, numVars, 2, 2, rowGray, colGray, true, zPrefix, scale);
-            }
-        });
-    });
+    container.style.transform = `scale(${scale})`;
+    container.style.transformOrigin = 'center center';
+
+    // Reading offsetWidth again flushes the transform so cell rects are
+    // correct when drawSVGLoops measures them below.
+    void container.offsetWidth;
+
+    svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
+    svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
+    svgOverlay.innerHTML = '';
+    for (let z = 0; z < numPlanes; z++) {
+        drawSVGLoops(activeSolution, numVars, 2, 2, rowGray, colGray, true, zGray[z], scale);
+    }
+    _lastSVGDrawParams = { solution: activeSolution, numVars, rowsBits: 2, colsBits: 2, rowGray, colGray, numPlanes, zGray, scale };
 }
 
 function binaryToVariables(binaryStr, variables, isPOS) {
