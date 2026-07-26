@@ -35,6 +35,11 @@ let _selectedImplicantTerm = null;
 // fast SVG-only redraw path so term selection never rebuilds the DOM.
 let _lastSVGDrawParams = null;
 
+// Same idea as _lastSVGDrawParams, but for the Wrap view's tiled loop
+// overlay, so selecting a term there redraws just the loops instead of
+// rebuilding the whole tile grid (which would reset the user's pan/scroll).
+let _lastWrapSVGDrawParams = null;
+
 /** Redraw only the SVG loop overlay using cached render parameters. */
 function _redrawSVGOnly() {
     if (!_lastSVGDrawParams) { renderHTMLKMap(); return; }
@@ -56,7 +61,13 @@ function _redrawSVGOnly() {
 /** Toggle selection of an implicant's K-map group from the analysis board. */
 function selectImplicantGroup(term) {
     _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
-    _redrawSVGOnly();
+    if (kmapViewMode === 'wrap') {
+        _redrawWrapSVGOnly();
+    } else if (kmapViewMode === '3d') {
+        _updateKMap3DGroupHelpers();
+    } else {
+        _redrawSVGOnly();
+    }
 }
 window.selectImplicantGroup = selectImplicantGroup;
 
@@ -70,7 +81,7 @@ function renderHTMLKMap() {
     
     if (!jsonStr) {
         lastKMapData = null;
-        if (container) container.innerHTML = '<div class="empty-msg">No expression processed yet</div>';
+        if (container) container.innerHTML = getLoadingOrEmptyMsg('No expression processed yet');
         if (svgOverlay) svgOverlay.innerHTML = '';
         if (implicantsList) implicantsList.innerHTML = '';
         return;
@@ -1938,9 +1949,17 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
     }
     
     updateTransform();
+    _lastWrapSVGDrawParams = { activeSolution, numVars, rowsBits, colsBits, rowGray, colGray, tilesX, tilesY };
     requestAnimationFrame(() => {
         drawWrapSVGLoops(activeSolution, numVars, rowsBits, colsBits, rowGray, colGray, tilesX, tilesY);
     });
+}
+
+/** Redraw only the Wrap view's SVG loop overlay using cached render parameters. */
+function _redrawWrapSVGOnly() {
+    if (!_lastWrapSVGDrawParams) { renderHTMLKMap(); return; }
+    const { activeSolution, numVars, rowsBits, colsBits, rowGray, colGray, tilesX, tilesY } = _lastWrapSVGDrawParams;
+    drawWrapSVGLoops(activeSolution, numVars, rowsBits, colsBits, rowGray, colGray, tilesX, tilesY);
 }
 
 // Given the sorted list of Gray-code indices (in [0,len)) that a term

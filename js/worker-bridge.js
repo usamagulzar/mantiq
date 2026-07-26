@@ -131,13 +131,23 @@ _worker.onerror = function (e) {
     console.error('[Mantiq] Worker system error:', e);
 };
 
+let _textDecoder = null;
+
 /** Apply a state snapshot from the worker to the local cache. */
 function _applySnapshot(snap) {
     if (!snap) return;
+    
+    if (!_textDecoder) _textDecoder = new TextDecoder('utf-8');
+    
+    // Decode transferables back to JS strings (zero-copy from WASM to worker bridge!)
+    const heavyFields = ['truthTableJSON', 'kMapJSON', 'circuitJSON', 'verilogGate', 'verilogDataflow'];
+    heavyFields.forEach(f => {
+        if (snap[f] instanceof ArrayBuffer) {
+            snap[f] = _textDecoder.decode(snap[f]);
+        }
+    });
+    
     Object.assign(_state, snap);
-    // snap.expression (from buildLightFields()) is always the expression the
-    // worker just finished computing against — safe to trust as "cache is
-    // fresh as of this expression."
     if (snap.expression !== undefined) _state.computedForExpr = snap.expression;
     // computedFields lists which heavy fields (truthTableJSON/kMapJSON/circuitJSON/
     // verilogGate/verilogDataflow) this snapshot actually refreshed. A field left out
@@ -233,9 +243,20 @@ const Module = {
             // ── Writes (async, latest-wins) ─────────────────────────────────
             case 'mantiq_setExpression': {
                 const expr = (args && args[0]) || '';
+                const exprChanged = _state.expression !== expr;
                 _state.expression = expr;
                 if (expr.trim() === '') {
                     _clearComputedState();
+                } else if (exprChanged) {
+                    // if expression changes: keep cache of only the current section selected, and delete for others
+                    const keepFields = VIEW_FIELDS_JS[_state.currentView] || [];
+                    const allFields = ['truthTableJSON', 'kMapJSON', 'circuitJSON', 'verilogGate', 'verilogDataflow'];
+                    allFields.forEach(f => {
+                        if (!keepFields.includes(f)) {
+                            _state[f] = '';
+                            _freshFields.delete(f);
+                        }
+                    });
                 }
                 if (typeof _exprDebounceTimeout !== 'undefined' && _exprDebounceTimeout) clearTimeout(_exprDebounceTimeout);
                 _exprDebounceTimeout = setTimeout(() => {
@@ -291,10 +312,6 @@ const Module = {
                 }
                 return undefined;
             }
-
-            case 'mantiq_toggleVariable':
-                _workerWriteCall('_toggleVariableAndSnapshot', [args && args[0]]);
-                return undefined;
 
             case 'mantiq_freeStr':
                 return undefined; // No-op — strings come from JS cache

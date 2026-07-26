@@ -10,7 +10,10 @@ function renderTruthTableAndWaveform() {
     
     if (!jsonStr) {
         lastTruthTableData = null;
-        if (table) table.innerHTML = '<thead><tr><th>No expression processed yet</th></tr></thead>';
+        if (table) {
+            const msg = getLoadingOrEmptyMsg('No expression processed yet');
+            table.innerHTML = `<thead><tr><th>${msg}</th></tr></thead>`;
+        }
         if (waveCanvas) {
             const ctx = waveCanvas.getContext('2d');
             ctx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
@@ -426,7 +429,7 @@ initExportButtons();
 
 function formatVerilogHTML(code) {
     if (!code) {
-        return '<div class="code-line"><span class="line-num">1</span><span class="line-text">// No code generated</span></div>';
+        return getLoadingOrEmptyMsg('No expression processed yet');
     }
     const lines = code.split('\n');
     return lines.map((line, idx) => {

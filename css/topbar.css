@@ -297,8 +297,8 @@
     align-items: center;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    max-width: calc(100vw - 300px); /* Leave room for sidebar */
-    padding-bottom: 4px; /* Optional, for grab area */
+    max-width: calc(100vw - 180px);
+    padding-bottom: 4px;
     min-width: 0;
 }
 .draggable-carousel::-webkit-scrollbar {

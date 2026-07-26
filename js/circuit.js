@@ -12,8 +12,8 @@ function renderHTMLCircuit() {
     if (!origScroll || !simpScroll || !origPanel || !container) return;
     
     if (!jsonStr) {
-        origScroll.innerHTML = '<div style="color:var(--text-muted); text-align:center; margin-top:20px;">No expression processed yet</div>';
-        simpScroll.innerHTML = '<div style="color:var(--text-muted); text-align:center; margin-top:20px;">No expression processed yet</div>';
+        origScroll.innerHTML = getLoadingOrEmptyMsg('No expression processed yet');
+        simpScroll.innerHTML = getLoadingOrEmptyMsg('No expression processed yet');
         return;
     }
     
@@ -60,7 +60,7 @@ function renderHTMLCircuit() {
         simpScroll.innerHTML = generateSVGForCircuit(circuitData.simplified, 'simp');
         fitToContainer('simp');
     } else {
-        simpScroll.innerHTML = '<div style="color:var(--text-muted); text-align:center; margin-top:20px;">No simplified circuit</div>';
+        simpScroll.innerHTML = getLoadingOrEmptyMsg('No simplified circuit');
     }
     
     // Wire PNG Export
@@ -1120,8 +1120,8 @@ function renderHTMLSimulation(resetZoom = true) {
     
     const jsonStr = queryWasmString('mantiq_getCircuitJSON');
     if (!jsonStr) {
-        origSimScroll.innerHTML = '<div style="color:var(--text-muted); text-align:center; margin-top:20px;">No expression processed yet</div>';
-        simpSimScroll.innerHTML = '<div style="color:var(--text-muted); text-align:center; margin-top:20px;">No expression processed yet</div>';
+        origSimScroll.innerHTML = getLoadingOrEmptyMsg('No expression processed yet');
+        simpSimScroll.innerHTML = getLoadingOrEmptyMsg('No expression processed yet');
         return;
     }
     
@@ -1185,7 +1185,7 @@ function renderHTMLSimulation(resetZoom = true) {
     } else if (circuitData.simplified) {
         injectSVG(simpSimScroll, generateSVGForSimulation(circuitData.simplified, 's', 'simSimp'));
     } else {
-        simpSimScroll.innerHTML = '<div style="color:var(--text-muted); text-align:center; margin-top:20px;">No simplified circuit</div>';
+        simpSimScroll.innerHTML = getLoadingOrEmptyMsg('No simplified circuit');
     }
     
     // Attach click listeners to all toggles in both panels

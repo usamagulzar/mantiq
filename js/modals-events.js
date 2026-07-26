@@ -257,6 +257,15 @@ const navTooltipTimers = new Map();
 document.addEventListener('pointerdown', (e) => {
     const btn = e.target.closest('.nav-btn');
     if (btn) {
+        // Destroy any existing tooltips first
+        navTooltipTimers.forEach((timer, otherBtn) => {
+            if (otherBtn !== btn) {
+                clearTimeout(timer);
+                otherBtn.classList.remove('show-tooltip');
+                navTooltipTimers.delete(otherBtn);
+            }
+        });
+
         btn.classList.add('show-tooltip');
         
         if (navTooltipTimers.has(btn)) {

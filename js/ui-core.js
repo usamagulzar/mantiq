@@ -2,6 +2,18 @@
 var lastKMapData = null;
 var lastTruthTableData = null;
 
+window.getLoadingOrEmptyMsg = function(msg) {
+    const exprTrimmed = _state.expression ? _state.expression.trim() : '';
+    if (exprTrimmed === '') {
+        return `<div class="empty-msg" style="color:var(--text-muted); text-align:center; margin-top:20px;">${msg}</div>`;
+    }
+    const isComputing = exprTrimmed !== _state.computedForExpr;
+    if (isComputing || _state.hasResult) {
+        return '<div class="solution-empty thinking-spinner" style="margin-top:20px;"><span class="thinking-dots">Thinking</span></div>';
+    }
+    return `<div class="empty-msg" style="color:var(--text-muted); text-align:center; margin-top:20px;">Invalid expression</div>`;
+};
+
 // DOM Elements
 const elements = {
     input: document.getElementById('expression-input'),

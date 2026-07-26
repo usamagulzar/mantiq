@@ -237,7 +237,13 @@
         pointer-events: none;
     }
 
-    #sidebar .nav-btn:hover .tooltip,
+    @media (hover: hover) and (pointer: fine) {
+        #sidebar .nav-btn:hover .tooltip {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+    }
+
     #sidebar .nav-btn:active .tooltip,
     #sidebar .nav-btn.show-tooltip .tooltip {
         opacity: 1;
