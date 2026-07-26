@@ -133,6 +133,7 @@
     <link rel="stylesheet" href="css/kmap.css?v=2.0.1">
     <link rel="stylesheet" href="css/about.css?v=2.0.1">
     <link rel="stylesheet" href="css/responsive.css?v=2.0.1">
+    <link rel="stylesheet" href="css/integrity.css?v=1.0.0">
   </head>
 
   <body>
@@ -144,6 +145,33 @@
         <p>This app requires JavaScript and WebAssembly to run. Please enable JavaScript in your browser to use Mantiq.</p>
       </div>
     </noscript>
+
+    <!-- Academic Integrity Gate -->
+    <script src="js/integrity-gate.js?v=1.0.0"></script>
+    <div id="integrity-popup" class="modal-overlay integrity-overlay" style="display: none;">
+        <div class="modal sm integrity-modal">
+            <div class="modal-header">
+                <div class="modal-header-info">
+                    <div class="modal-header-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6z"></path><path d="m9 12 2 2 4-4"></path></svg>
+                    </div>
+                    <div class="modal-header-text">
+                        <h2>Commitment to Academic Integrity</h2>
+                        <div class="modal-subtitle">Please read before continuing</div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-body integrity-body">
+                <p>Mantiq is built to make Boolean logic easier to see and easier to understand. It exists to help you check your own working, explore how simplification actually happens step by step, and build the kind of intuition that only comes from engaging with a concept directly.</p>
+                <p>It is not built to think through a problem on your behalf, and it should not be used to produce work that you submit as your own for a graded assignment, quiz, or exam. Typing in a problem and copying out the answer skips the part where the actual learning happens.</p>
+                <p>By continuing, you agree to use Mantiq as a study aid rather than a substitute for the effort your coursework is meant to require of you.</p>
+            </div>
+            <div class="modal-footer integrity-footer">
+                <span class="modal-footer-hint">This will only be shown once on this device.</span>
+                <button id="integrity-agree-btn" class="integrity-agree-btn">I Understand and Agree</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Loading Overlay -->
     <div id="loading-overlay">
