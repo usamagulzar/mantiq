@@ -687,37 +687,42 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
     }
     container.innerHTML = html;
 
-    // Synchronous scale computation
+    // On mobile the browser hasn't reflowed after innerHTML is set, so a
+    // synchronous getBoundingClientRect() returns stale/zero dimensions and
+    // produces a bad scale.  Wait one rAF for layout to settle, apply the
+    // scale, then wait a second rAF for the CSS transform to be composited
+    // before measuring cell positions for the SVG loop overlay.  This is the
+    // same double-rAF pattern used elsewhere in the codebase and is the
+    // minimal fix for the visible glitch when tapping a term on mobile.
     const wrapper = document.getElementById('kmap-visual-wrapper');
-    const rect = container.getBoundingClientRect();
     const isMobileKMap = window.innerWidth <= 900;
-    // Fit to the available space on every screen size, same as desktop -
-    // the visual panel never scrolls, it scales the planes down (or up,
-    // within limits) to fit exactly what's available on both axes.
-    const pad = isMobileKMap ? 24 : 40;
-    const availW = wrapper.clientWidth - pad;
-    const availH = wrapper.clientHeight - pad;
-    let scale = Math.min(availW / rect.width, availH / rect.height);
-    if (!isFinite(scale) || scale <= 0) scale = 1;
-    if (isMobileKMap) {
-        scale = Math.min(scale, 1); // never enlarge past default size on mobile
-    } else if (scale > 1.6) {
-        scale = 1.6;
-    }
-    
-    container.style.transform = `scale(${scale})`;
-    container.style.transformOrigin = 'center center';
-    
-    // See render2DKMap for why the clear happens inside the rAF, in the
-    // same tick as the redraw, instead of before it.
+
     requestAnimationFrame(() => {
-        svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
-        svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
-        svgOverlay.innerHTML = '';
-        for (let z = 0; z < numPlanes; z++) {
-            const zPrefix = zGray[z];
-            drawSVGLoops(activeSolution, numVars, 2, 2, rowGray, colGray, true, zPrefix, scale);
+        const rect = container.getBoundingClientRect();
+        const pad = isMobileKMap ? 24 : 40;
+        const availW = wrapper.clientWidth - pad;
+        const availH = wrapper.clientHeight - pad;
+        let scale = Math.min(availW / rect.width, availH / rect.height);
+        if (!isFinite(scale) || scale <= 0) scale = 1;
+        if (isMobileKMap) {
+            scale = Math.min(scale, 1); // never enlarge past default size on mobile
+        } else if (scale > 1.6) {
+            scale = 1.6;
         }
+
+        container.style.transform = `scale(${scale})`;
+        container.style.transformOrigin = 'center center';
+
+        // Second rAF: the transform is now applied; cell rects are correct.
+        requestAnimationFrame(() => {
+            svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
+            svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
+            svgOverlay.innerHTML = '';
+            for (let z = 0; z < numPlanes; z++) {
+                const zPrefix = zGray[z];
+                drawSVGLoops(activeSolution, numVars, 2, 2, rowGray, colGray, true, zPrefix, scale);
+            }
+        });
     });
 }
 
