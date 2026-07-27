@@ -31,6 +31,17 @@ const WRAP_CELL_SIZE = 44;
 // nothing is recolored, only filtered. null means "show everything" (default).
 let _selectedImplicantTerm = null;
 
+// Hovered-but-not-yet-clicked term, used to preview a group before committing
+// to it. Takes priority over _selectedImplicantTerm while the mouse is over a
+// term-box; clears on mouseleave and reveals whatever was actually selected.
+let _previewImplicantTerm = null;
+
+/** The term that should actually drive filtering right now: a live hover
+ *  preview wins over a committed click-selection. */
+function _effectiveImplicantTerm() {
+    return _previewImplicantTerm !== null ? _previewImplicantTerm : _selectedImplicantTerm;
+}
+
 // Cached parameters from the most recent successful render, used by the
 // fast SVG-only redraw path so term selection never rebuilds the DOM.
 let _lastSVGDrawParams = null;
@@ -59,25 +70,25 @@ function _redrawSVGOnly() {
 }
 
 /** Sync the analysis board's term-box selected/dimmed classes to the current
- *  _selectedImplicantTerm without rebuilding the list's DOM (rebuilding would
- *  collapse open <details> panels and is unnecessary — only the classes on
- *  existing .selectable-implicant boxes need to change). */
+ *  effective term (hover preview, or else the committed click-selection)
+ *  without rebuilding the list's DOM (rebuilding would collapse open
+ *  <details> panels and is unnecessary — only the classes on existing
+ *  .selectable-implicant boxes need to change). */
 function _updateImplicantBoxSelectionUI() {
     const list = document.getElementById('kmap-implicants-list');
     if (!list) return;
+    const eff = _effectiveImplicantTerm();
     list.querySelectorAll('.selectable-implicant').forEach(box => {
         const term = box.getAttribute('data-term');
-        const isSelected = term === _selectedImplicantTerm;
-        const isDimmed = _selectedImplicantTerm !== null && !isSelected;
+        const isSelected = term === eff;
+        const isDimmed = eff !== null && !isSelected;
         box.classList.toggle('selected', isSelected);
         box.classList.toggle('dimmed', isDimmed);
     });
 }
 
-/** Toggle selection of an implicant's K-map group from the analysis board. */
-function selectImplicantGroup(term) {
-    _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
-    _updateImplicantBoxSelectionUI();
+/** Redraw whichever K-map view is active using the current effective term. */
+function _redrawKMapForSelection() {
     if (kmapViewMode === 'wrap') {
         _redrawWrapSVGOnly();
     } else if (kmapViewMode === '3d') {
@@ -86,7 +97,25 @@ function selectImplicantGroup(term) {
         _redrawSVGOnly();
     }
 }
+
+/** Toggle selection of an implicant's K-map group from the analysis board. */
+function selectImplicantGroup(term) {
+    _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
+    _updateImplicantBoxSelectionUI();
+    _redrawKMapForSelection();
+}
 window.selectImplicantGroup = selectImplicantGroup;
+
+/** Preview an implicant's group on hover, without committing to it as the
+ *  actual selection — mouseleave (previewImplicantGroup(null)) restores
+ *  whatever was really selected. */
+function previewImplicantGroup(term) {
+    if (_previewImplicantTerm === term) return; // no-op, avoid redundant redraws
+    _previewImplicantTerm = term;
+    _updateImplicantBoxSelectionUI();
+    _redrawKMapForSelection();
+}
+window.previewImplicantGroup = previewImplicantGroup;
 
 function renderHTMLKMap() {
     if (!wasmReady) return;
@@ -150,6 +179,10 @@ function renderHTMLKMap() {
             (activeEPIsForValidity && activeEPIsForValidity.includes(_selectedImplicantTerm));
         if (!stillValid) _selectedImplicantTerm = null;
     }
+    // A full rebuild replaces the term-box DOM the mouse may currently be
+    // over, so any in-flight hover preview can no longer be cleared by a
+    // mouseout on the (now-gone) element — drop it up front instead.
+    _previewImplicantTerm = null;
 
     // Re-enable the toolbar buttons (they may have been disabled by the 1-var early-out above)
     const toggleBtnReset = document.getElementById('kmap-view-toggle-btn');
@@ -583,10 +616,12 @@ function drawSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGray, i
     // (un-padded) pixel box.
     const pieces = [];
     solution.forEach((term, idx) => {
-        // A selection restricts which group(s) get drawn, but idx (and so
-        // color) still comes from this term's position in the full solution —
-        // selecting doesn't recolor anything, only hides the rest.
-        if (_selectedImplicantTerm !== null && term !== _selectedImplicantTerm) return;
+        // A selection (or a live hover preview) restricts which group(s) get
+        // drawn, but idx (and so color) still comes from this term's position
+        // in the full solution — selecting doesn't recolor anything, only
+        // hides the rest.
+        const _effTerm = _effectiveImplicantTerm();
+        if (_effTerm !== null && term !== _effTerm) return;
 
         const zPart = term.slice(0, zBits);
         for (let k = 0; k < zBits; k++) {
@@ -867,8 +902,9 @@ function renderKMapAnalysis(solution, isSOP, variables) {
                 const color = LOOP_COLORS[colorIdx % LOOP_COLORS.length];
                 colorIdx++;
                 const literal = binaryToVariables(term, variables, !isSOP);
-                const isSelected = term === _selectedImplicantTerm;
-                const isDimmed = _selectedImplicantTerm !== null && !isSelected;
+                const _eff = _effectiveImplicantTerm();
+                const isSelected = term === _eff;
+                const isDimmed = _eff !== null && !isSelected;
                 const cls = `term-box selectable-implicant${isSelected ? ' selected' : ''}${isDimmed ? ' dimmed' : ''}`;
                 return `<span class="${cls}" data-term="${term}" style="border:1px solid ${color}; color:${color}; background:${color}20;">${literal}</span>`;
             }).join('');
@@ -884,8 +920,9 @@ function renderKMapAnalysis(solution, isSOP, variables) {
     if (activeEPIs && activeEPIs.length > 0) {
         const epiHtml = activeEPIs.map(epi => {
             const literal = binaryToVariables(epi, variables, !isSOP);
-            const isSelected = epi === _selectedImplicantTerm;
-            const isDimmed = _selectedImplicantTerm !== null && !isSelected;
+            const _eff = _effectiveImplicantTerm();
+            const isSelected = epi === _eff;
+            const isDimmed = _eff !== null && !isSelected;
             const cls = `term-box selectable-implicant${isSelected ? ' selected' : ''}${isDimmed ? ' dimmed' : ''}`;
             return `<span class="${cls}" data-term="${epi}" style="border:1px solid #AF52DE; color:#AF52DE;">${literal}</span>`;
         }).join('');
@@ -1432,9 +1469,11 @@ function _updateKMap3DGroupHelpers() {
     // cubes and wrap-face flags.
     const pieces = []; // { color, members, wrapFaces }
     activeSolution.forEach((term, idx) => {
-        // Selection filters which group gets a wireframe drawn; color still
-        // comes from this term's position in the full solution, unchanged.
-        if (_selectedImplicantTerm !== null && term !== _selectedImplicantTerm) return;
+        // Selection (or a live hover preview) filters which group gets a
+        // wireframe drawn; color still comes from this term's position in
+        // the full solution, unchanged.
+        const _effTerm3d = _effectiveImplicantTerm();
+        if (_effTerm3d !== null && term !== _effTerm3d) return;
 
         const colorStr = LOOP_COLORS[idx % LOOP_COLORS.length];
         const color = parseInt(colorStr.slice(1), 16);
@@ -2045,10 +2084,12 @@ function drawWrapSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGra
         const rects = solution.map(termStr => {
             const term = termStr;
 
-            // As in drawSVGLoops: a selection filters which term gets a box
-            // (returning null here, same as a term that doesn't touch this
-            // tile), without touching the idx-based color below.
-            if (_selectedImplicantTerm !== null && termStr !== _selectedImplicantTerm) return null;
+            // As in drawSVGLoops: a selection (or hover preview) filters
+            // which term gets a box (returning null here, same as a term
+            // that doesn't touch this tile), without touching the idx-based
+            // color below.
+            const _effTermWrap = _effectiveImplicantTerm();
+            if (_effTermWrap !== null && termStr !== _effTermWrap) return null;
 
             const rMatches = [];
             for (let r = 0; r < rowGray.length; r++) {
@@ -2144,6 +2185,23 @@ document.addEventListener('click', (e) => {
         }
         return;
     }
+});
+
+// Hover-preview: skim a group by hovering its term-box, without committing
+// to it as the actual selection. mouseover/mouseout (rather than mouseenter/
+// mouseleave, which don't bubble) plus a relatedTarget check so moving
+// between child nodes of the same box doesn't fire spurious enter/leave.
+document.addEventListener('mouseover', (e) => {
+    const implicant = e.target.closest('.selectable-implicant');
+    if (!implicant || !implicant.hasAttribute('data-term')) return;
+    if (implicant.contains(e.relatedTarget)) return;
+    previewImplicantGroup(implicant.getAttribute('data-term'));
+});
+document.addEventListener('mouseout', (e) => {
+    const implicant = e.target.closest('.selectable-implicant');
+    if (!implicant || !implicant.hasAttribute('data-term')) return;
+    if (implicant.contains(e.relatedTarget)) return;
+    previewImplicantGroup(null);
 });
 
 
