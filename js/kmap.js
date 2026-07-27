@@ -87,15 +87,26 @@ function _updateImplicantBoxSelectionUI() {
     });
 }
 
-/** Redraw whichever K-map view is active using the current effective term. */
+// A term-box click is preceded by a synthetic mouseover on both desktop and
+// mobile, so a single tap can trigger _redrawKMapForSelection twice in a row
+// (once for the preview, once for the commit) — two full innerHTML clears
+// and rebuilds landing in the same frame, which is what shows up as a
+// flash/glitch. Coalesce same-tick calls into a single rAF-scheduled redraw
+// that reads whatever state is current by the time it actually runs.
+let _redrawScheduled = false;
 function _redrawKMapForSelection() {
-    if (kmapViewMode === 'wrap') {
-        _redrawWrapSVGOnly();
-    } else if (kmapViewMode === '3d') {
-        _updateKMap3DGroupHelpers();
-    } else {
-        _redrawSVGOnly();
-    }
+    if (_redrawScheduled) return;
+    _redrawScheduled = true;
+    requestAnimationFrame(() => {
+        _redrawScheduled = false;
+        if (kmapViewMode === 'wrap') {
+            _redrawWrapSVGOnly();
+        } else if (kmapViewMode === '3d') {
+            _updateKMap3DGroupHelpers();
+        } else {
+            _redrawSVGOnly();
+        }
+    });
 }
 
 /** Toggle selection of an implicant's K-map group from the analysis board. */
