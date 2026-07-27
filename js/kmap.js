@@ -101,6 +101,12 @@ function _redrawKMapForSelection() {
 /** Toggle selection of an implicant's K-map group from the analysis board. */
 function selectImplicantGroup(term) {
     _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
+    // A click always represents committed intent, so it should never be
+    // masked by a leftover hover preview — this matters most on touch
+    // devices, which fire a synthetic mouseover before click but have no
+    // real pointer to trigger mouseout afterward, so without this the
+    // preview could get stuck and hide the toggle-off.
+    _previewImplicantTerm = null;
     _updateImplicantBoxSelectionUI();
     _redrawKMapForSelection();
 }
@@ -2191,20 +2197,22 @@ document.addEventListener('click', (e) => {
 // to it as the actual selection. mouseover/mouseout (rather than mouseenter/
 // mouseleave, which don't bubble) plus a relatedTarget check so moving
 // between child nodes of the same box doesn't fire spurious enter/leave.
-document.addEventListener('mouseover', (e) => {
-    const implicant = e.target.closest('.selectable-implicant');
-    if (!implicant || !implicant.hasAttribute('data-term')) return;
-    if (implicant.contains(e.relatedTarget)) return;
-    previewImplicantGroup(implicant.getAttribute('data-term'));
-});
-document.addEventListener('mouseout', (e) => {
-    const implicant = e.target.closest('.selectable-implicant');
-    if (!implicant || !implicant.hasAttribute('data-term')) return;
-    if (implicant.contains(e.relatedTarget)) return;
-    previewImplicantGroup(null);
-});
-
-
-
+// Gated on real hover support: touch devices fire a synthetic mouseover
+// before click with no true pointer to ever trigger mouseout, so previewing
+// there would just be flicker with no way to clear itself.
+if (window.matchMedia('(hover: hover)').matches) {
+    document.addEventListener('mouseover', (e) => {
+        const implicant = e.target.closest('.selectable-implicant');
+        if (!implicant || !implicant.hasAttribute('data-term')) return;
+        if (implicant.contains(e.relatedTarget)) return;
+        previewImplicantGroup(implicant.getAttribute('data-term'));
+    });
+    document.addEventListener('mouseout', (e) => {
+        const implicant = e.target.closest('.selectable-implicant');
+        if (!implicant || !implicant.hasAttribute('data-term')) return;
+        if (implicant.contains(e.relatedTarget)) return;
+        previewImplicantGroup(null);
+    });
+}
 
 
