@@ -58,9 +58,26 @@ function _redrawSVGOnly() {
     }
 }
 
+/** Sync the analysis board's term-box selected/dimmed classes to the current
+ *  _selectedImplicantTerm without rebuilding the list's DOM (rebuilding would
+ *  collapse open <details> panels and is unnecessary — only the classes on
+ *  existing .selectable-implicant boxes need to change). */
+function _updateImplicantBoxSelectionUI() {
+    const list = document.getElementById('kmap-implicants-list');
+    if (!list) return;
+    list.querySelectorAll('.selectable-implicant').forEach(box => {
+        const term = box.getAttribute('data-term');
+        const isSelected = term === _selectedImplicantTerm;
+        const isDimmed = _selectedImplicantTerm !== null && !isSelected;
+        box.classList.toggle('selected', isSelected);
+        box.classList.toggle('dimmed', isDimmed);
+    });
+}
+
 /** Toggle selection of an implicant's K-map group from the analysis board. */
 function selectImplicantGroup(term) {
     _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
+    _updateImplicantBoxSelectionUI();
     if (kmapViewMode === 'wrap') {
         _redrawWrapSVGOnly();
     } else if (kmapViewMode === '3d') {
