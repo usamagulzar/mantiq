@@ -1,11 +1,19 @@
-const CACHE_NAME = 'mantiq-cache-v2.2.8';
+const CACHE_NAME = 'mantiq-cache-v2.2.9'; // bumped so existing installs pick up the fix
 
 const urlsToCache = [
   './',
   './index.html',
   './manifest.json',
+  './icons/icon-16.png',
+  './icons/icon-32.png',
+  './icons/icon-48.png',
+  './icons/icon-180.png',
   './icons/icon-192.png',
+  './icons/icon-256.png',
+  './icons/icon-384.png',
   './icons/icon-512.png',
+  './icons/icon-maskable-192.png',
+  './icons/icon-maskable-512.png',
   './icons/icon.svg',
   './wasm/mantiq-worker.js',
   './wasm/index.js',
@@ -21,7 +29,9 @@ const urlsToCache = [
   './css/kmap.css',
   './css/about.css',
   './css/responsive.css',
+  './css/integrity.css',
   // JS
+  './js/integrity-gate.js',
   './js/three.min.js',
   './js/svg-icons.js',
   './js/worker-bridge.js',
@@ -73,17 +83,27 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 3. Fetch event - Cache First with Network Fallback
+// 3. Fetch event - Cache First (ignoring query strings) with Network Fallback
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
+    // ignoreSearch: true so "css/fonts.css?v=2.0.1" matches the cached
+    // "css/fonts.css" entry — this is the fix for the "You're Offline" bug.
+    caches.match(event.request, { ignoreSearch: true })
       .then(response => {
         // If the file is in the cache, return it (offline mode)
         if (response) {
           return response;
         }
         // Otherwise, try to fetch from network
-        return fetch(event.request);
+        return fetch(event.request).catch(() => {
+          // No cache hit and no network — fail gracefully instead of an
+          // unhandled rejection (which is what triggers the browser's own
+          // native "You're Offline" interstitial).
+          if (event.request.mode === 'navigate') {
+            return caches.match('./index.html');
+          }
+          return new Response('', { status: 504, statusText: 'Offline' });
+        });
       })
   );
 });
