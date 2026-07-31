@@ -5,8 +5,8 @@
 
 .about-modal {
     max-width: 720px;
-    height: 85%;
-    max-height: 780px;
+    height: auto;
+    max-height: min(85vh, 780px);
 }
 
 .about-body {
@@ -14,6 +14,9 @@
     display: flex;
     flex-direction: column;
     gap: 0;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 /* ---------- Hero ---------- */
@@ -311,3 +314,361 @@
         align-items: flex-start;
     }
 }
+
+/* ==========================================================================
+   Why Mantiq Comparison Modal
+   ========================================================================== */
+.why-mantiq-modal {
+    max-width: 700px;
+    height: auto;
+    max-height: min(85vh, 760px);
+}
+
+.why-mantiq-body {
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+}
+
+.comparison-intro p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.comparison-table-wrap {
+    overflow-x: auto;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.comparison-table th {
+    background: var(--bg-tertiary);
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.comparison-table th.mantiq-col {
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
+.comparison-table th.feat-col {
+    width: 45%;
+}
+
+.comparison-table tbody tr:hover {
+    background: rgba(var(--accent-rgb), 0.04);
+}
+
+.comparison-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.comparison-table td {
+    color: var(--text-secondary);
+}
+
+.comparison-table td.check {
+    color: var(--success);
+    font-weight: 600;
+}
+
+.comparison-table td.cross {
+    color: var(--error);
+    font-weight: 500;
+    opacity: 0.7;
+}
+
+.comparison-table td.partial {
+    color: #f59e0b;
+    font-weight: 500;
+}
+
+.comparison-table td.mantiq-col,
+.comparison-table th.mantiq-col {
+    background: var(--accent-light);
+}
+
+.comparison-note {
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px dashed rgba(var(--accent-rgb), 0.4);
+    background: var(--accent-light);
+}
+
+.comparison-note p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+/* ==========================================================================
+   Legal Modals (Privacy Policy, Terms of Use)
+   ========================================================================== */
+.legal-modal {
+    max-width: 640px;
+    height: auto;
+    max-height: min(85vh, 740px);
+}
+
+.legal-body {
+    padding: 20px 28px;
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.legal-section h3 {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+    letter-spacing: -0.01em;
+}
+
+.legal-section p {
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text-secondary);
+}
+
+.legal-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.legal-link:hover {
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   Contact Modal
+   ========================================================================== */
+.contact-modal {
+    max-width: 560px;
+    height: auto;
+    max-height: min(85vh, 600px);
+}
+
+.contact-body {
+    padding: 20px 28px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.contact-intro {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+}
+
+.contact-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.contact-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: var(--bg-tertiary);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    cursor: pointer;
+}
+
+.contact-card:hover {
+    border-color: rgba(var(--accent-rgb), 0.4);
+    background: var(--accent-light);
+}
+
+.contact-card-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--accent-light);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.contact-card-copy {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.contact-card-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--text-muted);
+}
+
+.contact-card-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.contact-card-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    margin-top: 2px;
+}
+
+@media (max-width: 640px) {
+    .why-mantiq-body,
+    .legal-body,
+    .contact-body {
+        padding: 16px 18px 22px;
+    }
+}
+
+/* ==========================================================================
+   Circuit Explain Modal
+   ========================================================================== */
+
+.circuit-explain-modal {
+    max-width: 560px;
+    height: auto;
+    max-height: min(85vh, 680px);
+}
+
+.circuit-explain-body {
+    padding: 6px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.circuit-explain-category {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    margin-top: 6px;
+    opacity: 0.9;
+}
+
+.circuit-explain-section {
+    margin-bottom: 20px;
+}
+
+.circuit-explain-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.circuit-explain-text {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.circuit-explain-expr {
+    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace;
+    font-size: 14px;
+    background: var(--bg-input, var(--bg-secondary));
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--accent);
+    letter-spacing: 0.02em;
+    word-break: break-all;
+}
+
+.circuit-explain-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.circuit-explain-tag {
+    display: inline-block;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.circuit-explain-funfact {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-top: 4px;
+    background: linear-gradient(135deg, var(--accent-light, rgba(99,102,241,0.08)) 0%, transparent 100%);
+    border: 1px solid var(--accent-border, rgba(99,102,241,0.2));
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.circuit-explain-funfact svg {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--accent);
+    opacity: 0.8;
+}
+
+.circuit-explain-funfact strong {
+    color: var(--text-primary);
+}
+
+@media (max-width: 640px) {
+    .circuit-explain-body {
+        padding: 6px 16px 22px;
+    }
+}
+

@@ -1,9 +1,11 @@
-/* ==========================================================================
-   Academic Integrity Gate
-   Shows a mandatory, blocking acknowledgement once per device before the
-   user can interact with the app. Agreement is remembered in localStorage
-   so returning users are not shown it again.
-   ========================================================================== */
+/* 
+   First-Time Integrity Gate
+   This is a simple integrity gate that will show a popup to the user
+   once per device before the user can interact with the app. The user must
+   acknowledge the terms before they can proceed. The agreement is remembered
+   in localStorage so returning users are not shown it again.
+ */
+
 (function () {
     "use strict";
 
@@ -13,8 +15,7 @@
     try {
         hasAcknowledged = localStorage.getItem(STORAGE_KEY) === "true";
     } catch (e) {
-        // If storage is unavailable, fail open rather than trap the user
-        // behind a gate that can never be dismissed.
+        // It is possible that localStorage is not available, in those cases we will not show the popup.
         hasAcknowledged = true;
     }
 
@@ -32,7 +33,7 @@
             try {
                 localStorage.setItem(STORAGE_KEY, "true");
             } catch (e) {
-                // Non-fatal: the user simply sees the gate again next visit.
+                // It is possible that localStorage is not available, in those cases we will not remember the acknowledgement.
             }
             popup.style.display = "none";
             document.body.classList.remove("integrity-locked");

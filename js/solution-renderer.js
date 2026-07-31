@@ -304,9 +304,17 @@ function renderSolutionView() {
             const isGiven = (pendingAlgebraicReason === 'Given');
             const isSimplified = (pendingAlgebraicReason === 'Already Simplified');
             const noDialog = isGiven || isSimplified;
+            let displayExpr = trimmed;
+            if (isGiven && typeof applySymbolReplacements === 'function') {
+                displayExpr = applySymbolReplacements(displayExpr)
+                    .replace(/\bXOR\b/gi, '⊕')
+                    .replace(/\bXNOR\b/gi, '⊙')
+                    .replace(/\bOR\b/gi, '+')
+                    .replace(/\bNOT\b/gi, '!');
+            }
             appendHtml(`
-                <div class="qm-row algebraic-step${noDialog ? ' no-rule-dialog' : ''}" data-rule="${escapeHtml(pendingAlgebraicReason)}" data-expr="${escapeHtml(trimmed)}"${noDialog ? '' : ' title="Click to view rule details and examples"'}>
-                    <div class="alg-expr">${escapeHtml(trimmed)}</div>
+                <div class="qm-row algebraic-step${noDialog ? ' no-rule-dialog' : ''}" data-rule="${escapeHtml(pendingAlgebraicReason)}" data-expr="${escapeHtml(displayExpr)}"${noDialog ? '' : ' title="Click to view rule details and examples"'}>
+                    <div class="alg-expr">${escapeHtml(displayExpr)}</div>
                     <div class="alg-reason">
                         <span class="alg-by">${isGiven || isSimplified ? '' : 'by'}</span>
                         <span class="alg-rule">${escapeHtml(pendingAlgebraicReason)}</span>

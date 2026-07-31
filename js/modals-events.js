@@ -158,8 +158,14 @@ document.getElementById('share-close').addEventListener('click', () => {
 // Keyboard escape handlers
 window.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
-        elements.altPopup.style.display = 'none';
-        document.getElementById('share-popup').style.display = 'none';
+        if (typeof elements !== 'undefined' && elements.altPopup) elements.altPopup.style.display = 'none';
+        const sharePopup = document.getElementById('share-popup');
+        if (sharePopup) sharePopup.style.display = 'none';
+        const pwaPopup = document.getElementById('pwa-popup');
+        if (pwaPopup) pwaPopup.style.display = 'none';
+        document.querySelectorAll('.modal-overlay').forEach(el => {
+            if (el.id !== 'integrity-popup') el.style.display = 'none';
+        });
     }
 });
 
@@ -281,3 +287,138 @@ document.addEventListener('pointerdown', (e) => {
         navTooltipTimers.set(btn, timer);
     }
 });
+
+// Footer nav modal buttons
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    const action = btn.getAttribute('data-action');
+    const footerActions = {
+        'whats-mantiq': 'about-popup',
+        'why-mantiq': 'why-mantiq-popup',
+        'privacy-policy': 'privacy-popup',
+        'terms-of-use': 'terms-popup',
+        'contact': 'contact-popup'
+    };
+    if (!footerActions[action]) return;
+    const el = document.getElementById(footerActions[action]);
+    if (el) el.style.display = 'flex';
+});
+
+// Pro Tips landing button
+const proTipsBtn = document.getElementById('pro-tips-btn');
+if (proTipsBtn) {
+    proTipsBtn.addEventListener('click', () => {
+        if (typeof openTipsModal === 'function') openTipsModal();
+    });
+}
+
+// Take a Tour landing button
+const landingTourBtn = document.getElementById('landing-tour-btn');
+if (landingTourBtn) {
+    landingTourBtn.addEventListener('click', () => {
+        if (typeof TourEngine !== 'undefined' && typeof TOUR_STEPS !== 'undefined') {
+            TourEngine.start(TOUR_STEPS);
+        }
+    });
+}
+
+// Close new modals via their X buttons
+['why-mantiq-close', 'privacy-close', 'terms-close', 'contact-close'].forEach(id => {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    const overlay = btn.closest('.modal-overlay');
+    btn.addEventListener('click', () => { if (overlay) overlay.style.display = 'none'; });
+});
+
+// Universal backdrop click handler: clicking outside any modal box on its backdrop closes it
+document.addEventListener('click', (e) => {
+    if (!e.target) return;
+    if (e.target.classList && e.target.classList.contains('modal-overlay') && e.target.id !== 'integrity-popup') {
+        e.target.style.display = 'none';
+    } else if (e.target.id === 'pwa-popup' || e.target.id === 'share-popup') {
+        e.target.style.display = 'none';
+    }
+});
+
+// ── Circuit Explain Modal ─────────────────────────────────────────────────────
+
+function _openCircuitExplainModal(info) {
+    const popup = document.getElementById('circuit-explain-popup');
+    if (!popup || !info) return;
+
+    document.getElementById('circuit-explain-name').textContent = info.name;
+    document.getElementById('circuit-explain-subtitle').textContent = info.subtitle || '';
+
+    const categoryColors = {
+        'Parity': 'var(--accent)',
+        'Arithmetic': '#f59e0b',
+        'Comparator': '#10b981',
+        'Majority / Voting': '#8b5cf6',
+        'Data Routing': '#3b82f6',
+        'Basic Gate': '#6b7280',
+        'Decoder / Basic Gate': '#6b7280',
+        'Encoding / Special': '#ec4899',
+        'Threshold': '#f97316',
+        'Special': '#64748b',
+        'Parity / Comparator': 'var(--accent)',
+        'Arithmetic / Majority': '#f59e0b',
+    };
+    const catColor = categoryColors[info.category] || 'var(--accent)';
+
+    const useCasesHtml = (info.useCases || []).map(u =>
+        `<span class="circuit-explain-tag">${u}</span>`
+    ).join('');
+
+    document.getElementById('circuit-explain-body').innerHTML = `
+        <div class="circuit-explain-category" style="color:${catColor}">
+            ${info.category || ''}
+        </div>
+
+        <div class="circuit-explain-section">
+            <div class="circuit-explain-label">What it does</div>
+            <p class="circuit-explain-text">${info.description}</p>
+        </div>
+
+        <div class="circuit-explain-section">
+            <div class="circuit-explain-label">How it works</div>
+            <p class="circuit-explain-text">${info.howItWorks}</p>
+        </div>
+
+        <div class="circuit-explain-section">
+            <div class="circuit-explain-label">Canonical Expression</div>
+            <div class="circuit-explain-expr">${info.canonicalExpr}</div>
+        </div>
+
+        ${info.useCases && info.useCases.length ? `
+        <div class="circuit-explain-section">
+            <div class="circuit-explain-label">Common Use Cases</div>
+            <div class="circuit-explain-tags">${useCasesHtml}</div>
+        </div>` : ''}
+
+        ${info.funFact ? `
+        <div class="circuit-explain-funfact">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            <span><strong>Fun Fact:</strong> ${info.funFact}</span>
+        </div>` : ''}
+    `;
+
+    popup.style.display = 'flex';
+}
+
+const circuitExplainBtn = document.getElementById('circuit-explain-btn');
+const circuitExplainPopup = document.getElementById('circuit-explain-popup');
+const circuitExplainClose = document.getElementById('circuit-explain-close');
+
+if (circuitExplainBtn) {
+    circuitExplainBtn.addEventListener('click', () => {
+        _openCircuitExplainModal(window._lastRecognizedCircuit || null);
+    });
+}
+
+if (circuitExplainClose && circuitExplainPopup) {
+    circuitExplainClose.addEventListener('click', () => {
+        circuitExplainPopup.style.display = 'none';
+    });
+}
+

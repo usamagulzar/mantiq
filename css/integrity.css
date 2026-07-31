@@ -10,11 +10,14 @@
 .integrity-modal {
     max-width: 480px;
     height: auto;
-    max-height: 90vh;
+    max-height: min(85vh, 520px);
 }
 
 .integrity-body {
     gap: 14px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .integrity-body p {

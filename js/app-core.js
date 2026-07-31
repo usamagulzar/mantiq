@@ -177,6 +177,9 @@ const heroLogoWrap = document.getElementById('hero-logo-wrap');
 if (heroLogoWrap) {
     heroLogoWrap.addEventListener('click', (e) => {
         e.preventDefault();
+        if (document.body.classList.contains('tour-active')) {
+            return;
+        }
         const appRoot = document.getElementById('app-root');
         
         // Only trigger if we aren't already on the landing page

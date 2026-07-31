@@ -504,6 +504,13 @@ if (typeof elements !== 'undefined' && elements.solutionsCarousel) {
         const walk = (x - startX) * 2; // Scroll-fast modifier
         elements.solutionsCarousel.scrollLeft = scrollLeft - walk;
     });
+
+    elements.solutionsCarousel.addEventListener('wheel', (e) => {
+        if (e.deltaY !== 0) {
+            e.preventDefault();
+            elements.solutionsCarousel.scrollLeft += e.deltaY;
+        }
+    });
 }
 
 // Blur search input when interacting with canvas (K-map/Simulation) to allow syncLoop updates

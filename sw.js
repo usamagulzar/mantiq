@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mantiq-cache-v2.2.4';
+const CACHE_NAME = 'mantiq-cache-v2.2.8';
 
 const urlsToCache = [
   './',
@@ -8,6 +8,7 @@ const urlsToCache = [
   './icons/icon-512.png',
   './icons/icon.svg',
   './wasm/mantiq-worker.js',
+  './wasm/index.js',
   './wasm/index.wasm',
   // CSS
   './css/fonts.css',
@@ -25,6 +26,8 @@ const urlsToCache = [
   './js/svg-icons.js',
   './js/worker-bridge.js',
   './js/zoom-pan.js',
+  './js/xor-detector.js',
+  './js/circuit-recognizer.js',
   './js/ui-core.js',
   './js/solution-renderer.js',
   './js/app-core.js',
@@ -37,14 +40,20 @@ const urlsToCache = [
   './js/tutorial.js',
 ];
 
-// 1. Install event - Cache files and force skip waiting
+// 1. Install event - Cache files individually so one failure doesn't abort the whole install
 self.addEventListener('install', event => {
-  self.skipWaiting(); // Immediately activate new worker
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        return cache.addAll(urlsToCache);
-      })
+    caches.open(CACHE_NAME).then(cache => {
+      // Cache each file individually — if one fails, the rest still get cached
+      return Promise.allSettled(
+        urlsToCache.map(url =>
+          cache.add(url).catch(err => {
+            console.warn('[ServiceWorker] Failed to cache:', url, err);
+          })
+        )
+      );
+    })
   );
 });
 
@@ -69,11 +78,11 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // If the file is in the cache, return it! (Offline mode)
+        // If the file is in the cache, return it (offline mode)
         if (response) {
           return response;
         }
-        // Otherwise, try to fetch it from the internet
+        // Otherwise, try to fetch from network
         return fetch(event.request);
       })
   );

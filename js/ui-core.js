@@ -2,12 +2,19 @@
 var lastKMapData = null;
 var lastTruthTableData = null;
 
+// Solutions currently shown in the carousel - kept in sync with each
+// updateFrontend() render so the overflow badge/popup can reference them
+// without re-deriving from WASM.
+let _lastRenderedSolutions = [];
+
 window.getLoadingOrEmptyMsg = function(msg) {
     const exprTrimmed = _state.expression ? _state.expression.trim() : '';
     if (exprTrimmed === '') {
         return `<div class="empty-msg" style="color:var(--text-muted); text-align:center; margin-top:20px;">${msg}</div>`;
     }
-    const isComputing = exprTrimmed !== _state.computedForExpr;
+    const isComputing = typeof normalizeExprForCompare === 'function' 
+        ? normalizeExprForCompare(exprTrimmed) !== normalizeExprForCompare(_state.computedForExpr)
+        : exprTrimmed !== _state.computedForExpr;
     if (isComputing || _state.hasResult) {
         return '<div class="solution-empty thinking-spinner" style="margin-top:20px;"><span class="thinking-dots">Thinking</span></div>';
     }
@@ -30,6 +37,10 @@ const elements = {
     altPopup: document.getElementById('alt-popup'),
     altBody: document.getElementById('alt-body'),
     altClose: document.getElementById('alt-close'),
+
+    // Solutions overflow indicator
+    solutionsOverflowBtn: document.getElementById('solutions-overflow-btn'),
+    solutionsOverflowCount: document.getElementById('solutions-overflow-count'),
     
     // Nav
     navButtons: document.querySelectorAll('.nav-btn'),
@@ -85,6 +96,162 @@ function showToast(message, type = 'success') {
         toast.classList.remove('show');
         setTimeout(() => toast.remove(), 300);
     }, 3000);
+}
+
+/**
+ * Apply the given solution index as the active selection everywhere: DOM
+ * card highlighting (in both the carousel and the "all solutions" popup if
+ * it's open), the WASM-side selected solution, and whichever view is
+ * currently on screen. Shared by the carousel card's own click handler and
+ * the popup so the two selection paths can never drift out of sync.
+ */
+function selectSolutionByIndex(index) {
+    if (!_lastRenderedSolutions[index]) return;
+
+    document.querySelectorAll('.solution-card').forEach(c => {
+        const isMatch = parseInt(c.getAttribute('data-solution-index'), 10) === index;
+        c.classList.toggle('selected-solution', isMatch);
+        const txt = c.querySelector('.expr-text');
+        if (txt) txt.style.color = isMatch ? 'var(--success)' : 'var(--text-primary)';
+    });
+
+    if (typeof Module !== 'undefined' && Module.ccall) {
+        Module.ccall('mantiq_setSelectedSolution', null, ['number'], [index]);
+        
+        // Re-apply custom expression if this card is currently toggled to XOR
+        const targetCard = document.querySelector(`.solution-card[data-solution-index="${index}"]`);
+        if (targetCard) {
+            const xorBtn = targetCard.querySelector('.xor-toggle-btn');
+            if (xorBtn && xorBtn.classList.contains('active')) {
+                const exprText = targetCard.querySelector('.expr-text').textContent;
+                Module.ccall('mantiq_setCustomSimplifiedExpr', null, ['string'], [exprText]);
+            }
+        }
+
+        selectedSolutionIndex = index;
+        window.globalSelectedSolutionIndex = index;
+
+        const activeBtn = document.querySelector('.nav-btn.active');
+        if (activeBtn) {
+            const viewMode = activeBtn.getAttribute('data-view');
+            if (viewMode === '3' && typeof renderTruthTableAndWaveform === 'function') renderTruthTableAndWaveform();
+            else if (viewMode === '4' && typeof renderVerilogHTML === 'function') renderVerilogHTML();
+            else if (viewMode === '0' && typeof renderHTMLSimulation === 'function') renderHTMLSimulation();
+            else if (viewMode === '1' && typeof renderHTMLCircuit === 'function') renderHTMLCircuit();
+            else if (viewMode === '5' && typeof renderSolutionView === 'function') renderSolutionView();
+        }
+    }
+
+    // Bring the selected card into view within the carousel. block:'nearest'
+    // keeps this from touching page-level vertical scroll - the card is
+    // already vertically in view, only the carousel's own horizontal scroll
+    // needs to move.
+    const targetCard = document.querySelector(`.solution-card[data-solution-index="${index}"]`);
+    if (targetCard) {
+        targetCard.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+    }
+
+    // Keep the popup's own list (if open) in sync with the new selection.
+    document.querySelectorAll('.alt-solution-item').forEach(item => {
+        item.classList.toggle('active', parseInt(item.getAttribute('data-solution-index'), 10) === index);
+    });
+}
+window.selectSolutionByIndex = selectSolutionByIndex;
+
+/**
+ * Show/hide the "+N" round badge at the right of the solutions carousel.
+ * N is however many solution cards are ACTUALLY scrolled out of the
+ * carousel's current visible width - recomputed on scroll/resize (see
+ * listeners below), not just at render time, so it tracks true overflow
+ * rather than a fixed "total minus one" count.
+ */
+function updateSolutionsOverflowBadge() {
+    const carousel = elements.solutionsCarousel;
+    const btn = elements.solutionsOverflowBtn;
+    const countEl = elements.solutionsOverflowCount;
+    if (!carousel || !btn || !countEl) return;
+
+    requestAnimationFrame(() => {
+        if (_lastRenderedSolutions.length <= 1 || carousel.scrollWidth <= carousel.clientWidth + 1) {
+            btn.style.display = 'none';
+            return;
+        }
+
+        const viewLeft = carousel.scrollLeft;
+        const viewRight = viewLeft + carousel.clientWidth;
+        let hiddenCount = 0;
+        Array.from(carousel.children).forEach(card => {
+            const cardLeft = card.offsetLeft;
+            const cardRight = cardLeft + card.offsetWidth;
+            if (cardLeft < viewLeft - 1 || cardRight > viewRight + 1) hiddenCount++;
+        });
+
+        if (hiddenCount <= 0) {
+            btn.style.display = 'none';
+            return;
+        }
+
+        countEl.textContent = '+' + hiddenCount;
+        btn.style.display = 'flex';
+    });
+}
+
+/** Build and show the "all solutions" popup - reuses the existing #alt-popup modal shell. */
+function openAllSolutionsPopup() {
+    if (!elements.altPopup || !elements.altBody) return;
+
+    const currentActiveIdx = (typeof selectedSolutionIndex !== 'undefined') ? selectedSolutionIndex : 0;
+
+    elements.altBody.innerHTML = '';
+    const list = document.createElement('div');
+    list.className = 'alt-solutions-list';
+
+    _lastRenderedSolutions.forEach((sol, index) => {
+        const item = document.createElement('div');
+        item.className = 'alt-solution-item' + (index === currentActiveIdx ? ' active' : '');
+        item.setAttribute('data-solution-index', String(index));
+
+        const textSpan = document.createElement('span');
+        textSpan.className = 'expr-text';
+        textSpan.textContent = sol.expr;
+
+        const indexTag = document.createElement('span');
+        indexTag.className = 'alt-solution-index';
+        indexTag.textContent = 'Sol ' + (index + 1);
+
+        item.appendChild(textSpan);
+        item.appendChild(indexTag);
+
+        item.addEventListener('click', () => {
+            selectSolutionByIndex(index);
+            elements.altPopup.style.display = 'none';
+        });
+
+        list.appendChild(item);
+    });
+
+    elements.altBody.appendChild(list);
+    elements.altPopup.style.display = 'flex';
+}
+
+if (elements.solutionsOverflowBtn) {
+    elements.solutionsOverflowBtn.addEventListener('click', openAllSolutionsPopup);
+}
+if (elements.altClose) {
+    elements.altClose.addEventListener('click', () => {
+        elements.altPopup.style.display = 'none';
+    });
+}
+if (elements.altPopup) {
+    elements.altPopup.addEventListener('click', (e) => {
+        if (e.target === elements.altPopup) elements.altPopup.style.display = 'none';
+    });
+}
+if (elements.solutionsCarousel) {
+    elements.solutionsCarousel.addEventListener('scroll', () => updateSolutionsOverflowBadge());
+    if (window.ResizeObserver) {
+        new ResizeObserver(() => updateSolutionsOverflowBadge()).observe(elements.solutionsCarousel);
+    }
 }
 
 // Helper: Calculate gate depth of a circuit node
@@ -217,7 +384,7 @@ function diagnoseExpressionError(expr) {
         uniqueVars = new Set(varPrefixMatch[1].match(/[a-zA-Z]/g) || []);
     } else if (!/[mMdD]\s*\(/.test(expr)) {
         // Algebraic format: Strip known keywords first
-        const stripped = expr.replace(/XOR|KMAP|TRUE|FALSE/gi, '');
+        const stripped = expr.replace(/XOR|XNOR|KMAP|TRUE|FALSE/gi, '');
         uniqueVars = new Set(stripped.match(/[a-zA-Z]/g) || []);
     }
     if (uniqueVars.size > 6) return "Maximum 6 variables supported.";
@@ -272,7 +439,7 @@ function updateFrontend() {
 function parseTermLitsJS(term) {
     const lits = [];
     const clean = term.replace(/[()]/g, '');
-    const re = /([a-zA-Z0-9_]+)(['!]?)/g;
+    const re = /([a-zA-Z])(['!]?)/g;
     let match;
     while ((match = re.exec(clean)) !== null) {
         lits.push({ var: match[1], comp: match[2] === "'" || match[2] === "!" });
@@ -325,8 +492,8 @@ function sortBooleanExpression(expr) {
                 const rawClause = expr.substring(i + 1, end);
                 const lits = rawClause.split('+').map(s => s.trim()).filter(Boolean);
                 lits.sort((a, b) => {
-                    const varA = a.replace(/['!]/g, '');
-                    const varB = b.replace(/['!]/g, '');
+                    const varA = a[0];
+                    const varB = b[0];
                     if (varA !== varB) return varA.localeCompare(varB);
                     const compA = a.includes("'") || a.includes("!");
                     const compB = b.includes("'") || b.includes("!");
@@ -334,9 +501,10 @@ function sortBooleanExpression(expr) {
                 });
                 clauses.push('(' + lits.join('+') + ')');
                 i = end + 1;
-            } else if (/[a-zA-Z0-9_]/.test(expr[i])) {
+            } else if (/[a-zA-Z]/.test(expr[i])) {
                 let start = i;
-                while (i < expr.length && /[a-zA-Z0-9_]/.test(expr[i])) i++;
+                i++; // Only consume a single character for the variable name
+
                 while (i < expr.length && (expr[i] === "'" || expr[i] === "!")) i++;
                 clauses.push(expr.substring(start, i));
             } else {
@@ -383,7 +551,12 @@ function sortBooleanExpression(expr) {
             } catch (e) {}
         }
         lastSimplifiedExpr = primaryExpr;
-        
+        const newSolsStr = JSON.stringify(solutions);
+        const oldSolsStr = JSON.stringify(_lastRenderedSolutions);
+        if (newSolsStr !== oldSolsStr) {
+            window.toggledXorIndices = new Set();
+        }
+        _lastRenderedSolutions = solutions;
         // Render into Carousel
         elements.solutionsCarousel.innerHTML = '';
         
@@ -393,6 +566,7 @@ function sortBooleanExpression(expr) {
             const isSelected = (index === currentActiveIdx);
             const card = document.createElement('div');
             card.className = 'solution-card' + (isSelected ? ' selected-solution' : '');
+            card.setAttribute('data-solution-index', String(index));
             
             const textSpan = document.createElement('span');
             textSpan.className = 'expr-text';
@@ -400,34 +574,16 @@ function sortBooleanExpression(expr) {
             textSpan.textContent = sol.expr;
 
             if (solutions.length > 1) {
+                const numSpan = document.createElement('span');
+                numSpan.textContent = (index + 1) + '. ';
+                numSpan.style.fontSize = '0.85em';
+                numSpan.style.opacity = '0.6';
+                numSpan.style.fontWeight = '500';
+                textSpan.prepend(numSpan);
+
                 textSpan.style.cursor = 'pointer';
                 textSpan.title = 'Click to select this solution for Circuit/Verilog/Simulation';
-                textSpan.addEventListener('click', () => {
-                    document.querySelectorAll('.solution-card').forEach(c => {
-                        c.classList.remove('selected-solution');
-                        const txt = c.querySelector('.expr-text');
-                        if (txt) txt.style.color = 'var(--text-primary)';
-                    });
-                    card.classList.add('selected-solution');
-                    textSpan.style.color = 'var(--success)';
-                    
-                    if (typeof Module !== 'undefined' && Module.ccall) {
-                        Module.ccall('mantiq_setSelectedSolution', null, ['number'], [index]);
-                        
-                        selectedSolutionIndex = index;
-                        window.globalSelectedSolutionIndex = index;
-                        
-                        const activeBtn = document.querySelector('.nav-btn.active');
-                        if (activeBtn) {
-                            const viewMode = activeBtn.getAttribute('data-view');
-                            if (viewMode === '3' && typeof renderTruthTableAndWaveform === 'function') renderTruthTableAndWaveform();
-                            else if (viewMode === '4' && typeof renderVerilogHTML === 'function') renderVerilogHTML();
-                            else if (viewMode === '0' && typeof renderHTMLSimulation === 'function') renderHTMLSimulation();
-                            else if (viewMode === '1' && typeof renderHTMLCircuit === 'function') renderHTMLCircuit();
-                            else if (viewMode === '5' && typeof renderSolutionView === 'function') renderSolutionView();
-                        }
-                    }
-                });
+                textSpan.addEventListener('click', () => selectSolutionByIndex(index));
             }
             
             const copyBtn = document.createElement('button');
@@ -435,22 +591,70 @@ function sortBooleanExpression(expr) {
             copyBtn.title = 'Copy expression';
             copyBtn.innerHTML = Icons.copy(18);
             
+            // Check for XOR/XNOR pattern using the dedicated module
+            let xorEq = null;
+            try {
+                if (typeof extractXorPatterns === 'function') {
+                    xorEq = extractXorPatterns(sol.expr);
+                }
+            } catch (e) {}
+
             copyBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(sol.expr).then(() => {
+                const isToggled = window.toggledXorIndices && window.toggledXorIndices.has(index) && xorEq;
+                const textToCopy = isToggled ? xorEq : sol.expr;
+                navigator.clipboard.writeText(textToCopy).then(() => {
                     showToast('Expression copied!', 'success');
                 }).catch(() => {
                     showToast('Failed to copy', 'error');
                 });
             });
+
+            let xorBtn = null;
+            if (xorEq) {
+                xorBtn = document.createElement('button');
+                xorBtn.className = 'action-icon-btn xor-toggle-btn';
+                xorBtn.title = 'Toggle XOR/XNOR form';
+                xorBtn.innerHTML = Icons.star || '★';
+                
+                // Restore toggle state
+                window.toggledXorIndices = window.toggledXorIndices || new Set();
+                if (window.toggledXorIndices.has(index)) {
+                    xorBtn.classList.add('active');
+                    textSpan.textContent = xorEq;
+                }
+                
+                xorBtn.addEventListener('click', () => {
+                    const isActive = xorBtn.classList.contains('active');
+                    if (isActive) {
+                        xorBtn.classList.remove('active');
+                        window.toggledXorIndices.delete(index);
+                        textSpan.textContent = sol.expr;
+                        if (isSelected && typeof Module !== 'undefined' && Module.ccall) {
+                            Module.ccall('mantiq_setCustomSimplifiedExpr', null, ['string'], ['']);
+                        }
+                    } else {
+                        xorBtn.classList.add('active');
+                        window.toggledXorIndices.add(index);
+                        textSpan.textContent = xorEq;
+                        if (isSelected && typeof Module !== 'undefined' && Module.ccall) {
+                            Module.ccall('mantiq_setCustomSimplifiedExpr', null, ['string'], [xorEq]);
+                        }
+                    }
+                });
+            }
             
             const actionsDiv = document.createElement('div');
             actionsDiv.className = 'solution-card-actions';
             actionsDiv.appendChild(copyBtn);
+            if (xorBtn) actionsDiv.appendChild(xorBtn);
+
             
             card.appendChild(textSpan);
             card.appendChild(actionsDiv);
             elements.solutionsCarousel.appendChild(card);
         });
+
+        updateSolutionsOverflowBadge();
         
     } else if (expr === '') {
         elements.emptyState.style.display = 'flex';
@@ -487,6 +691,49 @@ function sortBooleanExpression(expr) {
         }
     }
 
+    // Circuit Recognizer — show explain button when expression matches a known circuit
+    const circuitExplainBtn = document.getElementById('circuit-explain-btn');
+    if (circuitExplainBtn) {
+        let matchedCircuit = null;
+        if (!manualError && wasmHasResult && expr !== '' && typeof recognizeCircuit === 'function') {
+            try {
+                let vars = null;
+                let minterms = null;
+
+                const kmapJson = queryWasmString('mantiq_getKMapJSON');
+                if (kmapJson) {
+                    const kmapData = JSON.parse(kmapJson);
+                    if (kmapData && Array.isArray(kmapData.minterms) && Array.isArray(kmapData.variables)) {
+                        vars = kmapData.variables;
+                        minterms = kmapData.minterms;
+                    }
+                }
+
+                if (!minterms) {
+                    const ttJson = queryWasmString('mantiq_getTruthTableJSON');
+                    if (ttJson) {
+                        const ttData = JSON.parse(ttJson);
+                        if (Array.isArray(ttData) && ttData.length > 0 && ttData[0].inputs) {
+                            vars = Object.keys(ttData[0].inputs);
+                            minterms = ttData.filter(r => String(r.output) === '1').map(r => r.row);
+                        }
+                    }
+                }
+
+                if (vars && minterms) {
+                    matchedCircuit = recognizeCircuit(vars.length, minterms);
+                }
+            } catch (e) {}
+        }
+        window._lastRecognizedCircuit = matchedCircuit;
+        if (matchedCircuit && !appRootEl?.classList.contains('landing')) {
+            circuitExplainBtn.style.display = 'flex';
+            circuitExplainBtn.title = `What is this? — ${matchedCircuit.name}`;
+        } else {
+            circuitExplainBtn.style.display = 'none';
+        }
+    }
+
     // Sync Hash
     if (expr && !manualError) {
         window.location.hash = `#expr=${encodeURIComponent(expr)}`;
@@ -504,7 +751,10 @@ function sortBooleanExpression(expr) {
     // baseline, silently dropping earlier clicks in the burst. The later,
     // async updateFrontend() call (triggered once the worker's snapshot
     // actually arrives) is what performs the real render.
-    if (hasResult && _state.computedForExpr === expr) {
+    const isExprMatched = typeof normalizeExprForCompare === 'function'
+        ? normalizeExprForCompare(_state.computedForExpr) === normalizeExprForCompare(expr)
+        : _state.computedForExpr === expr;
+    if (hasResult && isExprMatched) {
         const activeBtn = document.querySelector('.nav-btn.active');
         if (activeBtn) {
             const viewMode = activeBtn.getAttribute('data-view');
@@ -567,8 +817,11 @@ document.addEventListener('input', (e) => {
     }
 }, true);
 
-
 function handleViewChange(viewMode) {
+    if (typeof window._closeTruthTableAndWaveFullscreen === 'function') {
+        window._closeTruthTableAndWaveFullscreen();
+    }
+
     const views = {
         tt: document.getElementById('truthtable-container'),
         verilog: document.getElementById('verilog-container'),

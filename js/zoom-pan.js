@@ -7,19 +7,13 @@ function _scrollIdFor(panelType) {
     return '';
 }
 
-// Per-panel cache of container/content metrics, populated once at the START
-// of a gesture (mousedown/touchstart/wheel) and reused for every frame of
-// that gesture, instead of calling getBoundingClientRect() on every single
-// touchmove/wheel event. Repeatedly reading layout geometry while also
-// writing style.transform every frame is classic layout-thrashing and was
-// the main source of the pinch/drag lag — this caches the read so a gesture
-// costs one layout read total, not one per frame.
 let _metricsCache = {};
 
 function _measureMetrics(panelType) {
     const scrollEl = document.getElementById(_scrollIdFor(panelType));
     const contentEl = scrollEl ? scrollEl.querySelector('.zoom-content-wrapper') : null;
     if (!scrollEl || !contentEl) return null;
+
     const containerRect = scrollEl.getBoundingClientRect();
     let cw = containerRect.width;
     let ch = containerRect.height;
@@ -95,29 +89,24 @@ function _getMetrics(panelType) {
     return _metricsCache[panelType] || _measureMetrics(panelType);
 }
 
-/**
- * Clamp pan so content never leaves the container with dead space around it
- * beyond what the fit-to-container view already shows — the same rule real
- * photo viewers and map apps use: if the content is smaller than (or equal
- * to) the viewport at this scale, it's locked centered; only once you've
- * zoomed in past that point can you pan, and then only until the content's
- * edge reaches the container's edge.
+/*
+  Clamp pan so content never leaves the container with dead space around it
+  beyond what the fit-to-container view already shows. This is the same rule real
+  photo viewers and map apps use: if the content is smaller than (or equal
+  to) the viewport at this scale, it's locked centered; only once you've
+  zoomed in past that point can you pan, and then only until the content's
+  edge reaches the container's edge.
  */
+
 function _clampPan(state, cw, ch, w, h) {
     const scaledW = w * state.scale;
     const scaledH = h * state.scale;
 
-    if (scaledW <= cw + 0.5) {
-        state.x = (cw - scaledW) / 2;
-    } else {
-        state.x = Math.max(cw - scaledW, Math.min(0, state.x));
-    }
+    if (scaledW <= cw + 0.5) { state.x = (cw - scaledW) / 2; } 
+    else { state.x = Math.max(cw - scaledW, Math.min(0, state.x)); }
 
-    if (scaledH <= ch + 0.5) {
-        state.y = (ch - scaledH) / 2;
-    } else {
-        state.y = Math.max(ch - scaledH, Math.min(0, state.y));
-    }
+    if (scaledH <= ch + 0.5) { state.y = (ch - scaledH) / 2;
+    } else { state.y = Math.max(ch - scaledH, Math.min(0, state.y)); }
 }
 
 function applyZoom(panelType, smooth = false) {
@@ -125,11 +114,14 @@ function applyZoom(panelType, smooth = false) {
     if (!m) return;
     const state = panelsState[panelType];
 
-    // Zoom-out limit: never smaller than the fit-to-container scale — that
+
+    // Zoom-out limit: never smaller than the fit-to-container scale; that
     // view is already "as much of the circuit, as big as possible, fully
     // visible" by definition, so zooming out further would only add dead
     // space. This also means _clampPan's centered-lock branch above kicks in
     // exactly at that limit, so hitting the floor always settles centered.
+
+
     if (state.fitScale) {
         state.scale = Math.max(state.fitScale, state.scale);
     }
@@ -140,7 +132,7 @@ function applyZoom(panelType, smooth = false) {
     // translate3d/scale3d (not translate/scale) is deliberate: this keeps the
     // element on a real GPU-composited layer on every single applied frame.
     // A 2D transform here can let WebKit fall back to stretching a cached
-    // raster of the filtered gate shapes (plastic-3d/silkscreen) during
+    // raster of the filtered gate shapes during
     // continuous pinch updates, which is what caused the blur.
     m.contentEl.style.transform = `translate3d(${state.x}px, ${state.y}px, 0) scale3d(${state.scale}, ${state.scale}, 1)`;
 }

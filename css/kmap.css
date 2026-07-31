@@ -27,8 +27,8 @@
 
 .alg-note-footer {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    justify-content: center;
+    text-align: center;
     padding: 10px 12px;
     margin-top: 12px;
     background: var(--bg-secondary);
@@ -38,10 +38,6 @@
     line-height: 1.4;
     color: var(--text-secondary);
     flex-shrink: 0;
-}
-.alg-note-footer svg {
-    margin-top: 2px;
-    color: var(--accent);
 }
 .alg-note-footer .solution-empty { color: var(--text-muted); font-style: italic; }
 .thinking-spinner {

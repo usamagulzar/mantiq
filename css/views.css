@@ -870,6 +870,29 @@
     overflow: auto;
 }
 
+/* In-Place Panel Fullscreen (Truth Table, Waveform Diagram, etc.) */
+.tt-panel.panel-fullscreen,
+.wave-panel.panel-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100vw !important;
+    height: 100dvh !important;
+    max-height: none !important;
+    z-index: 1500 !important;
+    border-radius: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    background-color: var(--bg-secondary) !important;
+}
+
+.tt-panel.panel-fullscreen .table-scroll-wrapper,
+.wave-panel.panel-fullscreen .wave-scroll-wrapper {
+    flex: 1;
+    min-height: 0;
+}
+
 /* Detach the controls from the scrolling content so they always stay on screen */
 .kmap-panel.kmap-panel-fullscreen .kmap-controls {
     position: fixed;

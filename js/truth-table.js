@@ -262,6 +262,15 @@ function initExportButtons() {
         });
     }
 
+    // Hook up Fullscreen Toggle for Truth Table and Waveform Diagram
+    const ttFsController = initPanelInplaceFullscreen('tt-fullscreen-btn', '#truthtable-container .tt-panel');
+    const waveFsController = initPanelInplaceFullscreen('wave-fullscreen-btn', '#truthtable-container .wave-panel');
+
+    window._closeTruthTableAndWaveFullscreen = () => {
+        if (ttFsController && ttFsController.isFullscreen()) ttFsController.setFullscreen(false);
+        if (waveFsController && waveFsController.isFullscreen()) waveFsController.setFullscreen(false);
+    };
+
     if (table) {
         table.addEventListener('click', (e) => {
             if (e.target.classList.contains('output-cell')) {
@@ -423,6 +432,67 @@ const minterms = [];
 
     elements.input.value = newExpr;
     elements.input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+function initPanelInplaceFullscreen(btnId, panelSelector) {
+    const btn = document.getElementById(btnId);
+    const panel = document.querySelector(panelSelector);
+    if (!btn || !panel) return null;
+
+    const anchor = document.createComment(btnId + '-anchor');
+    let isDetached = false;
+
+    const notifyResize = () => {
+        requestAnimationFrame(() => {
+            requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+        });
+    };
+
+    const setFullscreen = (on) => {
+        if (on && !isDetached) {
+            panel.parentNode.insertBefore(anchor, panel);
+            document.body.appendChild(panel);
+            isDetached = true;
+        } else if (!on && isDetached) {
+            anchor.parentNode.insertBefore(panel, anchor);
+            anchor.remove();
+            isDetached = false;
+        }
+        panel.classList.toggle('panel-fullscreen', on);
+        btn.classList.toggle('active', on);
+        btn.title = on ? 'Exit Fullscreen' : 'Fullscreen';
+
+        const labelSpan = btn.querySelector('span');
+        if (labelSpan) {
+            labelSpan.textContent = on ? 'Exit' : 'Fullscreen';
+        }
+
+        const svgEl = btn.querySelector('svg');
+        if (svgEl) {
+            if (on) {
+                // Exit fullscreen icon (compress)
+                svgEl.innerHTML = '<path d="M8 3v3a2 2 0 0 1-2 2H3"></path><path d="M21 8h-3a2 2 0 0 1-2-2V3"></path><path d="M3 16h3a2 2 0 0 1 2 2v3"></path><path d="M16 21v-3a2 2 0 0 1 2-2h3"></path>';
+            } else {
+                // Enter fullscreen icon (expand)
+                svgEl.innerHTML = '<path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path>';
+            }
+        }
+
+        document.body.style.overflow = on ? 'hidden' : '';
+        notifyResize();
+    };
+
+    btn.addEventListener('click', () => {
+        setFullscreen(!isDetached);
+    });
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && isDetached) {
+            setFullscreen(false);
+        }
+    });
+
+    return { setFullscreen, isFullscreen: () => isDetached };
 }
 
 initExportButtons();

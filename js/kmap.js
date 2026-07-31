@@ -31,17 +31,6 @@ const WRAP_CELL_SIZE = 44;
 // nothing is recolored, only filtered. null means "show everything" (default).
 let _selectedImplicantTerm = null;
 
-// Hovered-but-not-yet-clicked term, used to preview a group before committing
-// to it. Takes priority over _selectedImplicantTerm while the mouse is over a
-// term-box; clears on mouseleave and reveals whatever was actually selected.
-let _previewImplicantTerm = null;
-
-/** The term that should actually drive filtering right now: a live hover
- *  preview wins over a committed click-selection. */
-function _effectiveImplicantTerm() {
-    return _previewImplicantTerm !== null ? _previewImplicantTerm : _selectedImplicantTerm;
-}
-
 // Cached parameters from the most recent successful render, used by the
 // fast SVG-only redraw path so term selection never rebuilds the DOM.
 let _lastSVGDrawParams = null;
@@ -69,73 +58,38 @@ function _redrawSVGOnly() {
     }
 }
 
-/** Sync the analysis board's term-box selected/dimmed classes to the current
- *  effective term (hover preview, or else the committed click-selection)
- *  without rebuilding the list's DOM (rebuilding would collapse open
- *  <details> panels and is unnecessary — only the classes on existing
- *  .selectable-implicant boxes need to change). */
-function _updateImplicantBoxSelectionUI() {
-    const list = document.getElementById('kmap-implicants-list');
-    if (!list) return;
-    const eff = _effectiveImplicantTerm();
-    list.querySelectorAll('.selectable-implicant').forEach(box => {
-        const term = box.getAttribute('data-term');
-        const isSelected = term === eff;
-        const isDimmed = eff !== null && !isSelected;
-        box.classList.toggle('selected', isSelected);
-        box.classList.toggle('dimmed', isDimmed);
-    });
-}
-
-// A term-box click is preceded by a synthetic mouseover on both desktop and
-// mobile, so a single tap can trigger _redrawKMapForSelection twice in a row
-// (once for the preview, once for the commit) — two full innerHTML clears
-// and rebuilds landing in the same frame, which is what shows up as a
-// flash/glitch. Coalesce same-tick calls into a single rAF-scheduled redraw
-// that reads whatever state is current by the time it actually runs.
-let _redrawScheduled = false;
-function _redrawKMapForSelection() {
-    if (_redrawScheduled) return;
-    _redrawScheduled = true;
-    requestAnimationFrame(() => {
-        _redrawScheduled = false;
-        if (kmapViewMode === 'wrap') {
-            _redrawWrapSVGOnly();
-        } else if (kmapViewMode === '3d') {
-            _updateKMap3DGroupHelpers();
-        } else {
-            _redrawSVGOnly();
-        }
-    });
-}
-
 /** Toggle selection of an implicant's K-map group from the analysis board. */
 function selectImplicantGroup(term) {
     _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
-    // A click always represents committed intent, so it should never be
-    // masked by a leftover hover preview — this matters most on touch
-    // devices, which fire a synthetic mouseover before click but have no
-    // real pointer to trigger mouseout afterward, so without this the
-    // preview could get stuck and hide the toggle-off.
-    _previewImplicantTerm = null;
-    _updateImplicantBoxSelectionUI();
-    _redrawKMapForSelection();
+    if (kmapViewMode === 'wrap') {
+        _redrawWrapSVGOnly();
+    } else if (kmapViewMode === '3d') {
+        _updateKMap3DGroupHelpers();
+    } else {
+        _redrawSVGOnly();
+    }
 }
 window.selectImplicantGroup = selectImplicantGroup;
 
-/** Preview an implicant's group on hover, without committing to it as the
- *  actual selection — mouseleave (previewImplicantGroup(null)) restores
- *  whatever was really selected. */
-function previewImplicantGroup(term) {
-    if (_previewImplicantTerm === term) return; // no-op, avoid redundant redraws
-    _previewImplicantTerm = term;
-    _updateImplicantBoxSelectionUI();
-    _redrawKMapForSelection();
-}
-window.previewImplicantGroup = previewImplicantGroup;
-
 function renderHTMLKMap() {
     if (!wasmReady) return;
+
+    // Cell toggles (and any typing) dispatch a synthetic 'input' event that
+    // triggers a SYNCHRONOUS updateFrontend() call well before the debounced
+    // (60ms) worker request even fires - let alone before the worker has
+    // replied. While the KMap view is active, worker-bridge.js deliberately
+    // keeps the previous kMapJSON cached across that gap (so switching views
+    // doesn't flash empty) rather than clearing it - so at the moment of
+    // this early call, `_state.kMapJSON` still holds the *previous* toggle's
+    // data. Rendering it anyway is exactly the "noise" bug report: a flash
+    // back to the old grid/groups that then gets corrected a beat later once
+    // the real snapshot lands and calls updateFrontend() again.
+    // `_state.computedForExpr` (see worker-bridge.js) exists precisely to
+    // detect this: it only advances when a real snapshot comes back, so a
+    // mismatch here means kMapJSON is stale for the expression currently set.
+    // Bail out and leave whatever's already on screen alone - it's still the
+    // most recently-computed K-map - rather than repaint with stale data.
+    if (typeof _state !== 'undefined' && (typeof normalizeExprForCompare === 'function' ? normalizeExprForCompare(_state.computedForExpr) !== normalizeExprForCompare(_state.expression) : _state.computedForExpr !== _state.expression)) return;
 
     const jsonStr = queryWasmString('mantiq_getKMapJSON');
     const container = document.getElementById('kmap-grid-container');
@@ -196,10 +150,6 @@ function renderHTMLKMap() {
             (activeEPIsForValidity && activeEPIsForValidity.includes(_selectedImplicantTerm));
         if (!stillValid) _selectedImplicantTerm = null;
     }
-    // A full rebuild replaces the term-box DOM the mouse may currently be
-    // over, so any in-flight hover preview can no longer be cleared by a
-    // mouseout on the (now-gone) element — drop it up front instead.
-    _previewImplicantTerm = null;
 
     // Re-enable the toolbar buttons (they may have been disabled by the 1-var early-out above)
     const toggleBtnReset = document.getElementById('kmap-view-toggle-btn');
@@ -249,9 +199,18 @@ function renderHTMLKMap() {
 }
 
 function getGrayCodeStr(numBits) {
+    if (numBits <= 0) return [""];
     if (numBits === 1) return ["0", "1"];
     if (numBits === 2) return ["00", "01", "11", "10"];
-    return [];
+    const prev = getGrayCodeStr(numBits - 1);
+    const result = [];
+    for (let i = 0; i < prev.length; i++) {
+        result.push("0" + prev[i]);
+    }
+    for (let i = prev.length - 1; i >= 0; i--) {
+        result.push("1" + prev[i]);
+    }
+    return result;
 }
 
 function render2DKMap(numVars, variables, minterms, dontCares, activeSolution, isSOP, showLoops = false) {
@@ -340,12 +299,8 @@ function render2DKMap(numVars, variables, minterms, dontCares, activeSolution, i
     
     container.style.transform = `scale(${scale})`;
     container.style.transformOrigin = 'center center';
-    
+
     // SVG sizing and drawing must wait 1 tick for the DOM to reflect transform.
-    // Clearing happens here too (not before the rAF) so the old loops and the
-    // new loops swap in the same paint - clearing earlier left a one-frame
-    // gap where the overlay was empty, which read as every group "blinking"
-    // on each re-render (e.g. every time a cell is clicked).
     requestAnimationFrame(() => {
         svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
         svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
@@ -357,23 +312,110 @@ function render2DKMap(numVars, variables, minterms, dontCares, activeSolution, i
     });
 }
 
+function _parseShorthandExprStr(exprStr) {
+    if (!exprStr) return null;
+    const colonIdx = exprStr.indexOf(':');
+    if (colonIdx === -1) return null;
+    
+    const varPart = exprStr.slice(0, colonIdx).trim();
+    const mainPart = exprStr.slice(colonIdx + 1).trim();
+    
+    if (!varPart) return null;
+    const variables = varPart.split(',').map(v => v.trim()).filter(Boolean);
+    
+    if (mainPart.match(/M\s*\(/)) return null;
+    
+    const mMatch = mainPart.match(/m\s*\(([^)]*)\)/i);
+    const dMatch = mainPart.match(/d\s*\(([^)]*)\)/i);
+    
+    const minterms = [];
+    if (mMatch && mMatch[1].trim()) {
+        mMatch[1].split(',').forEach(n => {
+            const val = parseInt(n.trim(), 10);
+            if (!isNaN(val)) minterms.push(val);
+        });
+    }
+    
+    const dontCares = [];
+    if (dMatch && dMatch[1].trim()) {
+        dMatch[1].split(',').forEach(n => {
+            const val = parseInt(n.trim(), 10);
+            if (!isNaN(val)) dontCares.push(val);
+        });
+    }
+    
+    return { variables, minterms, dontCares };
+}
+
+// Instantly patches the clicked cell's value in whichever view(s) are
+// currently in the DOM (normal/wrap/multi-plane share the same
+// `.kmap-cell[data-minterm]` markup, and the 3D lattice keeps its cubes in
+// kmap3DState._cubes), WITHOUT waiting for the debounced WASM round trip.
+//
+// Why this exists: renderHTMLKMap() intentionally bails out until
+// _state.computedForExpr matches the live expression (see the comment at the
+// top of that function) so it never flashes stale loop/implicant data. That
+// guard is correct for the *analysis* (solutions, loops), but it also meant
+// the grid's own 0/1/X value - something we already know synchronously,
+// right here, from the click - sat frozen for the full worker round trip.
+// That's what made toggles feel slow, and it's why a user who clicks again
+// before that catches up ends up cycling the same cell twice (0->1->X)
+// instead of the single toggle they intended - it wasn't actually "lost",
+// it just looked that way because nothing on screen moved yet.
+function _optimisticallyPatchKMapCell(minterm, val) {
+    document.querySelectorAll(`.kmap-cell[data-minterm="${minterm}"]`).forEach(cell => {
+        cell.classList.remove('val-0', 'val-1', 'val-X');
+        cell.classList.add(`val-${val}`);
+        const label = cell.querySelector('.kmap-minterm-label');
+        cell.textContent = '';
+        if (label) {
+            cell.appendChild(label);
+        } else {
+            const d = document.createElement('div');
+            d.className = 'kmap-minterm-label';
+            d.textContent = String(minterm);
+            cell.appendChild(d);
+        }
+        cell.appendChild(document.createTextNode(val));
+    });
+
+    // 3D lattice: recolor the matching cube in place, same as the fast
+    // in-place update path inside render3DKMap().
+    if (typeof kmap3DState !== 'undefined' && kmap3DState._cubes && kmap3DState._cubes.length) {
+        const item = kmap3DState._cubes.find(c => !c.isLayerTag && c.minterm === minterm);
+        if (item && item.sphere) {
+            item.val = val;
+            const colorKey = val === '1' ? 'one' : (val === 'X' ? 'dc' : 'zero');
+            item.sphere.material.color.setHex(KMAP3D_COLOR[colorKey]);
+        }
+    }
+}
+
 function handleKMapCellClick(minterm) {
-    // wrapDragState.hasMoved is only meaningful for a click that originated
-    // in the Wrap view (it suppresses the native click that follows a
-    // drag-to-pan gesture there). It's only ever reset back to false at the
-    // START of the *next* Wrap-view pointer-down — never when the user
-    // leaves Wrap view. So a pan/drag in Wrap view left it stuck at `true`,
-    // and every subsequent tap in the 2D or 3D view (which share this same
-    // handler) was silently swallowed by this check, since nothing in
-    // those views ever cleared it. Scoping the check to kmapViewMode ===
-    // 'wrap' keeps the intended guard there without it leaking into the
-    // other views.
     if (kmapViewMode === 'wrap' && typeof wrapDragState !== 'undefined' && wrapDragState.hasMoved) {
         return;
     }
-    if (!lastKMapData) return;
-    
-    let { variables, minterms, dontCares } = lastKMapData;
+
+    const inputEl = document.getElementById('expression-input');
+    const currentVal = inputEl ? inputEl.value.trim() : '';
+
+    let variables = [];
+    let minterms = [];
+    let dontCares = [];
+
+    let parsed = _parseShorthandExprStr(currentVal);
+    if (parsed) {
+        variables = parsed.variables;
+        minterms = parsed.minterms;
+        dontCares = parsed.dontCares;
+    } else if (lastKMapData) {
+        variables = lastKMapData.variables || [];
+        minterms = lastKMapData.minterms || [];
+        dontCares = lastKMapData.dontCares || [];
+    } else {
+        return;
+    }
+
     let newMinterms = [...minterms];
     let newDontCares = [...dontCares];
 
@@ -389,18 +431,26 @@ function handleKMapCellClick(minterm) {
     newMinterms.sort((a, b) => a - b);
     newDontCares.sort((a, b) => a - b);
 
+    const newVal = newDontCares.includes(minterm) ? 'X' : (newMinterms.includes(minterm) ? '1' : '0');
+    _optimisticallyPatchKMapCell(minterm, newVal);
+
     const parts = [];
     if (newMinterms.length > 0) parts.push(`m(${newMinterms.join(',')})`);
     if (newDontCares.length > 0) parts.push(`d(${newDontCares.join(',')})`);
+    if (parts.length === 0) parts.push('m()');
+
     const newExpr = `${variables.join(',')}: ${parts.join(' ')}`;
     
-    const inputEl = document.getElementById('expression-input');
-    inputEl.value = newExpr;
+    if (inputEl) inputEl.value = newExpr;
+
+    if (lastKMapData) {
+        lastKMapData.minterms = newMinterms;
+        lastKMapData.dontCares = newDontCares;
+    }
     
     if (typeof selectedSolutionIndex !== 'undefined') selectedSolutionIndex = 0;
     
-    // Dispatch a native input event to trigger the main reactive pipeline
-    inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    if (inputEl) inputEl.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 // Same idea as computeAntiOverlapShrink, but operating on integer grid
@@ -633,12 +683,10 @@ function drawSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGray, i
     // (un-padded) pixel box.
     const pieces = [];
     solution.forEach((term, idx) => {
-        // A selection (or a live hover preview) restricts which group(s) get
-        // drawn, but idx (and so color) still comes from this term's position
-        // in the full solution — selecting doesn't recolor anything, only
-        // hides the rest.
-        const _effTerm = _effectiveImplicantTerm();
-        if (_effTerm !== null && term !== _effTerm) return;
+        // A selection restricts which group(s) get drawn, but idx (and so
+        // color) still comes from this term's position in the full solution —
+        // selecting doesn't recolor anything, only hides the rest.
+        if (_selectedImplicantTerm !== null && term !== _selectedImplicantTerm) return;
 
         const zPart = term.slice(0, zBits);
         for (let k = 0; k < zBits; k++) {
@@ -755,14 +803,14 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
     const rowGray = getGrayCodeStr(2);
     const colGray = getGrayCodeStr(2);
     
-    const numPlanes = (numVars === 5) ? 2 : 4;
-    const zVars = variables.slice(0, numVars - 4);
+    const zVars = variables.slice(0, Math.max(0, numVars - 4));
     const zGray = getGrayCodeStr(numVars - 4);
+    const numPlanes = (zGray && zGray.length > 0) ? zGray.length : (1 << Math.max(0, numVars - 4));
     
     let html = '';
     for (let z = 0; z < numPlanes; z++) {
-        const zPrefix = zGray[z];
-        const planeName = zVars.map((v, idx) => `${v}=${zPrefix[idx]}`).join(', ');
+        const zPrefix = (zGray && zGray[z] !== undefined) ? zGray[z] : '';
+        const planeName = zVars.map((v, idx) => `${v}=${(zPrefix && zPrefix[idx] !== undefined) ? zPrefix[idx] : '0'}`).join(', ');
         
         html += `<div class="kmap-plane-wrapper" style="text-align:center;">`;
         html += `<div style="font-weight:bold; margin-bottom: 10px; color:var(--accent);">${escapeHtml(planeName)}</div>`;
@@ -919,9 +967,8 @@ function renderKMapAnalysis(solution, isSOP, variables) {
                 const color = LOOP_COLORS[colorIdx % LOOP_COLORS.length];
                 colorIdx++;
                 const literal = binaryToVariables(term, variables, !isSOP);
-                const _eff = _effectiveImplicantTerm();
-                const isSelected = term === _eff;
-                const isDimmed = _eff !== null && !isSelected;
+                const isSelected = term === _selectedImplicantTerm;
+                const isDimmed = _selectedImplicantTerm !== null && !isSelected;
                 const cls = `term-box selectable-implicant${isSelected ? ' selected' : ''}${isDimmed ? ' dimmed' : ''}`;
                 return `<span class="${cls}" data-term="${term}" style="border:1px solid ${color}; color:${color}; background:${color}20;">${literal}</span>`;
             }).join('');
@@ -937,9 +984,8 @@ function renderKMapAnalysis(solution, isSOP, variables) {
     if (activeEPIs && activeEPIs.length > 0) {
         const epiHtml = activeEPIs.map(epi => {
             const literal = binaryToVariables(epi, variables, !isSOP);
-            const _eff = _effectiveImplicantTerm();
-            const isSelected = epi === _eff;
-            const isDimmed = _eff !== null && !isSelected;
+            const isSelected = epi === _selectedImplicantTerm;
+            const isDimmed = _selectedImplicantTerm !== null && !isSelected;
             const cls = `term-box selectable-implicant${isSelected ? ' selected' : ''}${isDimmed ? ' dimmed' : ''}`;
             return `<span class="${cls}" data-term="${epi}" style="border:1px solid #AF52DE; color:#AF52DE;">${literal}</span>`;
         }).join('');
@@ -1486,11 +1532,9 @@ function _updateKMap3DGroupHelpers() {
     // cubes and wrap-face flags.
     const pieces = []; // { color, members, wrapFaces }
     activeSolution.forEach((term, idx) => {
-        // Selection (or a live hover preview) filters which group gets a
-        // wireframe drawn; color still comes from this term's position in
-        // the full solution, unchanged.
-        const _effTerm3d = _effectiveImplicantTerm();
-        if (_effTerm3d !== null && term !== _effTerm3d) return;
+        // Selection filters which group gets a wireframe drawn; color still
+        // comes from this term's position in the full solution, unchanged.
+        if (_selectedImplicantTerm !== null && term !== _selectedImplicantTerm) return;
 
         const colorStr = LOOP_COLORS[idx % LOOP_COLORS.length];
         const color = parseInt(colorStr.slice(1), 16);
@@ -2023,6 +2067,7 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
     
     updateTransform();
     _lastWrapSVGDrawParams = { activeSolution, numVars, rowsBits, colsBits, rowGray, colGray, tilesX, tilesY };
+
     requestAnimationFrame(() => {
         drawWrapSVGLoops(activeSolution, numVars, rowsBits, colsBits, rowGray, colGray, tilesX, tilesY);
     });
@@ -2101,12 +2146,10 @@ function drawWrapSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGra
         const rects = solution.map(termStr => {
             const term = termStr;
 
-            // As in drawSVGLoops: a selection (or hover preview) filters
-            // which term gets a box (returning null here, same as a term
-            // that doesn't touch this tile), without touching the idx-based
-            // color below.
-            const _effTermWrap = _effectiveImplicantTerm();
-            if (_effTermWrap !== null && termStr !== _effTermWrap) return null;
+            // As in drawSVGLoops: a selection filters which term gets a box
+            // (returning null here, same as a term that doesn't touch this
+            // tile), without touching the idx-based color below.
+            if (_selectedImplicantTerm !== null && termStr !== _selectedImplicantTerm) return null;
 
             const rMatches = [];
             for (let r = 0; r < rowGray.length; r++) {
@@ -2204,26 +2247,7 @@ document.addEventListener('click', (e) => {
     }
 });
 
-// Hover-preview: skim a group by hovering its term-box, without committing
-// to it as the actual selection. mouseover/mouseout (rather than mouseenter/
-// mouseleave, which don't bubble) plus a relatedTarget check so moving
-// between child nodes of the same box doesn't fire spurious enter/leave.
-// Gated on real hover support: touch devices fire a synthetic mouseover
-// before click with no true pointer to ever trigger mouseout, so previewing
-// there would just be flicker with no way to clear itself.
-if (window.matchMedia('(hover: hover)').matches) {
-    document.addEventListener('mouseover', (e) => {
-        const implicant = e.target.closest('.selectable-implicant');
-        if (!implicant || !implicant.hasAttribute('data-term')) return;
-        if (implicant.contains(e.relatedTarget)) return;
-        previewImplicantGroup(implicant.getAttribute('data-term'));
-    });
-    document.addEventListener('mouseout', (e) => {
-        const implicant = e.target.closest('.selectable-implicant');
-        if (!implicant || !implicant.hasAttribute('data-term')) return;
-        if (implicant.contains(e.relatedTarget)) return;
-        previewImplicantGroup(null);
-    });
-}
+
+
 
 

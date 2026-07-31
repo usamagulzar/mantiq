@@ -1345,7 +1345,7 @@ function buildTipsModal() {
             <div class="modal-header">
                 <div class="modal-header-info">
                     <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 14c.2-.8.5-1.4 1.2-2A6 6 0 1 0 7.8 12c.7.6 1 1.2 1.2 2"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg>
                     </div>
                     <div class="modal-header-text">
                         <h2>Pro Tips</h2>
@@ -1363,6 +1363,9 @@ function buildTipsModal() {
     document.body.appendChild(overlay);
     const tipsClose = overlay.querySelector('.tips-close-btn');
     if (tipsClose) tipsClose.onclick = () => { overlay.style.display = 'none'; };
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.style.display = 'none';
+    });
 }
 
 function openTipsModal() {

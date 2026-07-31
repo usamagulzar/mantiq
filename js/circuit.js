@@ -590,7 +590,8 @@ function generateSVGForCircuit(root, panelType = 'orig') {
                 layoutNode(child, depth + 1);
                 sumY += child.y;
                 const childR = !child.isGate ? 20 : (child.children.length === 3 ? 25 : (child.children.length === 4 ? 30 : (child.children.length > 4 ? 35 : 20)));
-                const childOutputX = child.x + childR;
+                const childOutputOffset = (child.type === 'XNOR' || child.type === 'NAND' || child.type === 'NOR') ? 10 : 0;
+                const childOutputX = child.x + childR + childOutputOffset;
                 if (childOutputX > maxX) maxX = childOutputX;
             });
             node.x = maxX + 65;
@@ -660,12 +661,14 @@ function generateSVGForCircuit(root, panelType = 'orig') {
             // Sort children so wires don't criss-cross weirdly, though tree layout naturally handles it somewhat
             node.children.forEach((child, idx) => {
                 const childR = !child.isGate ? 20 : (child.children.length === 3 ? 25 : (child.children.length === 4 ? 30 : (child.children.length > 4 ? 35 : 20)));
-                const cx = child.x + childR; // output of child
+                const childOutputOffset = (child.type === 'XNOR' || child.type === 'NAND' || child.type === 'NOR') ? 10 : 0;
+                const cx = child.x + childR + childOutputOffset; // output of child
                 
                 // input of current node
                 let nx = node.x - 20; 
                 if (node.type === 'OR') nx = node.x - 15;
                 if (node.type === 'NOT') nx = node.x - 15;
+                if (node.type === 'XOR' || node.type === 'XNOR') nx = node.x - 21;
                 
                 let ny = node.y;
                 if (node.children.length > 1) {
@@ -706,8 +709,10 @@ function generateSVGForCircuit(root, panelType = 'orig') {
     
     // Output wire
     const rootR = !root.isGate ? 20 : (root.children.length === 3 ? 25 : (root.children.length === 4 ? 30 : (root.children.length > 4 ? 35 : 20)));
-    wires += `<path class="circuit-wire" d="M ${root.x + rootR} ${root.y} L ${root.x + rootR + 35} ${root.y}" />`;
-    gates += `<text class="var-text" x="${root.x + rootR + 45}" y="${root.y}" text-anchor="start" dominant-baseline="central">OUTPUT</text>`;
+    const rootOutputOffset = (root.type === 'XNOR' || root.type === 'NAND' || root.type === 'NOR') ? 10 : 0;
+    const finalOutX = root.x + rootR + rootOutputOffset;
+    wires += `<path class="circuit-wire" d="M ${finalOutX} ${root.y} L ${finalOutX + 35} ${root.y}" />`;
+    gates += `<text class="var-text" x="${finalOutX + 45}" y="${root.y}" text-anchor="start" dominant-baseline="central">OUTPUT</text>`;
     svg += wires;
     svg += gates;
     svg += `</svg></div>`;
@@ -725,6 +730,13 @@ function getGateSVG(type, x, y, numInputs = 2) {
         svg += `<path class="gate-shape" d="M ${x-20} ${y-r} L ${x} ${y-r} A ${r} ${r} 0 0 1 ${x} ${y+r} L ${x-20} ${y+r} Z" />`;
     } else if (type === 'OR') {
         svg += `<path class="gate-shape" d="M ${x-20} ${y-r} Q ${x-5} ${y} ${x-20} ${y+r} Q ${x+10} ${y+r} ${x+r} ${y} Q ${x+10} ${y-r} ${x-20} ${y-r} Z" />`;
+    } else if (type === 'XOR') {
+        svg += `<path class="gate-shape" d="M ${x-26} ${y-r} Q ${x-11} ${y} ${x-26} ${y+r}" />`;
+        svg += `<path class="gate-shape" d="M ${x-20} ${y-r} Q ${x-5} ${y} ${x-20} ${y+r} Q ${x+10} ${y+r} ${x+r} ${y} Q ${x+10} ${y-r} ${x-20} ${y-r} Z" />`;
+    } else if (type === 'XNOR') {
+        svg += `<path class="gate-shape" d="M ${x-26} ${y-r} Q ${x-11} ${y} ${x-26} ${y+r}" />`;
+        svg += `<path class="gate-shape" d="M ${x-20} ${y-r} Q ${x-5} ${y} ${x-20} ${y+r} Q ${x+10} ${y+r} ${x+r} ${y} Q ${x+10} ${y-r} ${x-20} ${y-r} Z" />`;
+        svg += `<circle class="gate-shape" cx="${x+r+5}" cy="${y}" r="5" />`;
     } else if (type === 'NOT') {
         svg += `<path class="gate-shape" d="M ${x-15} ${y-15} L ${x+10} ${y} L ${x-15} ${y+15} Z" />`;
         svg += `<circle class="gate-shape" cx="${x+15}" cy="${y}" r="5" />`;
@@ -1258,7 +1270,7 @@ function getGateOutputPinRange(type, x, numInputs = 2) {
     else if (numInputs === 4) r = 35;
     else if (numInputs > 4) r = 40;
 
-    if (type === 'NAND' || type === 'NOR') {
+    if (type === 'NAND' || type === 'NOR' || type === 'XNOR') {
         return { startX: x + r + 10, endX: x + r + 22 };
     }
     return { startX: x + r, endX: x + r + 12 }; // AND, OR, default
@@ -1287,6 +1299,13 @@ function getSimGateSilkscreen(type, x, y, panelId = 'p', numInputs = 2) {
     } else if (type === 'NOR') {
         inner = `<path d="M ${x-25-offset} ${y-ro} Q ${x-8} ${y} ${x-25-offset} ${y+ro} Q ${x+10+offset} ${y+ro} ${x+ro} ${y} Q ${x+10+offset} ${y-ro} ${x-25-offset} ${y-ro} Z" />
                  <circle cx="${x+r+5}" cy="${y}" r="${5+offset}" />`;
+    } else if (type === 'XOR') {
+        inner = `<path d="M ${x-32-offset} ${y-ro} Q ${x-15} ${y} ${x-32-offset} ${y+ro}" fill="none" />
+                 <path d="M ${x-25-offset} ${y-ro} Q ${x-8} ${y} ${x-25-offset} ${y+ro} Q ${x+10+offset} ${y+ro} ${x+ro} ${y} Q ${x+10+offset} ${y-ro} ${x-25-offset} ${y-ro} Z" />`;
+    } else if (type === 'XNOR') {
+        inner = `<path d="M ${x-32-offset} ${y-ro} Q ${x-15} ${y} ${x-32-offset} ${y+ro}" fill="none" />
+                 <path d="M ${x-25-offset} ${y-ro} Q ${x-8} ${y} ${x-25-offset} ${y+ro} Q ${x+10+offset} ${y+ro} ${x+ro} ${y} Q ${x+10+offset} ${y-ro} ${x-25-offset} ${y-ro} Z" />
+                 <circle cx="${x+r+5}" cy="${y}" r="${5+offset}" />`;
     } else {
         inner = `<rect x="${x-25-offset}" y="${y-ro}" width="${50+offset*2}" height="${r*2+offset*2}" rx="4" />`;
     }
@@ -1312,6 +1331,13 @@ function getSimGateShape(type, x, y, panelId = 'p', numInputs = 2) {
                  <circle cx="${x+r+5}" cy="${y}" r="5" />`;
     } else if (type === 'NOR') {
         inner = `<path d="M ${x-25} ${y-r} Q ${x-8} ${y} ${x-25} ${y+r} Q ${x+10} ${y+r} ${x+r} ${y} Q ${x+10} ${y-r} ${x-25} ${y-r} Z" />
+                 <circle cx="${x+r+5}" cy="${y}" r="5" />`;
+    } else if (type === 'XOR') {
+        inner = `<path d="M ${x-32} ${y-r} Q ${x-15} ${y} ${x-32} ${y+r}" stroke="#111111" stroke-width="3" fill="none" />
+                 <path d="M ${x-25} ${y-r} Q ${x-8} ${y} ${x-25} ${y+r} Q ${x+10} ${y+r} ${x+r} ${y} Q ${x+10} ${y-r} ${x-25} ${y-r} Z" />`;
+    } else if (type === 'XNOR') {
+        inner = `<path d="M ${x-32} ${y-r} Q ${x-15} ${y} ${x-32} ${y+r}" stroke="#111111" stroke-width="3" fill="none" />
+                 <path d="M ${x-25} ${y-r} Q ${x-8} ${y} ${x-25} ${y+r} Q ${x+10} ${y+r} ${x+r} ${y} Q ${x+10} ${y-r} ${x-25} ${y-r} Z" />
                  <circle cx="${x+r+5}" cy="${y}" r="5" />`;
     } else {
         inner = `<rect x="${x-25}" y="${y-r}" width="50" height="${r*2}" rx="4" />`;

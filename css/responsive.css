@@ -591,7 +591,8 @@
 
     .modal {
         width: 94%;
-        height: 86%;
+        height: auto;
+        max-height: min(85vh, 660px);
     }
 
     /* Compress the Learn Formats table on small phones */
@@ -722,74 +723,7 @@ html:not(.light-mode) .kmap-cell {
     color: var(--text-primary);
 }
 
-.help-fab {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 9999;
-    display: none;
-}
-#app-root.landing ~ .help-fab,
-body:has(#app-root.landing) .help-fab {
-    display: block;
-}
-.help-fab > button {
-    background: var(--bg-secondary);
-    color: var(--text-secondary);
-    border: 1px solid var(--border);
-    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.1));
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    font-size: 18px;
-    font-weight: 500;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: inherit;
-    transition: var(--transition-fast, all 0.2s ease);
-    line-height: 1;
-}
-.help-fab > button:hover {
-    color: var(--text-primary);
-    background: var(--bg-tertiary);
-}
 
-@media (max-width: 900px) {
-    .help-fab {
-        bottom: 74px; /* clears the 60px sidebar/footer */
-        right: 12px;
-    }
-}
-.help-fab-menu {
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
-    position: absolute;
-    bottom: 60px;
-    right: 0;
-    border-radius: 8px;
-    box-shadow: var(--shadow-lg);
-    padding: 8px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 160px;
-}
-.help-fab-menu button {
-    background: transparent;
-    border: none;
-    color: var(--text-primary);
-    text-align: right;
-    padding: 10px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 14px;
-}
-.help-fab-menu button:hover {
-    background: var(--bg-primary);
-}
 
 .tips-modal-list .tips-category h4 {
     color: var(--text-secondary);
@@ -805,7 +739,8 @@ body:has(#app-root.landing) .help-fab {
 
     .modal {
         width: 94%;
-        height: 86%;
+        height: auto;
+        max-height: min(85vh, 660px);
     }
 
     /* Compress the Learn Formats table on small phones */
@@ -975,6 +910,8 @@ body.tour-active #sidebar .nav-btn.tour-target svg {
 
 body.tour-active .zoom-btn-fullscreen,
 body.tour-active #kmap-fullscreen-btn,
+body.tour-active #tt-fullscreen-btn,
+body.tour-active #wave-fullscreen-btn,
 body.tour-active #export-csv-btn,
 body.tour-active #export-wave-btn,
 body.tour-active #export-circuit-png-orig,
@@ -989,8 +926,11 @@ body.tour-active #save-dataflow-btn {
 
 body.tour-active .zoom-btn-fullscreen,
 body.tour-active .kmap-view-toggle,
-body.tour-active .clear-expr-btn {
+body.tour-active .clear-expr-btn,
+body.tour-active #hero-logo-wrap,
+body.tour-active #hero-logo {
     pointer-events: none !important;
+    cursor: default !important;
 }
 
 .tour-bottom-nav {

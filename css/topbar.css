@@ -71,7 +71,7 @@
     align-items: center;
     width: min(640px, 90vw);
     margin: 0;
-    margin-bottom: 52px; /* Centers topbar in the space above the 52px tall footer */
+    margin-bottom: 80px; /* Centers topbar in the space above the taller footer */
     padding: 0;
     gap: 0;
 }
@@ -81,33 +81,68 @@
     #app-root.showing-examples #topbar {
         /* On mobile, the footer is now just two lines (credit, and links). Height is ~64px. 
            Adding 64px margin-bottom centers the main content perfectly in the space above it. */
-        margin-bottom: 64px;
+        margin-bottom: 90px;
     }
 }
 
 
-/* Landing Page Top-Left Install App Button */
-#landing-install-app-btn {
+/* Landing Page Top-Left Button Stack */
+#landing-top-left-btns {
     display: none;
 }
 
-#app-root.landing #landing-install-app-btn {
+#app-root.landing #landing-top-left-btns {
     position: absolute;
     top: 20px;
     left: 20px;
     z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+#landing-install-app-btn {
     display: inline-flex;
     align-items: center;
     gap: 7px;
 }
 
-#landing-install-app-btn svg {
+#landing-tour-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+}
+
+#landing-install-app-btn svg,
+#landing-tour-btn svg {
     color: currentColor;
 }
 
+@media (max-width: 768px) {
+    #app-root.landing #landing-top-left-btns {
+        top: 14px;
+        left: 14px;
+        right: 14px;
+        width: auto;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        pointer-events: none;
+    }
+
+    #app-root.landing #landing-top-left-btns > button {
+        pointer-events: auto;
+    }
+
+    #landing-tour-btn {
+        margin-left: auto;
+    }
+}
+
 @media all and (display-mode: standalone) {
-    #landing-install-app-btn,
-    #app-root.landing #landing-install-app-btn {
+    #landing-top-left-btns,
+    #app-root.landing #landing-top-left-btns {
         display: none !important;
     }
 }
@@ -292,7 +327,7 @@
     display: flex;
     gap: 12px;
     overflow-x: auto;
-    scroll-snap-type: x mandatory;
+    
     cursor: grab;
     align-items: center;
     scrollbar-width: none;
@@ -316,7 +351,7 @@
     border: 1px solid var(--border);
     padding: 6px 14px;
     border-radius: 12px;
-    scroll-snap-align: start;
+    
     flex-shrink: 0;
     transition: background-color 0.2s ease;
 }
@@ -393,7 +428,7 @@
     font-size: 16px;
     font-weight: 500;
     letter-spacing: 0.2px;
-    padding: 11px 76px 11px 24px;
+    padding: 11px 115px 11px 24px;
     border-radius: 24px;
     outline: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -408,7 +443,7 @@
 
 #app-root.landing #expression-input {
     border-radius: 28px;
-    padding: 16px 86px 16px 28px;
+    padding: 16px 125px 16px 28px;
     font-size: 18px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.05);
@@ -508,11 +543,41 @@
     display: block;
 }
 
+/* Circuit Explain button — sits just left of the status button */
+#circuit-explain-btn {
+    position: absolute;
+    right: 82px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 26px;
+    height: 26px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: var(--transition-fast);
+    padding: 0;
+    color: var(--accent);
+}
+
+#circuit-explain-btn:hover {
+    color: var(--accent);
+    background-color: var(--accent-light, rgba(99, 102, 241, 0.15));
+    transform: translateY(-50%) scale(1.1);
+}
+
+#app-root.landing #circuit-explain-btn {
+    right: 90px;
+}
+
 /* Share Popup */
 .modal.sm.share-modal {
     height: auto;
     min-height: unset;
-    max-height: 90vh;
+    max-height: min(85vh, 480px);
 }
 
 .share-note {
@@ -642,13 +707,16 @@
 /* Format Guide Modal Styles */
 .format-modal {
     max-width: 650px;
-    height: 80%;
-    max-height: 700px;
+    height: auto;
+    max-height: min(85vh, 700px);
 }
 
 .format-guide-body {
     padding: 24px;
     gap: 28px;
+    overflow-y: auto;
+    flex: 1 1 auto;
+    min-height: 0;
 }
 
 .guide-section {
@@ -822,3 +890,91 @@
     font-weight: 500;
 }
 
+
+/* ==========================================================================
+   Solutions Overflow Badge + "All Solutions" Popup List
+   ========================================================================== */
+
+/* Round "+N" badge shown at the right of the solutions carousel when one or
+   more solution cards are scrolled out of its visible width. Clicking it
+   opens the #alt-popup modal with the full list. Count is recomputed on
+   scroll/resize, not just on render, so it tracks the carousel's actual
+   scroll position. */
+.solutions-overflow-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background-color: var(--bg-secondary);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 0;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.solutions-overflow-btn:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* List rendered into the existing #alt-popup / #alt-body modal shell. */
+.alt-solutions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.alt-solution-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background-color: var(--bg-secondary);
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.alt-solution-item:hover {
+    background-color: var(--bg-tertiary);
+    border-color: var(--accent);
+}
+
+.alt-solution-item.active {
+    border-color: var(--success);
+    background-color: var(--bg-tertiary);
+}
+
+.alt-solution-item .expr-text {
+    font-family: 'STIX Two Text', 'Outfit', serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    word-break: break-all;
+}
+
+.alt-solution-item.active .expr-text {
+    color: var(--success);
+}
+
+.alt-solution-item .alt-solution-index {
+    flex-shrink: 0;
+    font-family: 'Outfit', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    background-color: var(--bg-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 6px;
+}

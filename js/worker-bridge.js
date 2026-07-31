@@ -15,6 +15,11 @@
  *   is still computing.
  */
 
+window.normalizeExprForCompare = function(s) {
+    if (!s) return '';
+    return String(s).replace(/\s+/g, '').toLowerCase();
+};
+
 // ── Web Worker bridge ─────────────────────────────────────────────────────────
 
 /** Cached state — populated by the worker after every computation. */
@@ -76,19 +81,19 @@ function _isShorthandInput(expr) {
  * heavy fields for whichever view was active at the time of the write.
  */
 const VIEW_FIELDS_JS = {
-    0: ['circuitJSON'],                     // SIMULATION
-    1: ['circuitJSON'],                     // CIRCUIT
-    2: ['kMapJSON'],                        // KMAP
-    3: ['truthTableJSON'],                  // TRUTHTABLE
-    4: ['verilogGate', 'verilogDataflow'],  // VERILOG
-    5: []                                   // SOLUTION
+    0: ['circuitJSON', 'kMapJSON'],                     // SIMULATION
+    1: ['circuitJSON', 'kMapJSON'],                     // CIRCUIT
+    2: ['kMapJSON'],                                    // KMAP
+    3: ['truthTableJSON', 'kMapJSON'],                  // TRUTHTABLE
+    4: ['verilogGate', 'verilogDataflow', 'kMapJSON'],  // VERILOG
+    5: ['kMapJSON']                                     // SOLUTION
 };
 
 /** Heavy fields known-fresh for the current expression/result. Reset on every content-changing snapshot. */
 const _freshFields = new Set();
 
 /** Spawn the worker that hosts the WASM engine. */
-const _worker = new Worker('wasm/mantiq-worker.js?v=1.4.0');
+const _worker = new Worker('wasm/mantiq-worker.js?v=1.5.0');
 
 _worker.onmessage = function (event) {
     const msg = event.data;
@@ -100,8 +105,6 @@ _worker.onmessage = function (event) {
         return;
     }
 
-    // State snapshot — only apply if this is from the LATEST request.
-    // Stale snapshots (from superseded requests) are discarded entirely.
     if (msg.type === 'state-snapshot') {
         if (msg.seq === _latestSeq) {
             _applySnapshot(msg.snapshot);
@@ -136,16 +139,7 @@ let _textDecoder = null;
 /** Apply a state snapshot from the worker to the local cache. */
 function _applySnapshot(snap) {
     if (!snap) return;
-    
-    if (!_textDecoder) _textDecoder = new TextDecoder('utf-8');
-    
-    // Decode transferables back to JS strings (zero-copy from WASM to worker bridge!)
-    const heavyFields = ['truthTableJSON', 'kMapJSON', 'circuitJSON', 'verilogGate', 'verilogDataflow'];
-    heavyFields.forEach(f => {
-        if (snap[f] instanceof ArrayBuffer) {
-            snap[f] = _textDecoder.decode(snap[f]);
-        }
-    });
+
     
     Object.assign(_state, snap);
     if (snap.expression !== undefined) _state.computedForExpr = snap.expression;
@@ -310,6 +304,12 @@ const Module = {
                         _workerWriteCall('_runProofAndSnapshot', []);
                     }, 400);
                 }
+                return undefined;
+            }
+
+            case 'mantiq_setCustomSimplifiedExpr': {
+                const expr = (args && args[0]) || '';
+                _workerWriteCall('_setCustomSimplifiedExprAndSnapshot', [expr]);
                 return undefined;
             }
 
