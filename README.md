@@ -75,7 +75,7 @@ Mantiq is also a fully installable **Progressive Web App**, so it keeps working,
 |---|---|
 | **Boolean Minimization** | Reduce any expression to its minimal SOP or POS form using the Quine–McCluskey algorithm, with all alternative minimal solutions listed side by side. |
 | **Algebraic Proofs** | A guided, step-by-step derivation naming every law used — Idempotent, Absorption, Distribution, De Morgan's, Consensus, and more. |
-| **Karnaugh Maps** | Auto-grouped, color-coded K-Maps for 2 to 5 variables, with prime implicant and don't-care highlighting. |
+| **Karnaugh Maps** | Auto-grouped, color-coded K-Maps for 2 to 6 variables, with prime implicant and don't-care highlighting. |
 | **Truth Tables** | Instantly generated, fully interactive truth tables with minterm/maxterm indices. |
 | **Circuit Diagrams** | A clean, auto-routed logic gate schematic generated straight from your expression. |
 | **Live Simulation** | Flip input switches and watch signal states and output LEDs update in real time through the actual gate network. |
