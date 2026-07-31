@@ -161,6 +161,7 @@ function buildSnapshot(view) {
     const needed = (view === -1 || view === 'all')
         ? new Set(['truthTableJSON', 'kMapJSON', 'circuitJSON', 'verilogGate', 'verilogDataflow'])
         : new Set(VIEW_FIELDS[view] || []);
+    needed.add('kMapJSON'); // Always marshal kMapJSON for Circuit Recognizer
     if (needed.has('truthTableJSON'))  snapshot.truthTableJSON  = wasmStr('mantiq_getTruthTableJSON') || '';
     if (needed.has('kMapJSON'))        snapshot.kMapJSON        = wasmStr('mantiq_getKMapJSON')       || '';
     if (needed.has('circuitJSON'))     snapshot.circuitJSON     = wasmStr('mantiq_getCircuitJSON')    || '';
@@ -223,6 +224,11 @@ function handleAggregate(fn, args, view) {
         case '_setSelectedSolutionAndSnapshot': {
             const idx = (args && args[0]) || 0;
             Module.ccall('mantiq_setSelectedSolution', null, ['number'], [idx]);
+            return buildSnapshot(view);
+        }
+        case '_setCustomSimplifiedExprAndSnapshot': {
+            const expr = (args && args[0]) || '';
+            Module.ccall('mantiq_setCustomSimplifiedExpr', null, ['string'], [expr]);
             return buildSnapshot(view);
         }
         case '_toggleVariableAndSnapshot': {
