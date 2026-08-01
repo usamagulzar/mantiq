@@ -163,7 +163,7 @@ window.addEventListener('keydown', (e) => {
         if (sharePopup) sharePopup.style.display = 'none';
         const pwaPopup = document.getElementById('pwa-popup');
         if (pwaPopup) pwaPopup.style.display = 'none';
-        document.querySelectorAll('.modal-overlay').forEach(el => {
+        document.querySelectorAll('.modal-overlay').forEach(el => {
             if (el.id !== 'integrity-popup') el.style.display = 'none';
         });
     }
@@ -189,8 +189,8 @@ window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     if (!isRunningStandalone()) {
-        pwaPopup.style.display = 'block';
-        installBtn.style.display = 'block';
+        const topInstallBtn = document.getElementById('landing-install-app-btn');
+        if (topInstallBtn) topInstallBtn.style.display = 'inline-flex';
     }
 });
 
@@ -205,8 +205,8 @@ installBtn.addEventListener('click', async () => {
 
 window.addEventListener('load', () => {
     if (isIos() && !isRunningStandalone()) {
-        pwaPopup.style.display = 'block';
-        iosInstructions.style.display = 'block';
+        const topInstallBtn = document.getElementById('landing-install-app-btn');
+        if (topInstallBtn) topInstallBtn.style.display = 'inline-flex';
     }
 });
 
@@ -421,4 +421,61 @@ if (circuitExplainClose && circuitExplainPopup) {
         circuitExplainPopup.style.display = 'none';
     });
 }
+// URL Hash Sync for Modals
+const HASH_MODALS = {
+    '#about': 'about-popup',
+    '#why': 'why-mantiq-popup',
+    '#privacy': 'privacy-popup',
+    '#terms': 'terms-popup',
+    '#contact': 'contact-popup',
+    '#guide': 'format-guide-popup'
+};
 
+const MODALS_HASH = Object.fromEntries(Object.entries(HASH_MODALS).map(([k, v]) => [v, k]));
+
+if (HASH_MODALS[window.location.hash]) {
+    const modal = document.getElementById(HASH_MODALS[window.location.hash]);
+    if (modal) modal.style.display = 'flex';
+}
+
+Object.values(HASH_MODALS).forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'style') {
+                const isVisible = el.style.display === 'flex';
+                const targetHash = MODALS_HASH[id];
+                
+                if (isVisible) {
+                    if (window.location.hash !== targetHash) {
+                        window.history.pushState(null, null, window.location.pathname + window.location.search + targetHash);
+                    }
+                } else {
+                    if (window.location.hash === targetHash) {
+                        window.history.pushState(null, null, window.location.pathname + window.location.search);
+                    }
+                }
+            }
+        });
+    });
+    observer.observe(el, { attributes: true, attributeFilter: ['style'] });
+});
+
+window.addEventListener('hashchange', () => {
+    const hash = window.location.hash;
+    
+    Object.values(HASH_MODALS).forEach(id => {
+        const el = document.getElementById(id);
+        if (el && el.style.display === 'flex' && MODALS_HASH[id] !== hash) {
+            el.style.display = 'none';
+        }
+    });
+
+    if (HASH_MODALS[hash]) {
+        const el = document.getElementById(HASH_MODALS[hash]);
+        if (el && el.style.display !== 'flex') {
+            el.style.display = 'flex';
+        }
+    }
+});

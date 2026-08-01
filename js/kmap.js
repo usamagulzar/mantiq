@@ -1172,7 +1172,11 @@ function render3DKMap(numVars, variables, minterms, dontCares, activeSolution, i
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ 
+        antialias: true, 
+        alpha: true,
+        preserveDrawingBuffer: true 
+    });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     canvasWrap.appendChild(renderer.domElement);

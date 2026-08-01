@@ -123,17 +123,17 @@
       }
     </style>
 
-    <link rel="stylesheet" href="css/fonts.css?v=2.0.1">
-    <link rel="stylesheet" href="css/vars.css?v=2.0.1">
-    <link rel="stylesheet" href="css/layout.css?v=2.0.1">
-    <link rel="stylesheet" href="css/topbar.css?v=2.0.1">
-    <link rel="stylesheet" href="css/panels.css?v=2.0.1">
-    <link rel="stylesheet" href="css/solution.css?v=2.0.1">
-    <link rel="stylesheet" href="css/views.css?v=2.0.1">
-    <link rel="stylesheet" href="css/kmap.css?v=2.0.1">
-    <link rel="stylesheet" href="css/about.css?v=2.0.1">
-    <link rel="stylesheet" href="css/responsive.css?v=2.0.1">
-    <link rel="stylesheet" href="css/integrity.css?v=1.0.0">
+    <link rel="stylesheet" href="css/fonts.css?v=2.0.2">
+    <link rel="stylesheet" href="css/vars.css?v=2.0.2">
+    <link rel="stylesheet" href="css/layout.css?v=2.0.2">
+    <link rel="stylesheet" href="css/topbar.css?v=2.0.2">
+    <link rel="stylesheet" href="css/panels.css?v=2.0.2">
+    <link rel="stylesheet" href="css/solution.css?v=2.0.2">
+    <link rel="stylesheet" href="css/views.css?v=2.0.2">
+    <link rel="stylesheet" href="css/kmap.css?v=2.0.2">
+    <link rel="stylesheet" href="css/about.css?v=2.0.2">
+    <link rel="stylesheet" href="css/responsive.css?v=2.0.2">
+    <link rel="stylesheet" href="css/integrity.css?v=1.0.1">
   </head>
 
   <body>
@@ -455,6 +455,9 @@
 <div id="kmap-3d-container" style="display: none;"></div>
                     </div>
                     <div class="kmap-controls">
+                        <button id="kmap-export-png-btn" class="kmap-fs-btn" title="Export PNG">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                        </button>
                         <button id="kmap-view-toggle-btn" class="kmap-fs-btn" title="Toggle View">
                             <span style="font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700;">WRP</span>
                         </button>
@@ -486,6 +489,12 @@
                                     <h2>Algebraic Proof</h2>
                                     <button class="concept-info-btn" data-concept="algebraic_proof" aria-label="What is this?">?</button>
                                 </div>
+                                <div class="panel-actions">
+                                    <button id="copy-alg-btn" class="action-link-btn" title="Copy proof">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                        <span>Copy</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="solution-content-wrapper" id="alg-body">
                                 <!-- Injected by JS -->
@@ -499,6 +508,12 @@
                                 <div class="panel-title-group">
                                     <h2>Quine-McCluskey</h2>
                                     <button class="concept-info-btn" data-concept="quine_mccluskey" aria-label="What is this?">?</button>
+                                </div>
+                                <div class="panel-actions">
+                                    <button id="copy-qm-btn" class="action-link-btn" title="Copy steps">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                                        <span>Copy</span>
+                                    </button>
                                 </div>
                             </div>
                             <div class="solution-content-wrapper" id="qm-body">
@@ -599,7 +614,7 @@
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                             </button>
                             <button class="zoom-btn zoom-btn-fullscreen" id="zoom-fullscreen-orig" title="Fullscreen">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
                             </button>
                         </div>
                     </div>
@@ -625,7 +640,7 @@
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                             </button>
                             <button class="zoom-btn zoom-btn-fullscreen" id="zoom-fullscreen-simp" title="Fullscreen">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
                             </button>
                         </div>
                     </div>
@@ -898,10 +913,7 @@
 
                 <div class="about-scroll">
                     <p class="about-lede">
-                        <b>Mantiq</b> is a free, offline-capable digital logic workbench for students, educators, and engineers.
-                        Type a Boolean expression and instantly get a minimized solution, a step-by-step algebraic proof,
-                        a Karnaugh map, a truth table, an auto-generated circuit diagram you can simulate live, and clean
-                        exportable Verilog - all powered by a compiled WebAssembly logic engine, right in your browser.
+                        <b>Mantiq</b> is a free, offline digital logic workbench. It turns abstract Boolean algebra into interactive proofs, K-Maps, and live circuits that you can see, simplify, and simulate right in your browser.
                     </p>
 
                     <div class="about-badges">
@@ -919,7 +931,7 @@
                         </span>
                         <span class="about-badge">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
-                            Free &amp; Open Source
+                            100% Free
                         </span>
                     </div>
 
@@ -932,7 +944,7 @@
                                 </div>
                                 <div class="about-feature-copy">
                                     <h4>Minimize Expressions</h4>
-                                    <p>Simplify any Boolean expression to its minimal SOP or POS form using the Quine-McCluskey method.</p>
+                                    <p>Simplify any Boolean expression to its minimal SOP or POS form using Quine-McCluskey.</p>
                                 </div>
                             </div>
                             <div class="about-feature-card">
@@ -941,7 +953,7 @@
                                 </div>
                                 <div class="about-feature-copy">
                                     <h4>Algebraic Proofs</h4>
-                                    <p>See every law - absorption, distribution, De Morgan's, and more - applied step by step.</p>
+                                    <p>See every law—absorption, De Morgan's, and more—applied step by step.</p>
                                 </div>
                             </div>
                             <div class="about-feature-card">
@@ -950,7 +962,7 @@
                                 </div>
                                 <div class="about-feature-copy">
                                     <h4>Karnaugh Maps</h4>
-                                    <p>Auto-grouped, color-coded K-Maps for 2-6 variables with prime implicant highlighting.</p>
+                                    <p>Auto-grouped, color-coded K-Maps for up to 6 variables with prime implicants.</p>
                                 </div>
                             </div>
                             <div class="about-feature-card">
@@ -959,7 +971,7 @@
                                 </div>
                                 <div class="about-feature-copy">
                                     <h4>Truth Tables</h4>
-                                    <p>Full, instantly generated truth tables with minterm and maxterm callouts.</p>
+                                    <p>Instantly generated truth tables with minterm and maxterm callouts.</p>
                                 </div>
                             </div>
                             <div class="about-feature-card">
@@ -968,7 +980,7 @@
                                 </div>
                                 <div class="about-feature-copy">
                                     <h4>Live Circuit Simulation</h4>
-                                    <p>An auto-drawn gate diagram you can interact with - flip inputs and watch outputs respond in real time.</p>
+                                    <p>An auto-drawn gate diagram you can interact with to test inputs in real time.</p>
                                 </div>
                             </div>
                             <div class="about-feature-card">
@@ -977,7 +989,7 @@
                                 </div>
                                 <div class="about-feature-copy">
                                     <h4>Verilog Export</h4>
-                                    <p>Generate clean, ready-to-use Verilog HDL from your simplified expression in one click.</p>
+                                    <p>Generate clean, ready-to-use Verilog HDL from your expression in one click.</p>
                                 </div>
                             </div>
                         </div>
@@ -986,9 +998,7 @@
                     <div class="about-callout">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z"></path><path d="M6 12v5c0 1.66 2.5 3 6 3s6-1.34 6-3v-5"></path></svg>
                         <p>
-                            <b>Built for the classroom and beyond.</b> Whether you're checking Digital Logic Design
-                            homework, prepping for an exam, teaching K-Maps, or prototyping a circuit for fun, Mantiq
-                            turns abstract Boolean algebra into something you can see, simplify, and simulate.
+                            <b>Built for the classroom and beyond.</b> Whether you're checking homework, prepping for an exam, or prototyping a circuit, Mantiq makes digital logic intuitive and fast.
                         </p>
                     </div>
 
@@ -1019,23 +1029,44 @@
                             <strong>SEECS, NUST (2025)</strong>.
                             <strong>Usama Gulzar</strong> took that spark and turned it into something much bigger.
                         </p>
-                        <p style="color: var(--text-secondary); font-size: 13px; font-weight: 600; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.05em;">
-                            Special Thanks — Brainstorming &amp; Support
+                        <p style="color: var(--text-secondary); font-size: 12.5px; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
+                            Special Thanks &mdash; Brainstorming &amp; Support
                         </p>
-                        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 4px;">
-                            <span class="about-badge">Muhammad Bin Shahzad</span>
-                            <span class="about-badge">Muhammad Talha</span>
-                            <span class="about-badge">Muhammad Abdul Rafay</span>
-                            <span class="about-badge">Hamza Ahmed</span>
-                            <span class="about-badge">Muhammad Faizan Ali</span>
-                            <span class="about-badge">Muhammad Taha Balouch</span>
-                            <span class="about-badge">Muhammad Umair Akram</span>
-                        </div>
+                        <ul style="list-style: none; padding: 0; margin: 0 0 12px 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
+                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
+                                Muhammad Bin Shahzad
+                            </li>
+                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
+                                Muhammad Talha
+                            </li>
+                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
+                                Muhammad Abdul Rafay
+                            </li>
+                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
+                                Hamza Ahmed
+                            </li>
+                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
+                                Muhammad Faizan Ali
+                            </li>
+                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
+                                Muhammad Taha Balouch
+                            </li>
+                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
+                                Muhammad Umair Akram
+                            </li>
+                        </ul>
                     </div>
 
                     <div class="about-footer">
                         <div class="about-footer-meta">
-                            <span>Mantiq v2.0.0</span> &middot; Licensed under MIT &middot; Runs 100% client-side - your expressions never leave your device.
+                            <span>Mantiq v2.0.0</span> &middot; Runs 100% client-side - your expressions never leave your device.
                         </div>
                         <div class="about-footer-links">
                             <button class="about-footer-link" data-action="about-formats">
@@ -1070,7 +1101,7 @@
             </div>
             <div class="modal-body why-mantiq-body">
                 <div class="comparison-intro">
-                    <p>Each of these tools serves a different purpose. Here is an honest look at where they overlap and where they differ.</p>
+                    <p>Each tool serves a different purpose. Here is an honest look at where they overlap and differ.</p>
                 </div>
                 <div class="comparison-table-wrap">
                     <table class="comparison-table">
@@ -1079,25 +1110,57 @@
                                 <th class="feat-col">Feature</th>
                                 <th class="mantiq-col">Mantiq</th>
                                 <th>Wolfram|Alpha</th>
-                                <th>Logisim-evolution</th>
+                                <th>Logisim</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>Boolean Simplification</td><td class="check">SOP &amp; POS</td><td class="check">SOP &amp; POS</td><td class="check">SOP &amp; POS</td></tr>
-                            <tr><td>K-Map</td><td class="check">2–6 variables</td><td class="cross">No</td><td class="partial">Up to 4 variables</td></tr>
-                            <tr><td>Step-by-step algebraic proof</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td></tr>
-                            <tr><td>Quine-McCluskey</td><td class="check">Shown step by step</td><td class="cross">No</td><td class="partial">Runs internally, not shown</td></tr>
-                            <tr><td>Truth table</td><td class="check">Yes</td><td class="check">Yes</td><td class="check">Yes</td></tr>
-                            <tr><td>Circuit diagram</td><td class="check">Auto-generated</td><td class="check">Static diagram</td><td class="check">Full schematic editor</td></tr>
-                            <tr><td>Interactive simulation</td><td class="check">In browser</td><td class="cross">No</td><td class="check">Desktop app</td></tr>
-                            <tr><td>Verilog export</td><td class="check">Gate &amp; dataflow</td><td class="cross">No</td><td class="partial">Via FPGA synthesis tools</td></tr>
-                            <tr><td>Runs offline</td><td class="check">PWA, no install</td><td class="cross">No</td><td class="check">Desktop install</td></tr>
-                            <tr><td>Free to use</td><td class="check">Yes</td><td class="partial">Free tier, paid Pro</td><td class="check">Open source</td></tr>
+                            <tr>
+                                <td data-label="Feature" class="feat-cell">Boolean Simplification</td>
+                                <td data-label="Mantiq" class="check">SOP &amp; POS</td>
+                                <td data-label="Wolfram|Alpha" class="check">SOP &amp; POS</td>
+                                <td data-label="Logisim" class="check">SOP &amp; POS</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Feature" class="feat-cell">K-Map</td>
+                                <td data-label="Mantiq" class="check">Up to 6 vars</td>
+                                <td data-label="Wolfram|Alpha" class="cross">No</td>
+                                <td data-label="Logisim" class="partial">Up to 4 vars</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Feature" class="feat-cell">Step-by-step Proof</td>
+                                <td data-label="Mantiq" class="check">Yes</td>
+                                <td data-label="Wolfram|Alpha" class="cross">No</td>
+                                <td data-label="Logisim" class="cross">No</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Feature" class="feat-cell">Quine-McCluskey</td>
+                                <td data-label="Mantiq" class="check">Step-by-step</td>
+                                <td data-label="Wolfram|Alpha" class="cross">No</td>
+                                <td data-label="Logisim" class="partial">Internal only</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Feature" class="feat-cell">Truth Table</td>
+                                <td data-label="Mantiq" class="check">Yes</td>
+                                <td data-label="Wolfram|Alpha" class="check">Yes</td>
+                                <td data-label="Logisim" class="check">Yes</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Feature" class="feat-cell">Circuit Diagram</td>
+                                <td data-label="Mantiq" class="check">Auto-generated</td>
+                                <td data-label="Wolfram|Alpha" class="check">Static diagram</td>
+                                <td data-label="Logisim" class="check">Full editor</td>
+                            </tr>
+                            <tr>
+                                <td data-label="Feature" class="feat-cell">Runs Offline</td>
+                                <td data-label="Mantiq" class="check">PWA (Browser)</td>
+                                <td data-label="Wolfram|Alpha" class="cross">No</td>
+                                <td data-label="Logisim" class="check">Desktop app</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="comparison-note">
-                    <p>Wolfram|Alpha is a general-purpose math engine — it simplifies Boolean expressions and generates truth tables and circuit diagrams, but is not focused on digital logic education. Logisim-evolution is a full-featured desktop circuit simulator built for designing and testing complete circuits, with Boolean analysis as one component. Mantiq is narrower in scope than Logisim and less general than Wolfram|Alpha, but is purpose-built around the Boolean algebra workflow a DLD course actually requires.</p>
+                    <p><strong>Wolfram|Alpha</strong> is a general math engine. <strong>Logisim</strong> is a full desktop circuit simulator. <strong>Mantiq</strong> is purpose-built specifically for the Boolean algebra workflow taught in Digital Logic Design courses.</p>
                 </div>
             </div>
         </div>
@@ -1189,7 +1252,7 @@
                 </div>
                 <div class="legal-section">
                     <h3>6. Intellectual Property</h3>
-                    <p>Mantiq is open-source software licensed under the MIT License. You are free to inspect, fork, and contribute to the source code on GitHub, subject to the terms of that license.</p>
+                    <p>Mantiq's source code is publicly accessible on GitHub for inspection.</p>
                 </div>
                 <div class="legal-section">
                     <h3>7. Changes</h3>
@@ -1338,5 +1401,6 @@
     <script src="js/rule-modal.js?v=2.2.8"></script>
     <script src="js/modals-events.js?v=2.2.8"></script>
     <script src="js/tutorial.js?v=2.2.8"></script>
+    <script src="js/html2canvas.min.js"></script>
   </body>
 </html>
