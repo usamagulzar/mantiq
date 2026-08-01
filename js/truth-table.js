@@ -442,7 +442,10 @@ const minterms = [];
     }
 
     elements.input.value = newExpr;
-    elements.input.dispatchEvent(new Event('input', { bubbles: true }));
+    if (typeof Module !== 'undefined' && Module.ccall) {
+        Module.ccall('mantiq_setExpression', null, ['string'], [newExpr]);
+        if (typeof updateFrontend === 'function') updateFrontend();
+    }
 }
 
 function initPanelInplaceFullscreen(btnId, panelSelector) {

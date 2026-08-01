@@ -450,7 +450,12 @@ function handleKMapCellClick(minterm) {
     
     if (typeof selectedSolutionIndex !== 'undefined') selectedSolutionIndex = 0;
     
-    if (inputEl) inputEl.dispatchEvent(new Event('input', { bubbles: true }));
+    if (inputEl) {
+        if (typeof Module !== 'undefined' && Module.ccall) {
+            Module.ccall('mantiq_setExpression', null, ['string'], [inputEl.value]);
+            if (typeof updateFrontend === 'function') updateFrontend();
+        }
+    }
 }
 
 // Same idea as computeAntiOverlapShrink, but operating on integer grid
