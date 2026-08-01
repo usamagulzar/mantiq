@@ -1070,7 +1070,7 @@
             </div>
             <div class="modal-body why-mantiq-body">
                 <div class="comparison-intro">
-                    <p>Mantiq is purpose-built for digital logic and Boolean algebra. Here is how it stacks up against other commonly used tools.</p>
+                    <p>Each of these tools serves a different purpose. Here is an honest look at where they overlap and where they differ.</p>
                 </div>
                 <div class="comparison-table-wrap">
                     <table class="comparison-table">
@@ -1078,26 +1078,26 @@
                             <tr>
                                 <th class="feat-col">Feature</th>
                                 <th class="mantiq-col">Mantiq</th>
-                                <th>WolframAlpha</th>
-                                <th>Logisim</th>
+                                <th>Wolfram|Alpha</th>
+                                <th>Logisim-evolution</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td>Boolean Simplification</td><td class="check">Yes</td><td class="partial">Limited</td><td class="cross">No</td></tr>
-                            <tr><td>K-Map Generation (2 to 6 vars)</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td></tr>
-                            <tr><td>Interactive Simulation</td><td class="check">Yes</td><td class="cross">No</td><td class="check">Yes</td></tr>
-                            <tr><td>Verilog Export</td><td class="check">Yes</td><td class="cross">No</td><td class="partial">Partial</td></tr>
-                            <tr><td>Full Truth Table</td><td class="check">Yes</td><td class="partial">Limited</td><td class="cross">No</td></tr>
-                            <tr><td>Algebraic Proof Steps</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td></tr>
-                            <tr><td>Quine-McCluskey Method</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td></tr>
-                            <tr><td>Works Offline</td><td class="check">Yes</td><td class="cross">No</td><td class="check">Yes</td></tr>
-                            <tr><td>Completely Free</td><td class="check">Yes</td><td class="partial">Freemium</td><td class="check">Yes</td></tr>
-                            <tr><td>No Account Required</td><td class="check">Yes</td><td class="check">Yes</td><td class="check">Yes</td></tr>
+                            <tr><td>Boolean Simplification</td><td class="check">SOP &amp; POS</td><td class="check">SOP &amp; POS</td><td class="check">SOP &amp; POS</td></tr>
+                            <tr><td>K-Map</td><td class="check">2–6 variables</td><td class="cross">No</td><td class="partial">Up to 4 variables</td></tr>
+                            <tr><td>Step-by-step algebraic proof</td><td class="check">Yes</td><td class="cross">No</td><td class="cross">No</td></tr>
+                            <tr><td>Quine-McCluskey</td><td class="check">Shown step by step</td><td class="cross">No</td><td class="partial">Runs internally, not shown</td></tr>
+                            <tr><td>Truth table</td><td class="check">Yes</td><td class="check">Yes</td><td class="check">Yes</td></tr>
+                            <tr><td>Circuit diagram</td><td class="check">Auto-generated</td><td class="check">Static diagram</td><td class="check">Full schematic editor</td></tr>
+                            <tr><td>Interactive simulation</td><td class="check">In browser</td><td class="cross">No</td><td class="check">Desktop app</td></tr>
+                            <tr><td>Verilog export</td><td class="check">Gate &amp; dataflow</td><td class="cross">No</td><td class="partial">Via FPGA synthesis tools</td></tr>
+                            <tr><td>Runs offline</td><td class="check">PWA, no install</td><td class="cross">No</td><td class="check">Desktop install</td></tr>
+                            <tr><td>Free to use</td><td class="check">Yes</td><td class="partial">Free tier, paid Pro</td><td class="check">Open source</td></tr>
                         </tbody>
                     </table>
                 </div>
                 <div class="comparison-note">
-                    <p>Mantiq was built specifically for digital logic education. It combines simplification, visualization, simulation, and export in a single free tool that runs entirely in your browser, with no account or internet connection required.</p>
+                    <p>Wolfram|Alpha is a general-purpose math engine — it simplifies Boolean expressions and generates truth tables and circuit diagrams, but is not focused on digital logic education. Logisim-evolution is a full-featured desktop circuit simulator built for designing and testing complete circuits, with Boolean analysis as one component. Mantiq is narrower in scope than Logisim and less general than Wolfram|Alpha, but is purpose-built around the Boolean algebra workflow a DLD course actually requires.</p>
                 </div>
             </div>
         </div>
