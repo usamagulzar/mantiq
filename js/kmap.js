@@ -69,6 +69,26 @@ function _redrawSVGOnly() {
 }
 
 /** Toggle selection of an implicant's K-map group from the analysis board. */
+// Applies the .selected / .dimmed classes to the term-boxes in the analysis
+// board to match the current _selectedImplicantTerm. This is a targeted
+// class toggle rather than a full renderKMapAnalysis() re-render, so that a
+// click doesn't blow away DOM state a full re-render would reset - most
+// importantly, any <details> sections (EPI/NEPI/Canonical) the user has
+// manually expanded, which renderKMapAnalysis() always redraws collapsed.
+// Hover intentionally does NOT call this - bold/dim on the term list itself
+// is a click-only affordance; hover only isolates the group on the K-map.
+function _updateImplicantBoxClasses() {
+    const list = document.getElementById('kmap-implicants-list');
+    if (!list) return;
+    list.querySelectorAll('.term-box.selectable-implicant').forEach(box => {
+        const term = box.getAttribute('data-term');
+        const isSelected = term === _selectedImplicantTerm;
+        const isDimmed = _selectedImplicantTerm !== null && !isSelected;
+        box.classList.toggle('selected', isSelected);
+        box.classList.toggle('dimmed', isDimmed);
+    });
+}
+
 function selectImplicantGroup(term) {
     _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
     // The mouse is necessarily still over the box that was just clicked, so
@@ -77,6 +97,7 @@ function selectImplicantGroup(term) {
     // K-map wouldn't visibly change until the mouse moved away. Syncing hover
     // to match the fresh click state makes the click always win instantly.
     _hoveredImplicantTerm = _selectedImplicantTerm;
+    _updateImplicantBoxClasses();
     _redrawActiveKMapView();
 }
 window.selectImplicantGroup = selectImplicantGroup;
