@@ -694,7 +694,7 @@ function sortBooleanExpression(expr) {
     // Circuit Recognizer — show explain button when expression matches a known circuit
     const circuitExplainBtn = document.getElementById('circuit-explain-btn');
     if (circuitExplainBtn) {
-        let matchedCircuit = null;
+        let matchedCircuits = null;
         if (!manualError && wasmHasResult && expr !== '' && typeof recognizeCircuit === 'function') {
             try {
                 let vars = null;
@@ -721,14 +721,16 @@ function sortBooleanExpression(expr) {
                 }
 
                 if (vars && minterms) {
-                    matchedCircuit = recognizeCircuit(vars.length, minterms);
+                    matchedCircuits = recognizeCircuit(vars.length, minterms);
                 }
             } catch (e) {}
         }
-        window._lastRecognizedCircuit = matchedCircuit;
-        if (matchedCircuit && !appRootEl?.classList.contains('landing')) {
+        window._lastRecognizedCircuits = matchedCircuits;
+        if (matchedCircuits && matchedCircuits.length && !appRootEl?.classList.contains('landing')) {
             circuitExplainBtn.style.display = 'flex';
-            circuitExplainBtn.title = `What is this? — ${matchedCircuit.name}`;
+            circuitExplainBtn.title = matchedCircuits.length === 1
+                ? `What is this? — ${matchedCircuits[0].name}`
+                : `What is this? — ${matchedCircuits.length} circuits recognized: ${matchedCircuits.map(m => m.name).join(', ')}`;
         } else {
             circuitExplainBtn.style.display = 'none';
         }

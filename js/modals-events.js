@@ -343,12 +343,9 @@ document.addEventListener('click', (e) => {
 
 // ── Circuit Explain Modal ─────────────────────────────────────────────────────
 
-function _openCircuitExplainModal(info) {
+function _openCircuitExplainModal(matches) {
     const popup = document.getElementById('circuit-explain-popup');
-    if (!popup || !info) return;
-
-    document.getElementById('circuit-explain-name').textContent = info.name;
-    document.getElementById('circuit-explain-subtitle').textContent = info.subtitle || '';
+    if (!popup || !matches || !matches.length) return;
 
     const categoryColors = {
         'Parity': 'var(--accent)',
@@ -364,44 +361,73 @@ function _openCircuitExplainModal(info) {
         'Parity / Comparator': 'var(--accent)',
         'Arithmetic / Majority': '#f59e0b',
     };
-    const catColor = categoryColors[info.category] || 'var(--accent)';
 
-    const useCasesHtml = (info.useCases || []).map(u =>
-        `<span class="circuit-explain-tag">${u}</span>`
-    ).join('');
+    // Renders one match's full detail section. When there's more than one
+    // match, each block gets its own name/subtitle header inline (the fixed
+    // header elements above the modal body get a generic "N circuits
+    // recognized" label instead, set below).
+    const renderMatch = (info, showOwnHeader) => {
+        const catColor = categoryColors[info.category] || 'var(--accent)';
+        const useCasesHtml = (info.useCases || []).map(u =>
+            `<span class="circuit-explain-tag">${u}</span>`
+        ).join('');
 
-    document.getElementById('circuit-explain-body').innerHTML = `
-        <div class="circuit-explain-category" style="color:${catColor}">
-            ${info.category || ''}
-        </div>
+        return `
+            ${showOwnHeader ? `
+            <div class="circuit-explain-match-header">
+                <div class="circuit-explain-match-name">${info.name}</div>
+                ${info.subtitle ? `<div class="circuit-explain-match-subtitle">${info.subtitle}</div>` : ''}
+            </div>` : ''}
 
-        <div class="circuit-explain-section">
-            <div class="circuit-explain-label">What it does</div>
-            <p class="circuit-explain-text">${info.description}</p>
-        </div>
+            <div class="circuit-explain-category" style="color:${catColor}">
+                ${info.category || ''}
+            </div>
 
-        <div class="circuit-explain-section">
-            <div class="circuit-explain-label">How it works</div>
-            <p class="circuit-explain-text">${info.howItWorks}</p>
-        </div>
+            <div class="circuit-explain-section">
+                <div class="circuit-explain-label">What it does</div>
+                <p class="circuit-explain-text">${info.description}</p>
+            </div>
 
-        <div class="circuit-explain-section">
-            <div class="circuit-explain-label">Canonical Expression</div>
-            <div class="circuit-explain-expr">${info.canonicalExpr}</div>
-        </div>
+            <div class="circuit-explain-section">
+                <div class="circuit-explain-label">How it works</div>
+                <p class="circuit-explain-text">${info.howItWorks}</p>
+            </div>
 
-        ${info.useCases && info.useCases.length ? `
-        <div class="circuit-explain-section">
-            <div class="circuit-explain-label">Common Use Cases</div>
-            <div class="circuit-explain-tags">${useCasesHtml}</div>
-        </div>` : ''}
+            <div class="circuit-explain-section">
+                <div class="circuit-explain-label">Canonical Expression</div>
+                <div class="circuit-explain-expr">${info.canonicalExpr}</div>
+            </div>
 
-        ${info.funFact ? `
-        <div class="circuit-explain-funfact">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            <span><strong>Fun Fact:</strong> ${info.funFact}</span>
-        </div>` : ''}
-    `;
+            ${info.useCases && info.useCases.length ? `
+            <div class="circuit-explain-section">
+                <div class="circuit-explain-label">Common Use Cases</div>
+                <div class="circuit-explain-tags">${useCasesHtml}</div>
+            </div>` : ''}
+
+            ${info.funFact ? `
+            <div class="circuit-explain-funfact">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <span><strong>Fun Fact:</strong> ${info.funFact}</span>
+            </div>` : ''}
+        `;
+    };
+
+    if (matches.length === 1) {
+        const info = matches[0];
+        document.getElementById('circuit-explain-name').textContent = info.name;
+        document.getElementById('circuit-explain-subtitle').textContent = info.subtitle || '';
+        document.getElementById('circuit-explain-body').innerHTML = renderMatch(info, false);
+    } else {
+        // Same truth table, multiple real circuits - e.g. a 2-var XOR gate
+        // IS a Half Adder's Sum output. Show every match instead of
+        // arbitrarily picking one.
+        document.getElementById('circuit-explain-name').textContent = `${matches.length} Circuits Recognized`;
+        document.getElementById('circuit-explain-subtitle').textContent =
+            'This truth table matches multiple known circuits — same logic, different roles.';
+        document.getElementById('circuit-explain-body').innerHTML = matches
+            .map((info, i) => renderMatch(info, true) + (i < matches.length - 1 ? '<div class="circuit-explain-divider"></div>' : ''))
+            .join('');
+    }
 
     popup.style.display = 'flex';
 }
@@ -412,7 +438,7 @@ const circuitExplainClose = document.getElementById('circuit-explain-close');
 
 if (circuitExplainBtn) {
     circuitExplainBtn.addEventListener('click', () => {
-        _openCircuitExplainModal(window._lastRecognizedCircuit || null);
+        _openCircuitExplainModal(window._lastRecognizedCircuits || null);
     });
 }
 
