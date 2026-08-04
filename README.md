@@ -15,7 +15,7 @@ truth tables, interactive circuit simulation, and Verilog export, all in your br
 [![Made with vanilla JS](https://img.shields.io/badge/frontend-vanilla%20JS-f7df1e)](#-tech-stack)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Live Demo](https://usamagulzar.github.io/mantiq) · [Report a Bug](../../issues/new?template=bug_report.md) · [Request a Feature](../../issues/new?template=feature_request.md) · [Documentation](#-table-of-contents)
+[Live Demo](https://mantiq.usamagulzar.dev/) · [Report a Bug](../../issues/new?template=bug_report.md) · [Request a Feature](../../issues/new?template=feature_request.md) · [Documentation](#-table-of-contents)
 
 <br/>
 
