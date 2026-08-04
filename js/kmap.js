@@ -71,6 +71,12 @@ function _redrawSVGOnly() {
 /** Toggle selection of an implicant's K-map group from the analysis board. */
 function selectImplicantGroup(term) {
     _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
+    // The mouse is necessarily still over the box that was just clicked, so
+    // without this, _hoveredImplicantTerm (still == term) would keep forcing
+    // that one group to show even after a click just deselected it - the
+    // K-map wouldn't visibly change until the mouse moved away. Syncing hover
+    // to match the fresh click state makes the click always win instantly.
+    _hoveredImplicantTerm = _selectedImplicantTerm;
     _redrawActiveKMapView();
 }
 window.selectImplicantGroup = selectImplicantGroup;
