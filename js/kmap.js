@@ -31,6 +31,16 @@ const WRAP_CELL_SIZE = 44;
 // nothing is recolored, only filtered. null means "show everything" (default).
 let _selectedImplicantTerm = null;
 
+// Term currently under the mouse in the analysis board (Minimal Expression /
+// EPI lists). Kept separate from _selectedImplicantTerm so hovering never
+// fights with a click-selection - hover just wins while it's active.
+let _hoveredImplicantTerm = null;
+
+/** Whichever term should currently be isolated on the K-map: hover beats a click-selection. */
+function _effectiveImplicantTerm() {
+    return _hoveredImplicantTerm !== null ? _hoveredImplicantTerm : _selectedImplicantTerm;
+}
+
 // Cached parameters from the most recent successful render, used by the
 // fast SVG-only redraw path so term selection never rebuilds the DOM.
 let _lastSVGDrawParams = null;
@@ -61,13 +71,7 @@ function _redrawSVGOnly() {
 /** Toggle selection of an implicant's K-map group from the analysis board. */
 function selectImplicantGroup(term) {
     _selectedImplicantTerm = (_selectedImplicantTerm === term) ? null : term;
-    if (kmapViewMode === 'wrap') {
-        _redrawWrapSVGOnly();
-    } else if (kmapViewMode === '3d') {
-        _updateKMap3DGroupHelpers();
-    } else {
-        _redrawSVGOnly();
-    }
+    _redrawActiveKMapView();
 }
 window.selectImplicantGroup = selectImplicantGroup;
 
@@ -691,7 +695,8 @@ function drawSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGray, i
         // A selection restricts which group(s) get drawn, but idx (and so
         // color) still comes from this term's position in the full solution —
         // selecting doesn't recolor anything, only hides the rest.
-        if (_selectedImplicantTerm !== null && term !== _selectedImplicantTerm) return;
+        const _effTerm = _effectiveImplicantTerm();
+        if (_effTerm !== null && term !== _effTerm) return;
 
         const zPart = term.slice(0, zBits);
         for (let k = 0; k < zBits; k++) {
@@ -1543,7 +1548,8 @@ function _updateKMap3DGroupHelpers() {
     activeSolution.forEach((term, idx) => {
         // Selection filters which group gets a wireframe drawn; color still
         // comes from this term's position in the full solution, unchanged.
-        if (_selectedImplicantTerm !== null && term !== _selectedImplicantTerm) return;
+        const _effTerm3D = _effectiveImplicantTerm();
+        if (_effTerm3D !== null && term !== _effTerm3D) return;
 
         const colorStr = LOOP_COLORS[idx % LOOP_COLORS.length];
         const color = parseInt(colorStr.slice(1), 16);
@@ -2158,7 +2164,8 @@ function drawWrapSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGra
             // As in drawSVGLoops: a selection filters which term gets a box
             // (returning null here, same as a term that doesn't touch this
             // tile), without touching the idx-based color below.
-            if (_selectedImplicantTerm !== null && termStr !== _selectedImplicantTerm) return null;
+            const _effTermWrap = _effectiveImplicantTerm();
+            if (_effTermWrap !== null && termStr !== _effTermWrap) return null;
 
             const rMatches = [];
             for (let r = 0; r < rowGray.length; r++) {
@@ -2254,6 +2261,42 @@ document.addEventListener('click', (e) => {
         }
         return;
     }
+});
+
+/** Redraw whichever K-map view is active - shared by hover and click paths. */
+function _redrawActiveKMapView() {
+    if (kmapViewMode === 'wrap') {
+        _redrawWrapSVGOnly();
+    } else if (kmapViewMode === '3d') {
+        _updateKMap3DGroupHelpers();
+    } else {
+        _redrawSVGOnly();
+    }
+}
+
+// Event Delegation for Implicant Group Hover-Preview.
+// NOTE: mouseenter/mouseleave do NOT bubble, so they can't be delegated from
+// document the way 'click' above is - only mouseover/mouseout bubble, so
+// those are what we listen for here. closest('.selectable-implicant') plus
+// checking relatedTarget is what keeps this from firing repeatedly as the
+// mouse moves between child nodes inside the same term-box.
+document.addEventListener('mouseover', (e) => {
+    const implicant = e.target.closest('.selectable-implicant');
+    if (!implicant || !implicant.hasAttribute('data-term')) return;
+    if (implicant.contains(e.relatedTarget)) return; // moved within the same box, ignore
+    const term = implicant.getAttribute('data-term');
+    if (!term || term === _hoveredImplicantTerm) return;
+    _hoveredImplicantTerm = term;
+    _redrawActiveKMapView();
+});
+
+document.addEventListener('mouseout', (e) => {
+    const implicant = e.target.closest('.selectable-implicant');
+    if (!implicant || !implicant.hasAttribute('data-term')) return;
+    if (implicant.contains(e.relatedTarget)) return; // moved within the same box, ignore
+    if (_hoveredImplicantTerm === null) return;
+    _hoveredImplicantTerm = null;
+    _redrawActiveKMapView();
 });
 
 
