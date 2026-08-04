@@ -17,7 +17,14 @@ function _mintermKey(minterms) {
 const _circuitDB = new Map();
 
 function _reg(numVars, minterms, info) {
-    _circuitDB.set(`${numVars}:${_mintermKey(minterms)}`, info);
+    const key = `${numVars}:${_mintermKey(minterms)}`;
+    // Multiple real circuits can share an identical truth table (e.g. a 2-var
+    // XOR gate IS the Half Adder's Sum output - same minterms, different
+    // role). Previously this .set() silently overwrote any earlier entry for
+    // the same key, so only the last-registered circuit ever showed up.
+    // Accumulate instead so recognizeCircuit() can surface every match.
+    if (!_circuitDB.has(key)) _circuitDB.set(key, []);
+    _circuitDB.get(key).push(info);
 }
 
 // ── SECTION 1: PARITY ───────────────────────────────────────────────────────
@@ -118,6 +125,56 @@ _reg(6, [1,2,4,7,8,11,13,14,16,19,21,22,25,26,28,31,32,35,37,38,41,42,44,47,49,5
     funFact: '6-input parity trees are used inside modern CPUs for fast parity generation across data bus lines. In hardware, they are implemented as a balanced tree for minimum delay.'
 });
 
+// 2-input AND Gate: same minterm as Half Adder Carry above - registered
+// separately on purpose so both show up together for "ab".
+_reg(2, [3], {
+    name: '2-input AND Gate',
+    subtitle: 'Output is 1 only when both inputs are 1',
+    category: 'Basic Gate',
+    description: 'The most basic AND gate. Output is 1 if and only if both inputs A and B are 1.',
+    howItWorks: 'AND implements logical conjunction: Y = AB. Every other input combination (00, 01, 10) gives 0.',
+    canonicalExpr: "Y = AB",
+    useCases: ['Enable/gating logic', 'Bitwise AND in ALUs', 'Building block for larger AND trees', 'Half Adder carry output'],
+    funFact: 'AND, OR, and NOT form a functionally complete set — any Boolean function can be built from just these three gates.'
+});
+
+// 2-input OR Gate: {1,2,3}
+_reg(2, [1,2,3], {
+    name: '2-input OR Gate',
+    subtitle: 'Output is 1 when at least one input is 1',
+    category: 'Basic Gate',
+    description: 'The most basic OR gate. Output is 1 whenever at least one of A or B is 1; only 00 gives 0.',
+    howItWorks: "OR implements logical disjunction: Y = A + B. It's the complement of NOR.",
+    canonicalExpr: "Y = A + B",
+    useCases: ['Alarm/interrupt logic ("any condition triggers")', 'Bitwise OR in ALUs', 'Wired-OR bus logic'],
+    funFact: 'OR is one of the oldest logic primitives, dating to George Boole\'s 1854 algebra — long before it had any electronic implementation.'
+});
+
+// 2-input NAND Gate: {0,1,2}
+_reg(2, [0,1,2], {
+    name: '2-input NAND Gate',
+    subtitle: 'Output is 0 only when both inputs are 1',
+    category: 'Basic Gate',
+    description: 'A 2-input NAND gate, the complement of AND. Output is 0 only when both A and B are 1.',
+    howItWorks: "NAND = NOT(AND): Y = (AB)'. Every combination except 11 gives 1.",
+    canonicalExpr: "Y = (AB)'",
+    useCases: ['Universal gate — any Boolean function can be built from NAND alone', 'Standard cell libraries default to NAND-based logic', 'SR latch construction'],
+    funFact: 'NAND is the workhorse of CMOS design: it\'s usually the fastest and smallest basic gate to fabricate, which is why NAND-based standard cells dominate real chips.'
+});
+
+// 2-input NOR Gate: same minterm as the "2:4 Decoder Y0" entry above -
+// registered separately so plain "NOR" also shows up for a'b'.
+_reg(2, [0], {
+    name: '2-input NOR Gate',
+    subtitle: 'Output is 1 only when both inputs are 0',
+    category: 'Basic Gate',
+    description: 'A 2-input NOR gate, the complement of OR. Output is 1 only when both A and B are 0.',
+    howItWorks: "NOR = NOT(OR): Y = (A+B)'. It's the only combination (00) that survives the complement.",
+    canonicalExpr: "Y = (A+B)'",
+    useCases: ['Universal gate — any Boolean function can be built from NOR alone', 'Zero-detect logic', 'The Apollo Guidance Computer was built entirely from NOR gates'],
+    funFact: 'Like NAND, NOR alone is functionally complete. The historic Apollo Guidance Computer used a single type of NOR gate for its entire logic design.'
+});
+
 // ── SECTION 2: ARITHMETIC ────────────────────────────────────────────────────
 
 // Half adder Carry: AB
@@ -133,6 +190,8 @@ _reg(2, [3], {
 });
 
 // Full adder Sum (Cin=C): A⊕B⊕C = minterms {1,2,4,7}
+// Identical truth table to "3-var Odd Parity" registered above - both are
+// kept as separate entries on purpose so recognizeCircuit() surfaces both.
 _reg(3, [1,2,4,7], {
     name: 'Full Adder — Sum Output',
     subtitle: 'Sum bit when adding three 1-bit inputs',
@@ -156,7 +215,46 @@ _reg(3, [3,5,6,7], {
     funFact: 'The 3-input majority function is one of the most studied Boolean functions in circuit theory. It is self-dual, monotone, and appears as a primitive in some logic synthesis frameworks.'
 });
 
-// Half adder Sum: A⊕B — already covered by 2-var odd parity above
+// Full Subtractor — Difference (A - B - Bin): A⊕B⊕Bin, identical truth
+// table to Full Adder Sum / 3-var Odd Parity above - a third match on the
+// same {1,2,4,7} key, which is correct: it's genuinely the same circuit.
+_reg(3, [1,2,4,7], {
+    name: 'Full Subtractor — Difference Output',
+    subtitle: 'Difference bit when subtracting three 1-bit inputs',
+    category: 'Arithmetic',
+    description: 'This is the Difference output of a Full Subtractor (inputs: minuend A, subtrahend B, borrow-in Bin). It outputs 1 when the total count of 1s among the three inputs is odd — exactly the same computation as a Full Adder\'s Sum.',
+    howItWorks: 'Difference = A⊕B⊕Bin. Subtraction and addition share the same "count parity" logic at the bit level, which is why the Full Adder Sum and Full Subtractor Difference circuits are electrically identical — only the Carry/Borrow-out logic differs.',
+    canonicalExpr: "D = A ⊕ B ⊕ Bᵢₙ",
+    useCases: ['Ripple borrow subtractor bit cells', 'Two\'s-complement subtractor stages (built from an adder with inverted B)', 'ALU subtract-mode datapaths'],
+    funFact: 'Most real ALUs don\'t build a separate subtractor at all — they reuse the adder, feeding it B\' (inverted B) with Cin=1, since A + B\' + 1 = A - B in two\'s complement.'
+});
+
+// Full Subtractor — Borrow-out: A'B + A'Bin + BBin = {1,2,3,7}
+_reg(3, [1,2,3,7], {
+    name: 'Full Subtractor — Borrow Output',
+    subtitle: 'Borrow generated when subtracting three 1-bit inputs',
+    category: 'Arithmetic',
+    description: 'This is the Borrow-out of a Full Subtractor. It outputs 1 whenever the subtraction A - B - Bin needs to borrow from the next higher bit position.',
+    howItWorks: "Borrow = A'B + A'Bin + BBin. A borrow is needed whenever A is 0 and either B or Bin is 1, or when both B and Bin are 1 (which forces a borrow regardless of A).",
+    canonicalExpr: "Bout = A'B + A'Bᵢₙ + BBᵢₙ",
+    useCases: ['Ripple borrow subtractor chains', 'Signed-magnitude arithmetic units', 'Comparator logic derived from subtractor borrow-out'],
+    funFact: "Borrow-out and Carry-out have nearly identical formulas (swap A for A' ) — subtractors and adders are structurally near-twins, which is exploited heavily in ALU design."
+});
+
+// Half adder Sum: A⊕B — identical truth table to the 2-var XOR/Odd-Parity
+// gate above ({1,2}), so it's a second registration on the same key. It used
+// to just be a comment noting the overlap; now that _reg() accumulates
+// matches instead of overwriting, it needs an actual entry to show up.
+_reg(2, [1,2], {
+    name: 'Half Adder — Sum Output',
+    subtitle: 'Sum bit when adding two 1-bit numbers',
+    category: 'Arithmetic',
+    description: 'This is the Sum output of a Half Adder. It outputs 1 when exactly one of the two input bits A and B is 1 — the low bit of the addition A + B.',
+    howItWorks: 'When adding two 1-bit numbers: 0+0=00, 0+1=01, 1+0=01, 1+1=10. The sum bit (the lower bit of the result) is 1 in exactly the cases where A and B differ. That is precisely the XOR function.',
+    canonicalExpr: "Sum = A ⊕ B",
+    useCases: ['LSB sum generation in multi-bit adders', 'Combined with an AND gate for the Carry output to form a complete Half Adder', 'Building block for ripple carry adders'],
+    funFact: 'A Half Adder needs only 2 logic gates: an XOR (for Sum) and an AND (for Carry). It is the simplest arithmetic circuit and the foundation of all digital adders.'
+});
 
 // ── SECTION 3: COMPARATORS ───────────────────────────────────────────────────
 
@@ -294,6 +392,20 @@ _reg(3, [0,1,2,3,4,5,6], {
     funFact: 'NAND is functionally complete — any Boolean function can be implemented using only NAND gates. This is why NAND-based cells are the most common in CMOS standard cell libraries.'
 });
 
+// 3-input XNOR / Equivalence Gate: identical truth table to "Even Parity
+// Generator (3 inputs)" above - registered separately so the plain gate name
+// shows up too, not just the parity framing.
+_reg(3, [0,3,5,6], {
+    name: '3-input XNOR (Equivalence) Gate',
+    subtitle: 'Output is 1 when the inputs agree in count-parity',
+    category: 'Basic Gate',
+    description: 'A 3-input XNOR chain. Output is 1 whenever an even number of inputs are 1 (0 or 2) — the complement of a 3-input XOR chain.',
+    howItWorks: "Y = (A⊕B⊕C)' = A⊙B⊙C. Built as two cascaded XNOR gates, mirroring how a 3-input XOR is built from two cascaded XOR gates.",
+    canonicalExpr: "Y = A ⊙ B ⊙ C",
+    useCases: ['Even parity checking', 'Equivalence/comparison chains', 'Error detection circuits'],
+    funFact: 'XNOR chains and XOR chains are complements of each other bit-for-bit, but XOR is far more common in practice because parity schemes conventionally use odd parity.'
+});
+
 // 3-input NOR: complement of 3-input OR = {0}
 _reg(3, [0], {
     name: '3-input NOR Gate',
@@ -393,6 +505,116 @@ _reg(1, [0], {
     funFact: 'A CMOS NOT gate is the simplest CMOS circuit: one PMOS transistor in pull-up and one NMOS in pull-down. It is so efficient that a tiny smartphone chip contains billions of them.'
 });
 
+// ── SECTION 11: WIDE BASIC GATES (4, 5, 6 inputs) ────────────────────────────
+// Registered generically (indices [0..2^n-1] etc.) rather than hand-typed,
+// since the pattern is mechanical and hand-typing 30+ minterms invites typos.
+
+function _regGateFamily(numVars) {
+    const full = (1 << numVars) - 1;
+    const all = Array.from({ length: full + 1 }, (_, i) => i);
+
+    _reg(numVars, [full], {
+        name: `${numVars}-input AND Gate`,
+        subtitle: 'Output is 1 only when every input is 1',
+        category: 'Basic Gate',
+        description: `A ${numVars}-input AND gate. Output is 1 if and only if all ${numVars} inputs are simultaneously 1.`,
+        howItWorks: `AND generalizes directly to any width: Y = A₁·A₂·...·A${numVars}. A ${numVars}-input AND is normally built from a tree of 2-input AND gates for speed.`,
+        canonicalExpr: `Y = A₁A₂...A${numVars}`,
+        useCases: [`All-1s detector for a ${numVars}-bit bus`, 'Multi-condition enable logic', 'Wide AND trees in address decoding'],
+        funFact: 'Wide AND/OR gates are almost never built as a single physical gate — real hardware assembles them as balanced trees of 2- or 3-input gates to keep propagation delay logarithmic in the input count.'
+    });
+
+    _reg(numVars, all.slice(1), {
+        name: `${numVars}-input OR Gate`,
+        subtitle: 'Output is 1 when at least one input is 1',
+        category: 'Basic Gate',
+        description: `A ${numVars}-input OR gate. Output is 1 whenever at least one of the ${numVars} inputs is 1; only the all-zero input gives 0.`,
+        howItWorks: `Y = A₁+A₂+...+A${numVars}. Like wide AND, this is normally implemented as a tree rather than one large gate.`,
+        canonicalExpr: `Y = A₁+A₂+...+A${numVars}`,
+        useCases: [`Any-of-${numVars} alarm/interrupt logic`, 'Wide bus-contention detection', 'Fan-in OR trees'],
+        funFact: `A ${numVars}-input OR gate's K-map has exactly one 0 (the all-zero cell) — it's about as "broad" a detector as a single-output function can be.`
+    });
+
+    _reg(numVars, all.slice(0, full), {
+        name: `${numVars}-input NAND Gate`,
+        subtitle: 'Output is 0 only when every input is 1',
+        category: 'Basic Gate',
+        description: `A ${numVars}-input NAND gate, the complement of the ${numVars}-input AND. Output is 0 only when all inputs are 1.`,
+        howItWorks: `NAND = NOT(AND): Y = (A₁A₂...A${numVars})'.`,
+        canonicalExpr: `Y = (A₁A₂...A${numVars})'`,
+        useCases: ['Universal gate building blocks at any width', 'Active-low all-select enable logic'],
+        funFact: 'NAND stays functionally complete no matter how many inputs it has — any Boolean circuit can in principle be built from NAND gates alone.'
+    });
+
+    _reg(numVars, [0], {
+        name: `${numVars}-input NOR Gate`,
+        subtitle: 'Output is 1 only when every input is 0',
+        category: 'Basic Gate',
+        description: `A ${numVars}-input NOR gate, the complement of the ${numVars}-input OR. Output is 1 only when all inputs are 0.`,
+        howItWorks: `NOR = NOT(OR): Y = (A₁+A₂+...+A${numVars})'. Only the all-zero input survives the complement.`,
+        canonicalExpr: `Y = (A₁+A₂+...+A${numVars})'`,
+        useCases: [`All-zero detector for a ${numVars}-bit bus`, 'Universal gate building blocks at any width'],
+        funFact: 'Like NAND, NOR stays functionally complete regardless of width — historic all-NOR computers like the Apollo Guidance Computer relied on exactly this property.'
+    });
+}
+_regGateFamily(4);
+_regGateFamily(5);
+_regGateFamily(6);
+
+// ── SECTION 12: WIDE EQUALITY COMPARATORS ────────────────────────────────────
+
+// 2-bit Equality Comparator: X1,X0,Y1,Y0 → 1 iff X==Y. {0,5,10,15}
+_reg(4, [0,5,10,15], {
+    name: '2-bit Equality Comparator (A = B)',
+    subtitle: 'Output is 1 when two 2-bit numbers are equal',
+    category: 'Comparator',
+    description: 'Compares two 2-bit numbers, X = X₁X₀ and Y = Y₁Y₀, and outputs 1 only when they are equal bit-for-bit.',
+    howItWorks: "Equality holds when each corresponding bit pair matches: Y = (X₁⊙Y₁)·(X₀⊙Y₀) — an AND of per-bit XNORs. This pattern extends to any bit width by ANDing more XNOR terms.",
+    canonicalExpr: "Y = (X₁⊙Y₁)(X₀⊙Y₀)",
+    useCases: ['The equality output of a 74HC85-style 2-bit magnitude comparator', 'Cache tag comparison', 'Address decoding match logic'],
+    funFact: 'Wider equality comparators (8-bit, 32-bit, etc.) use exactly this same structure — one XNOR per bit position, ANDed together. It scales linearly, unlike magnitude (>,<) comparators.'
+});
+
+// 3-bit Equality Comparator: X2,X1,X0,Y2,Y1,Y0 → 1 iff X==Y. {0,9,18,27,36,45,54,63}
+_reg(6, [0,9,18,27,36,45,54,63], {
+    name: '3-bit Equality Comparator (A = B)',
+    subtitle: 'Output is 1 when two 3-bit numbers are equal',
+    category: 'Comparator',
+    description: 'Compares two 3-bit numbers, X = X₂X₁X₀ and Y = Y₂Y₁Y₀, and outputs 1 only when they are equal bit-for-bit.',
+    howItWorks: "Y = (X₂⊙Y₂)(X₁⊙Y₁)(X₀⊙Y₀) — one XNOR per bit position, ANDed together. Exactly 8 of the 64 input combinations (one per value of X, with Y forced to match) produce a 1.",
+    canonicalExpr: "Y = (X₂⊙Y₂)(X₁⊙Y₁)(X₀⊙Y₀)",
+    useCases: ['3-bit tag/address match logic', 'Small content-addressable memory (CAM) cells', 'Building block for wider equality comparators'],
+    funFact: 'This is the same XNOR-and-AND pattern as the 2-bit version, just one more term — equality comparators are one of the few common circuits whose complexity grows only linearly with bit width.'
+});
+
+// ── SECTION 13: THRESHOLD / VOTING (4 inputs) ────────────────────────────────
+
+// At-least-2-of-4: {3,5,6,7,9,10,11,12,13,14,15}
+_reg(4, [3,5,6,7,9,10,11,12,13,14,15], {
+    name: 'At-Least-2-of-4 Threshold Function',
+    subtitle: 'Output is 1 when 2 or more of 4 inputs are 1',
+    category: 'Threshold',
+    description: 'A 4-input threshold circuit that outputs 1 whenever at least 2 of the 4 inputs are 1 — a generalized majority/quorum gate.',
+    howItWorks: "Y is 1 for any input combination with 2, 3, or 4 ones, and 0 only for combinations with 0 or 1 ones. Unlike a strict majority (which needs an odd input count to avoid ties), this is a simple 'quorum of 2' threshold.",
+    canonicalExpr: "Y = Σ (weight ≥ 2 of A,B,C,D)",
+    useCases: ['Quorum/voting logic with a low bar (2 out of 4 sensors agree)', 'Redundant-sensor fault tolerance', 'Threshold logic gate emulation'],
+    funFact: 'Threshold functions like this one are the building blocks of early neural network models (McCulloch-Pitts neurons) — a weighted sum compared against a firing threshold.'
+});
+
+// ── SECTION 14: WIDE MULTIPLEXER ─────────────────────────────────────────────
+
+// 4:1 MUX: S1,S0 select + D0..D3 data (6 vars)
+_reg(6, [8,9,10,11,12,13,14,15,20,21,22,23,28,29,30,31,34,35,38,39,42,43,46,47,49,51,53,55,57,59,61,63], {
+    name: '4:1 Multiplexer (MUX)',
+    subtitle: 'Selects one of four data inputs',
+    category: 'Data Routing',
+    description: 'A 4-to-1 multiplexer routes one of four data inputs (D0-D3) to the output based on a 2-bit select value S1S0.',
+    howItWorks: "Output = S1'S0'D0 + S1'S0 D1 + S1 S0' D2 + S1 S0 D3. Each data input is gated by the unique AND term that decodes its select combination, and the four gated terms are OR'd together.",
+    canonicalExpr: "Y = S1'S0'D0 + S1'S0D1 + S1S0'D2 + S1S0D3",
+    useCases: ['CPU data path selection between four sources', 'Implementing any 2-variable Boolean function directly on the select lines', 'Time-division signal routing', 'FPGA logic cell building block'],
+    funFact: 'A 4:1 MUX generalizes the 2:1 MUX by adding one more select line and doubling the data inputs. Chaining smaller MUXes (e.g. three 2:1 MUXes) is a common way to build a 4:1 MUX from simpler parts.'
+});
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Public API
 // ─────────────────────────────────────────────────────────────────────────────
@@ -401,12 +623,13 @@ _reg(1, [0], {
  * Tries to identify the given function.
  * @param {number} numVars - number of variables
  * @param {number[]} minterms - array of minterm indices (0-based)
- * @returns {object|null} - circuit info, or null if not recognized
+ * @returns {object[]|null} - array of every matching circuit's info, or null if none recognized
  */
 function recognizeCircuit(numVars, minterms) {
     if (!Array.isArray(minterms) || minterms.length === 0) return null;
     const key = `${numVars}:${_mintermKey(minterms)}`;
-    return _circuitDB.get(key) || null;
+    const matches = _circuitDB.get(key);
+    return (matches && matches.length) ? matches : null;
 }
 
 if (typeof window !== 'undefined') {
