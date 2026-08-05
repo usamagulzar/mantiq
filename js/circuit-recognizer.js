@@ -12,6 +12,59 @@ function _mintermKey(minterms) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Variable-permutation support
+//
+// The DB registers exactly one labeling per circuit (e.g. the 2:1 MUX is
+// stored as S,D0,D1 → minterms {2,3,5,7}). But "a'b + ac" and "ab + a'c"
+// are the SAME circuit (a 2:1 MUX) with D0/D1 swapped - they just produce
+// different raw minterm sets ({2,3,5,7} vs {1,3,6,7}) because the variables
+// play different roles in each. A plain key lookup only ever finds the one
+// arrangement that was registered.
+//
+// To recognize a circuit regardless of how its variables are ordered/named,
+// we re-index the input's minterms under every permutation of its
+// variables and check each resulting key against the DB, rather than only
+// checking the literal key the caller passed in.
+// ─────────────────────────────────────────────────────────────────────────────
+function _allPermutations(n) {
+    const indices = Array.from({ length: n }, (_, i) => i);
+    const results = [];
+    function permute(arr, current) {
+        if (arr.length === 0) { results.push(current); return; }
+        for (let i = 0; i < arr.length; i++) {
+            const rest = arr.slice(0, i).concat(arr.slice(i + 1));
+            permute(rest, current.concat(arr[i]));
+        }
+    }
+    permute(indices, []);
+    return results;
+}
+
+// Re-index a minterm array under a variable permutation.
+// perm[newPos] = oldPos: the variable that appears at position `newPos`
+// in the relabeled function is whatever variable was at `oldPos` originally.
+// Variable position 0 is the most-significant bit (matches the convention
+// used everywhere else in this file, e.g. S1,S0,D0..D3 for the 4:1 MUX).
+function _permuteMinterms(minterms, numVars, perm) {
+    return minterms.map(v => {
+        let nv = 0;
+        for (let newPos = 0; newPos < numVars; newPos++) {
+            const oldPos = perm[newPos];
+            const bit = (v >> (numVars - 1 - oldPos)) & 1;
+            nv |= bit << (numVars - 1 - newPos);
+        }
+        return nv;
+    });
+}
+
+// Cache permutations per numVars since they're reused across calls.
+const _permCache = new Map();
+function _permutationsFor(numVars) {
+    if (!_permCache.has(numVars)) _permCache.set(numVars, _allPermutations(numVars));
+    return _permCache.get(numVars);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Build lookup table: key = "numVars:m0,m1,..." → circuit info object
 // ─────────────────────────────────────────────────────────────────────────────
 const _circuitDB = new Map();
@@ -621,15 +674,36 @@ _reg(6, [8,9,10,11,12,13,14,15,20,21,22,23,28,29,30,31,34,35,38,39,42,43,46,47,4
 
 /**
  * Tries to identify the given function.
+ *
+ * Checks not just the literal minterm set the caller passed in, but every
+ * relabeling of its variables, so that circuits registered under one
+ * variable ordering (e.g. a 2:1 MUX stored as S,D0,D1) are still recognized
+ * when the same circuit shows up with its inputs in a different role/order
+ * (e.g. S,D1,D0 - as in "ab + a'c" vs the registered "a'b + ac").
+ *
  * @param {number} numVars - number of variables
  * @param {number[]} minterms - array of minterm indices (0-based)
  * @returns {object[]|null} - array of every matching circuit's info, or null if none recognized
  */
 function recognizeCircuit(numVars, minterms) {
     if (!Array.isArray(minterms) || minterms.length === 0) return null;
-    const key = `${numVars}:${_mintermKey(minterms)}`;
-    const matches = _circuitDB.get(key);
-    return (matches && matches.length) ? matches : null;
+
+    const results = [];
+    const seen = new Set();
+
+    for (const perm of _permutationsFor(numVars)) {
+        const permuted = _permuteMinterms(minterms, numVars, perm);
+        const key = `${numVars}:${_mintermKey(permuted)}`;
+        const matches = _circuitDB.get(key);
+        if (!matches) continue;
+        for (const info of matches) {
+            if (seen.has(info)) continue;
+            seen.add(info);
+            results.push(info);
+        }
+    }
+
+    return results.length ? results : null;
 }
 
 if (typeof window !== 'undefined') {
