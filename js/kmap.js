@@ -276,7 +276,7 @@ function render2DKMap(numVars, variables, minterms, dontCares, activeSolution, i
     const colGray = getGrayCodeStr(colsBits);
     
     let html = '<table class="kmap-table">';
-    html += `<tr><th class="kmap-corner" style="position: relative; padding: 0; min-width: 40px; height: 40px;"><svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"><line x1="0" y1="0" x2="100%" y2="100%" stroke="var(--border)" stroke-width="1.5" /></svg><div class="kmap-corner-col">${escapeHtml(colVars.join(''))}</div><div class="kmap-corner-row">${escapeHtml(rowVars.join(''))}</div></th>`;
+    html += `<tr><th class="kmap-corner" style="position: relative; padding: 0; min-width: 40px; height: 40px;"><svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"><line x1="0" y1="0" x2="100%" y2="100%" stroke="var(--border)" stroke-width="1.5" /></svg><div class="kmap-corner-col">${formatExprHtml(colVars.join(''))}</div><div class="kmap-corner-row">${formatExprHtml(rowVars.join(''))}</div></th>`;
     for (let c of colGray) { html += `<th style="height: 40px; vertical-align: bottom; padding-bottom: 2px;">${c}</th>`; }
     html += '</tr>';
 
@@ -850,9 +850,9 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
         const planeName = zVars.map((v, idx) => `${v}=${(zPrefix && zPrefix[idx] !== undefined) ? zPrefix[idx] : '0'}`).join(', ');
         
         html += `<div class="kmap-plane-wrapper" style="text-align:center;">`;
-        html += `<div style="font-weight:bold; margin-bottom: 10px; color:var(--accent);">${escapeHtml(planeName)}</div>`;
+        html += `<div style="font-weight:bold; margin-bottom: 10px; color:var(--accent);">${formatExprHtml(planeName)}</div>`;
         html += '<table class="kmap-table" style="margin: 0 auto;">';
-        html += `<tr><th class="kmap-corner" style="position: relative; padding: 0; min-width: 40px; height: 40px;"><svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"><line x1="0" y1="0" x2="100%" y2="100%" stroke="var(--border)" stroke-width="1.5" /></svg><div class="kmap-corner-col">${escapeHtml(colVars.join(''))}</div><div class="kmap-corner-row">${escapeHtml(rowVars.join(''))}</div></th>`;
+        html += `<tr><th class="kmap-corner" style="position: relative; padding: 0; min-width: 40px; height: 40px;"><svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"><line x1="0" y1="0" x2="100%" y2="100%" stroke="var(--border)" stroke-width="1.5" /></svg><div class="kmap-corner-col">${formatExprHtml(colVars.join(''))}</div><div class="kmap-corner-row">${formatExprHtml(rowVars.join(''))}</div></th>`;
         for (let c of colGray) { html += `<th style="height: 40px; vertical-align: bottom; padding-bottom: 2px;">${c}</th>`; }
         html += '</tr>';
         
@@ -920,7 +920,7 @@ function binaryToVariables(binaryStr, variables, isPOS) {
             if (!first && isPOS) {
                 term += "+";
             }
-            term += escapeHtml(variables[j]);
+            term += formatExprHtml(variables[j]);
             if (isPOS ? (bit === '1') : (bit === '0')) {
                 term += "'";
             }
@@ -2004,8 +2004,8 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
     // Floating Headers with SVG line split (50x50 corner)
     let headerHtml = `<div id="wrap-corner" class="kmap-corner" style="position: absolute; top:0; left:0; width:40px; height:40px; background:var(--bg-primary); z-index: 30; border-right: 1px solid var(--border); border-bottom: 1px solid var(--border); box-sizing: border-box; padding: 0;">`;
     headerHtml += `<svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"><line x1="0" y1="0" x2="100%" y2="100%" stroke="var(--border)" stroke-width="1.5" /></svg>`;
-    headerHtml += `<div class="kmap-corner-col">${escapeHtml(colVars.join(''))}</div>`;
-    headerHtml += `<div class="kmap-corner-row">${escapeHtml(rowVars.join(''))}</div>`;
+    headerHtml += `<div class="kmap-corner-col">${formatExprHtml(colVars.join(''))}</div>`;
+    headerHtml += `<div class="kmap-corner-row">${formatExprHtml(rowVars.join(''))}</div>`;
     headerHtml += `</div>`;
 
     headerHtml += `<div id="wrap-top-header" style="position: absolute; top:0; left: 40px; display: flex; z-index: 20; background:var(--bg-primary); height:40px; border-bottom: 1px solid var(--border);">`;

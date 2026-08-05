@@ -397,9 +397,29 @@ function diagnoseExpressionError(expr) {
     return ""; // Return empty string if no explicit error found
 }
 
+window.formatInputSubscriptsNative = function(inputEl) {
+    if (!inputEl || !inputEl.value) return;
+    const oldVal = inputEl.value;
+    const oldPos = inputEl.selectionStart;
+    const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
+    const newVal = oldVal.replace(/([a-zA-Z])(\d{1,2})(?!\d)/g, (m, p1, p2) => {
+        return p1 + p2.split('').map(d => subMap[d] || d).join('');
+    });
+    if (newVal !== oldVal) {
+        inputEl.value = newVal;
+        try {
+            inputEl.setSelectionRange(oldPos, oldPos);
+        } catch (e) {}
+    }
+};
+
 // Sync WASM State with DOM Layout
 function updateFrontend() {
     if (!wasmReady) return;
+
+    if (elements.input) {
+        formatInputSubscriptsNative(elements.input);
+    }
 
     const expr = elements.input.value.trim();
     
@@ -436,10 +456,59 @@ function updateFrontend() {
         
         updateNavigationState();
         
+function compareNaturalJS(a, b) {
+    if (a === b) return 0;
+    const matchA = String(a).match(/^([a-zA-Z]+)(\d*)$/);
+    const matchB = String(b).match(/^([a-zA-Z]+)(\d*)$/);
+    if (matchA && matchB) {
+        if (matchA[1] !== matchB[1]) {
+            return matchA[1].localeCompare(matchB[1]);
+        }
+        const numA = matchA[2] !== '' ? parseInt(matchA[2], 10) : -1;
+        const numB = matchB[2] !== '' ? parseInt(matchB[2], 10) : -1;
+        if (numA !== numB) {
+            return numA - numB;
+        }
+    }
+    return String(a).localeCompare(String(b));
+}
+
+window.formatInputSubscriptsNative = function(inputEl) {
+    if (!inputEl || !inputEl.value) return;
+    const oldVal = inputEl.value;
+    const oldPos = inputEl.selectionStart;
+    const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
+    const newVal = oldVal.replace(/([a-zA-Z])(\d)/g, (m, p1, p2) => {
+        return p1 + (subMap[p2] || p2);
+    });
+    if (newVal !== oldVal) {
+        inputEl.value = newVal;
+        try {
+            inputEl.setSelectionRange(oldPos, oldPos);
+        } catch (e) {}
+    }
+};
+
+window.formatSubscript = function(str) {
+    if (!str || typeof str !== 'string') return '';
+    const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
+    return str.replace(/([a-zA-Z])(\d)/g, (m, p1, p2) => {
+        return p1 + (subMap[p2] || p2);
+    });
+};
+
+window.formatSubscriptUnicode = window.formatSubscript;
+
+window.formatExprHtml = function(str) {
+    if (!str || typeof str !== 'string') return '';
+    const safe = typeof escapeHtml === 'function' ? escapeHtml(str) : String(str);
+    return window.formatSubscript(safe);
+};
+
 function parseTermLitsJS(term) {
     const lits = [];
     const clean = term.replace(/[()]/g, '');
-    const re = /([a-zA-Z])(['!]?)/g;
+    const re = /([a-zA-Z]\d?|\d)(['!]?)/g;
     let match;
     while ((match = re.exec(clean)) !== null) {
         lits.push({ var: match[1], comp: match[2] === "'" || match[2] === "!" });
@@ -459,7 +528,7 @@ function compareSopTermsJS(a, b) {
     const minLen = Math.min(litsA.length, litsB.length);
     for (let i = 0; i < minLen; i++) {
         if (litsA[i].var !== litsB[i].var) {
-            return litsA[i].var.localeCompare(litsB[i].var);
+            return compareNaturalJS(litsA[i].var, litsB[i].var);
         }
         if (litsA[i].comp !== litsB[i].comp) {
             return litsA[i].comp ? 1 : -1;
@@ -472,7 +541,7 @@ function sortLiteralsInSingleTermJS(term) {
     const lits = parseTermLitsJS(term);
     if (lits.length === 0) return term;
     lits.sort((a, b) => {
-        if (a.var !== b.var) return a.var.localeCompare(b.var);
+        if (a.var !== b.var) return compareNaturalJS(a.var, b.var);
         return a.comp === b.comp ? 0 : (a.comp ? 1 : -1);
     });
     const hasParens = term.trim().startsWith('(') && term.trim().endsWith(')');
@@ -492,19 +561,25 @@ function sortBooleanExpression(expr) {
                 const rawClause = expr.substring(i + 1, end);
                 const lits = rawClause.split('+').map(s => s.trim()).filter(Boolean);
                 lits.sort((a, b) => {
-                    const varA = a[0];
-                    const varB = b[0];
-                    if (varA !== varB) return varA.localeCompare(varB);
+                    const matchA = a.match(/^([a-zA-Z]\d?|\d)/);
+                    const matchB = b.match(/^([a-zA-Z]\d?|\d)/);
+                    const varA = matchA ? matchA[1] : a[0];
+                    const varB = matchB ? matchB[1] : b[0];
+                    if (varA !== varB) return compareNaturalJS(varA, varB);
                     const compA = a.includes("'") || a.includes("!");
                     const compB = b.includes("'") || b.includes("!");
                     return compA === compB ? 0 : (compA ? 1 : -1);
                 });
                 clauses.push('(' + lits.join('+') + ')');
                 i = end + 1;
-            } else if (/[a-zA-Z]/.test(expr[i])) {
+            } else if (/[a-zA-Z0-9]/.test(expr[i])) {
                 let start = i;
-                i++; // Only consume a single character for the variable name
-
+                if (/[a-zA-Z]/.test(expr[i])) {
+                    i++;
+                    if (i < expr.length && /\d/.test(expr[i])) i++;
+                } else {
+                    i++;
+                }
                 while (i < expr.length && (expr[i] === "'" || expr[i] === "!")) i++;
                 clauses.push(expr.substring(start, i));
             } else {
@@ -571,7 +646,7 @@ function sortBooleanExpression(expr) {
             const textSpan = document.createElement('span');
             textSpan.className = 'expr-text';
             textSpan.style.color = isSelected ? 'var(--success)' : 'var(--text-primary)';
-            textSpan.textContent = sol.expr;
+            textSpan.innerHTML = formatExprHtml(sol.expr);
 
             if (solutions.length > 1) {
                 const numSpan = document.createElement('span');
@@ -601,7 +676,7 @@ function sortBooleanExpression(expr) {
 
             copyBtn.addEventListener('click', () => {
                 const isToggled = window.toggledXorIndices && window.toggledXorIndices.has(index) && xorEq;
-                const textToCopy = isToggled ? xorEq : sol.expr;
+                const textToCopy = formatSubscript(isToggled ? xorEq : sol.expr);
                 navigator.clipboard.writeText(textToCopy).then(() => {
                     showToast('Expression copied!', 'success');
                 }).catch(() => {

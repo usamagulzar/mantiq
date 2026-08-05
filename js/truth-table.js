@@ -41,7 +41,7 @@ function renderHTMLTruthTable(data) {
     let html = '<thead><tr>';
     // Headers
     data.variables.forEach(v => {
-        html += `<th>${escapeHtml(v)}</th>`;
+        html += `<th>${formatExprHtml(v)}</th>`;
     });
     html += '<th class="tt-out-col">Out</th>';
     html += '<th>Minterm</th>';

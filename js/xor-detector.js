@@ -11,7 +11,7 @@ function parseLits(termStr) {
     }
     const lits = [];
     const clean = termStr.replace(/[()]/g, '');
-    const re = /([a-zA-Z])(['!]?)/g;
+    const re = /([a-zA-Z]\d?|\d)(['!]?)/g;
     let match;
     while ((match = re.exec(clean)) !== null) {
         lits.push({ var: match[1], comp: match[2] === "'" || match[2] === "!" });

@@ -699,7 +699,7 @@ function generateSVGForCircuit(root, panelType = 'orig') {
             // needed to align its visual center (not its alphabetic baseline)
             // with the circle's center. 0.35em (the generic rule-of-thumb) was
             // still measurably too small a shift and left the glyph sitting high.
-            gates += `<text class="var-text" x="${node.x}" y="${node.y}" text-anchor="middle" dy="0.244em">${escapeHtml(node.value)}</text>`;
+            gates += `<text class="var-text" x="${node.x}" y="${node.y}" text-anchor="middle" dy="0.244em">${typeof formatSubscriptUnicode === 'function' ? formatSubscriptUnicode(node.value) : escapeHtml(node.value)}</text>`;
         } else {
             gates += getGateSVG(node.type, node.x, node.y, node.children ? node.children.length : 2);
         }
@@ -1035,22 +1035,50 @@ function updateSimulationColors(panelId, scrollElId) {
 
     const { root, posMap, dx, dy } = cache;
 
-    // Same index sequence generateSVGForSimulation used when it built the ids
-    // (copper-traces loop and components loop both walk posMap in this same
-    // order, starting at 0), so idx here lines up with the ids in the DOM.
+    // 1. Update Master Variable Buttons
+    const uniqueVars = [];
+    for (const [node] of posMap.entries()) {
+        if (!node.isGate && node.value !== '0' && node.value !== '1') {
+            if (!uniqueVars.includes(node.value)) uniqueVars.push(node.value);
+        }
+    }
+
+    let minLeafY = 0, maxLeafY = 0;
+    const leafNodes = Array.from(posMap.keys()).filter(n => !n.isGate);
+    if (leafNodes.length > 0) {
+        minLeafY = posMap.get(leafNodes[0]).y;
+        maxLeafY = posMap.get(leafNodes[leafNodes.length - 1]).y;
+    }
+
+    const numUnique = uniqueVars.length;
+    uniqueVars.forEach((vName, idx) => {
+        const state = !!simInputStates[vName];
+        let yBtn = (minLeafY + maxLeafY) / 2;
+        if (numUnique > 1) {
+            const step = (maxLeafY - minLeafY) / Math.max(1, numUnique - 1);
+            yBtn = minLeafY + idx * step;
+        }
+        const capY = yBtn + dy;
+        const cap = document.getElementById(`toggle-master-cap-${panelId}-${vName}`);
+        if (cap) cap.setAttribute('cy', state ? capY : capY - 4);
+
+        const dot = document.getElementById(`toggle-master-dot-${panelId}-${vName}`);
+        if (dot) dot.setAttribute('fill', state ? '#30d158' : '#ff453a');
+    });
+
+    // 2. Update Leaf Connection Pads, Gates & Traces
     let idx = 0;
     for (const [node, pos] of posMap.entries()) {
         const myIdx = idx++;
-        const y = pos.y + dy;
         const state = evaluateSimLogic(node);
 
         if (!node.isGate) {
             const isConst = node.value === '0' || node.value === '1';
             if (!isConst) {
-                const cap = document.getElementById(`toggle-cap-${panelId}-${myIdx}`);
-                if (cap) cap.setAttribute('cy', state ? y : y - 4);
-                const dot = document.getElementById(`toggle-dot-${panelId}-${myIdx}`);
-                if (dot) dot.setAttribute('fill', state ? '#30d158' : '#ff453a');
+                const nodePad = document.getElementById(`node-pad-${panelId}-${myIdx}`);
+                if (nodePad) {
+                    nodePad.setAttribute('fill', state ? '#60ff60' : '#225522');
+                }
             }
             continue;
         }
@@ -1082,7 +1110,7 @@ function updateSimulationColors(panelId, scrollElId) {
         }
     }
 
-    // Output trace + LED
+    // 3. Output Trace + LED
     const finalState = evaluateSimLogic(root);
     const outTrace = document.getElementById(`output-trace-${panelId}`);
     if (outTrace) {

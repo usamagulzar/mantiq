@@ -155,7 +155,7 @@ function renderSolutionView() {
                 html += `<span class="qm-lit-dash">-</span>`;
             } else {
                 const negated = isPOS ? (bit === '1') : (bit === '0');
-                html += `<span class="qm-lit-var${negated ? ' neg' : ''}">${escapeHtml(vars[j])}</span>`;
+                html += `<span class="qm-lit-var${negated ? ' neg' : ''}">${formatExprHtml(vars[j])}</span>`;
             }
         }
         return html || `<span class="qm-lit-dash">-</span>`;
@@ -324,7 +324,7 @@ function renderSolutionView() {
             }
             appendHtml(`
                 <div class="qm-row algebraic-step${noDialog ? ' no-rule-dialog' : ''}" data-rule="${escapeHtml(pendingAlgebraicReason)}" data-expr="${escapeHtml(displayExpr)}"${noDialog ? '' : ' title="Click to view rule details and examples"'}>
-                    <div class="alg-expr">${escapeHtml(displayExpr)}</div>
+                    <div class="alg-expr">${formatExprHtml(displayExpr)}</div>
                     <div class="alg-reason">
                         <span class="alg-by">${isGiven || isSimplified ? '' : 'by'}</span>
                         <span class="alg-rule">${escapeHtml(pendingAlgebraicReason)}</span>
