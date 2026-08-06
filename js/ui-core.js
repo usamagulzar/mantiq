@@ -742,6 +742,9 @@ function sortBooleanExpression(expr) {
     if (appRootEl) {
         if (expr === '') {
             appRootEl.classList.add('landing');
+            if (wasmReady && typeof Module !== 'undefined' && Module.ccall) {
+                Module.ccall('mantiq_setView', null, ['number'], [0]);
+            }
         } else if (wasmHasResult && appRootEl.classList.contains('landing')) {
             appRootEl.classList.remove('landing');
             appRootEl.classList.remove('showing-examples');

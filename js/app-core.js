@@ -130,12 +130,17 @@ elements.input.addEventListener('input', (e) => {
     if (appRoot) {
         if (expr.trim() !== '') {
             appRoot.classList.remove('showing-examples');
-        } else if (!appRoot.classList.contains('landing')) {
-            // Input was cleared out entirely - go back to the landing screen
-            // right away, no need to wait on anything.
-            changeState(() => {
-                appRoot.classList.add('landing');
-            });
+        } else {
+            // Input was cleared out entirely - reset section to Simulation (0) in background
+            if (wasmReady) {
+                Module.ccall('mantiq_setView', null, ['number'], [0]);
+            }
+            if (!appRoot.classList.contains('landing')) {
+                // Go back to the landing screen right away, no need to wait on anything.
+                changeState(() => {
+                    appRoot.classList.add('landing');
+                });
+            }
         }
         // Note: leaving the landing screen for a non-empty expression is
         // handled in updateFrontend() once the expression is confirmed valid
@@ -182,6 +187,7 @@ if (clearBtn) {
             window.history.replaceState(null, null, ' ');
             
             if (wasmReady) {
+                Module.ccall('mantiq_setView', null, ['number'], [0]);
                 Module.ccall('mantiq_setExpression', null, ['string'], ['']);
                 updateFrontend();
             }
@@ -214,6 +220,7 @@ if (heroLogoWrap) {
                 window.history.replaceState(null, null, ' ');
                 
                 if (wasmReady) {
+                    Module.ccall('mantiq_setView', null, ['number'], [0]);
                     Module.ccall('mantiq_setExpression', null, ['string'], ['']);
                     updateFrontend();
                 }

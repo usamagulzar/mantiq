@@ -241,6 +241,7 @@ const Module = {
                 _state.expression = expr;
                 if (expr.trim() === '') {
                     _clearComputedState();
+                    _state.currentView = 0;
                 } else if (exprChanged) {
                     // if expression changes: keep cache of only the current section selected, and delete for others
                     const keepFields = VIEW_FIELDS_JS[_state.currentView] || [];
