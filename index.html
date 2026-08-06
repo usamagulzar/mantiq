@@ -1402,5 +1402,16 @@
     <script src="js/modals-events.js?v=2.2.10"></script>
     <script src="js/tutorial.js?v=2.2.10"></script>
     <script src="js/html2canvas.min.js"></script>
+
+    <!-- Register the service worker so the app actually caches assets and works offline -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('[ServiceWorker] registered:', reg.scope))
+            .catch(err => console.warn('[ServiceWorker] registration failed:', err));
+        });
+      }
+    </script>
   </body>
 </html>
