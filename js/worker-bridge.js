@@ -67,8 +67,8 @@ let   _proofTimeout = null;
  * would just recompute an identical snapshot.
  */
 const _KMAP_CMD_RE          = /^\s*KMAP\s*\(([^)]+)\)\s*$/i;
-const _SHORTHAND_RE         = /^\s*(?:[a-zA-Z0-9_,'\s]+:)?\s*[mM]\s*\([\d,\s]*\)(?:\s*[dD]\s*\([\d,\s]*\))?\s*$/;
-const _SHORTHAND_DC_ONLY_RE = /^\s*(?:[a-zA-Z0-9_,'\s]+:)?\s*[dD]\s*\([\d,\s]*\)\s*$/;
+const _SHORTHAND_RE         = /^\s*(?:[a-zA-Z0-9_,'\s\u2080-\u2089]+:)?\s*[mM]\s*\([\d,\s]*\)(?:\s*[dD]\s*\([\d,\s]*\))?\s*$/;
+const _SHORTHAND_DC_ONLY_RE = /^\s*(?:[a-zA-Z0-9_,'\s\u2080-\u2089]+:)?\s*[dD]\s*\([\d,\s]*\)\s*$/;
 
 function _isShorthandInput(expr) {
     return _KMAP_CMD_RE.test(expr) || _SHORTHAND_RE.test(expr) || _SHORTHAND_DC_ONLY_RE.test(expr);

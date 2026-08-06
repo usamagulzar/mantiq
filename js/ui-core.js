@@ -508,7 +508,7 @@ window.formatExprHtml = function(str) {
 function parseTermLitsJS(term) {
     const lits = [];
     const clean = term.replace(/[()]/g, '');
-    const re = /([a-zA-Z]\d?|\d)(['!]?)/g;
+    const re = /([a-zA-Z][a-zA-Z0-9_\u2080-\u2089]*|\d)(['!]?)/g;
     let match;
     while ((match = re.exec(clean)) !== null) {
         lits.push({ var: match[1], comp: match[2] === "'" || match[2] === "!" });
