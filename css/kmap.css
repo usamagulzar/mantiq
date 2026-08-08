@@ -372,6 +372,14 @@
    and the group boxes silently fail to render once you pan. */
 #kmap-wrap-svg-overlay { overflow: visible; }
 
+/* Export K-Map PNG button: while html2canvas is working, make the disabled
+   state visually obvious (not just non-clickable) so the wait reads as
+   "exporting" rather than "did my click even register". */
+#kmap-export-png-btn.is-exporting {
+    opacity: 0.6;
+    cursor: progress;
+}
+
 /* The tiled grid, its SVG loop overlay, and the floating row/col headers are
    all re-translated on every drag frame while panning the wrap view. Hinting
    will-change here lets the browser promote them to their own compositor
