@@ -426,11 +426,17 @@ function updateFrontend() {
     elements.syntaxErrorLine.style.display = 'none';
     elements.errorFeedback.style.display = 'none';
 
-    // Check if input is a KMAP command — force shift to K-Map section and lock navigation
+    // Check if input is a KMAP command — force shift to K-Map section and lock navigation.
+    // This also re-runs asynchronously whenever a worker state-snapshot lands
+    // (see worker-bridge.js), which happens on a delay after typing/toggling.
+    // If the user clicks over to Truth Table (view 3, still allowed for KMAP
+    // input) in that window, a naive "!== 2" check here would force them back
+    // to K-Map the instant the snapshot arrives - the "first click resets,
+    // second click works" bug. Treat both allowed views as already-settled.
     const isKmapInput = expr.toUpperCase().includes('KMAP');
     if (isKmapInput) {
         setAlgProofAvailability(false);
-        if (_state.currentView !== 2) {
+        if (_state.currentView !== 2 && _state.currentView !== 3) {
             _state.currentView = 2;
             Module.ccall('mantiq_setView', null, ['number'], [2]);
             lastActiveView = 2;
