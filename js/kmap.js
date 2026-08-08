@@ -2025,8 +2025,8 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
     const availW = wrapper.clientWidth;
     const availH = wrapper.clientHeight;
     
-    const tilesX = Math.ceil(availW / w) + 2;
-    const tilesY = Math.ceil(availH / h) + 2;
+    const tilesX = Math.ceil(availW / w) + 3;
+    const tilesY = Math.ceil(availH / h) + 3;
     
     let surfaceHtml = `<div style="display: grid; grid-template-columns: repeat(${tilesX}, max-content); grid-template-rows: repeat(${tilesY}, max-content); place-items: center; gap: 0;">`;
     for(let i=0; i< (tilesX * tilesY); i++) {
