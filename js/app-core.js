@@ -524,7 +524,7 @@ elements.navButtons.forEach(btn => {
         const isKmapInput = currentExprStr.toUpperCase().includes('KMAP');
         const viewMode = parseInt(e.currentTarget.getAttribute('data-view'));
 
-        if (isKmapInput && viewMode !== 2) {
+        if (isKmapInput && viewMode !== 2 && viewMode !== 3) {
             e.preventDefault();
             e.stopPropagation();
             return;

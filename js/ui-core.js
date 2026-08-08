@@ -275,9 +275,9 @@ function updateNavigationState() {
     if (isKmapInput) {
         elements.navButtons.forEach(b => {
             const vMode = b.getAttribute('data-view');
-            if (vMode !== '2') {
+            if (vMode !== '2' && vMode !== '3') {
                 b.classList.add('disabled');
-                b.title = 'Navigation locked to K-Map view for KMAP input';
+                b.title = 'Navigation locked to K-Map/Truth Table view for KMAP input';
             } else {
                 b.classList.remove('disabled');
                 b.removeAttribute('title');
