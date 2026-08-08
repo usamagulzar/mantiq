@@ -2083,6 +2083,15 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
             wrapDragState.hasMoved = false;
             wrapContainer.style.cursor = 'grabbing';
         });
+        // mousemove can fire far more often than the screen actually repaints
+        // (especially on high-poll-rate mice/trackpads/touchpads). Calling
+        // updateTransform() synchronously on every single event did the
+        // style write + forced recalc that many extra times per real frame,
+        // which is what made panning feel laggy. Instead, just record the
+        // latest offset here (cheap) and let a single rAF tick apply it once
+        // per frame - any events that land between frames get coalesced for
+        // free.
+        let wrapRafPending = false;
         window.addEventListener('mousemove', (e) => {
             if (!wrapDragState.isDragging) return;
             const dx = e.clientX - wrapDragState.startX;
@@ -2094,7 +2103,13 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
             wrapDragState.offY += dy;
             wrapDragState.startX = e.clientX;
             wrapDragState.startY = e.clientY;
-            updateTransform();
+            if (!wrapRafPending) {
+                wrapRafPending = true;
+                requestAnimationFrame(() => {
+                    wrapRafPending = false;
+                    updateTransform();
+                });
+            }
         });
         window.addEventListener('mouseup', () => {
             wrapDragState.isDragging = false;
@@ -2115,6 +2130,7 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
             }
         }, { passive: false });
 
+        let wrapTouchRafPending = false;
         window.addEventListener('touchmove', (e) => {
             if (wrapDragState.isDragging && e.touches.length === 1) {
                 e.preventDefault();
@@ -2127,7 +2143,13 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
                 wrapDragState.offY += dy;
                 wrapDragState.startX = e.touches[0].clientX;
                 wrapDragState.startY = e.touches[0].clientY;
-                updateTransform();
+                if (!wrapTouchRafPending) {
+                    wrapTouchRafPending = true;
+                    requestAnimationFrame(() => {
+                        wrapTouchRafPending = false;
+                        updateTransform();
+                    });
+                }
             }
         }, { passive: false });
 
