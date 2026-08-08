@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mantiq-cache-v2.2.15'; // bumped so existing installs pick up the fix
+const CACHE_NAME = 'mantiq-cache-v2.2.16'; // bumped so existing installs pick up the fix
 
 const urlsToCache = [
   './',
