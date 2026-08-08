@@ -69,13 +69,18 @@ function _permutationsFor(numVars) {
 // ─────────────────────────────────────────────────────────────────────────────
 const _circuitDB = new Map();
 
-function _reg(numVars, minterms, info) {
+function _reg(numVars, minterms, info, opts) {
     const key = `${numVars}:${_mintermKey(minterms)}`;
     // Multiple real circuits can share an identical truth table (e.g. a 2-var
     // XOR gate IS the Half Adder's Sum output - same minterms, different
     // role). Previously this .set() silently overwrote any earlier entry for
     // the same key, so only the last-registered circuit ever showed up.
     // Accumulate instead so recognizeCircuit() can surface every match.
+    // opts.exact marks circuits where swapping variables changes what's
+    // being claimed (A>B vs A<B are NOT the same circuit relabeled - they're
+    // opposite claims about the same two inputs). recognizeCircuit() only
+    // matches these against the literal, unpermuted variable order.
+    if (opts && opts.exact) info.__exactOrder = true;
     if (!_circuitDB.has(key)) _circuitDB.set(key, []);
     _circuitDB.get(key).push(info);
 }
@@ -321,7 +326,7 @@ _reg(2, [2], {
     canonicalExpr: "A > B  =  AB'",
     useCases: ['Priority encoder cell comparison', 'Building block for multi-bit magnitude comparators (74HC85)', 'Sorting network cells'],
     funFact: 'A full 2-bit magnitude comparator (comparing 2-bit numbers) requires three outputs: A>B, A=B, A<B. The equals output is XNOR, while greater/less-than are more complex.'
-});
+}, { exact: true });
 
 // A < B: minterm {1} = A'B
 _reg(2, [1], {
@@ -333,7 +338,7 @@ _reg(2, [1], {
     canonicalExpr: "A < B  =  A'B",
     useCases: ['Magnitude comparator sub-circuit', 'Priority logic', 'Min-finding circuits in hardware sorters'],
     funFact: 'Interestingly, A>B and A<B are complements of each other swapped: swap the inputs of one to get the other. This symmetry is exploited in efficient comparator IC designs.'
-});
+}, { exact: true });
 
 // A >= B: {0,2,3}
 _reg(2, [0,2,3], {
@@ -345,7 +350,7 @@ _reg(2, [0,2,3], {
     canonicalExpr: "A ≥ B  =  A + B'",
     useCases: ['Threshold comparators', 'Building blocks for multi-bit ≥ comparators', 'Priority circuits'],
     funFact: "A ≥ B is equivalent to the Boolean implication B→A (B implies A). Logic gates and logical implication share deep mathematical roots in Boolean algebra."
-});
+}, { exact: true });
 
 // A <= B: {0,1,3}
 _reg(2, [0,1,3], {
@@ -357,7 +362,7 @@ _reg(2, [0,1,3], {
     canonicalExpr: "A ≤ B  =  A' + B",
     useCases: ['Lower-bound checking', 'Comparator networks', 'Building multi-bit ≤ comparators'],
     funFact: "A ≤ B equals logical implication A→B (A implies B). Implication gates are fundamental in propositional logic and hardware description languages."
-});
+}, { exact: true });
 
 // ── SECTION 4: MAJORITY / MINORITY ──────────────────────────────────────────
 
@@ -696,7 +701,15 @@ function recognizeCircuit(numVars, minterms) {
         const key = `${numVars}:${_mintermKey(permuted)}`;
         const matches = _circuitDB.get(key);
         if (!matches) continue;
+        // perm is identity when perm[i] === i for every position - i.e. the
+        // variables weren't actually reordered to get this match.
+        const isIdentity = perm.every((oldPos, newPos) => oldPos === newPos);
         for (const info of matches) {
+            // Order-sensitive circuits (e.g. A>B) only mean what they claim
+            // under the literal input order. Only a swap turned this AB'
+            // into an A<B match too - without this check both would be
+            // reported for the same expression, which is contradictory.
+            if (info.__exactOrder && !isIdentity) continue;
             if (seen.has(info)) continue;
             seen.add(info);
             results.push(info);
