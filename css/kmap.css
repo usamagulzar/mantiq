@@ -372,6 +372,20 @@
    and the group boxes silently fail to render once you pan. */
 #kmap-wrap-svg-overlay { overflow: visible; }
 
+/* The tiled grid, its SVG loop overlay, and the floating row/col headers are
+   all re-translated on every drag frame while panning the wrap view. Hinting
+   will-change here lets the browser promote them to their own compositor
+   layers up front, so panning is a cheap GPU-composited move instead of a
+   layout/repaint of the whole (potentially large) tiled table on every
+   frame - this is what actually fixes drag lag, not just the JS-side
+   rAF batching. */
+#kmap-wrap-surface > div:nth-child(4),
+#kmap-wrap-svg-overlay,
+#wrap-top-header,
+#wrap-left-header {
+    will-change: transform;
+}
+
 
 /* No algebraic proof to switch to - there's nothing to toggle between, so
    the tab bar (and its "Algebraic Proof" pill) is hidden outright. When the
