@@ -548,6 +548,39 @@ function computeAntiOverlapShrinkGrid(boxes) {
             }
         }
     }
+
+    // --- Keep every fragment of the same wrapped group visually consistent ---
+    // A group that wraps around an edge is split into several rectangular
+    // pieces (see Pass 1 in drawSVGLoops), all sharing the same idx. The
+    // loop above only bumps whichever fragment actually collides with
+    // another group's edge, so a group with e.g. 4 corner fragments could
+    // end up with 1 shrunk corner and 3 full-size ones - same loop, visibly
+    // inconsistent border. Spread the largest per-side shrink found across
+    // all of a group's fragments so the whole loop reads as one uniform
+    // shape. This can't push a true wrap edge away from the map wall: wrap
+    // sides are always drawn flush with 0 padding regardless of this value
+    // (see padTop/padBottom/padLeft/padRight in drawSVGLoops).
+    const byGroup = new Map();
+    boxes.forEach((box, i) => {
+        if (!box) return;
+        if (!byGroup.has(box.idx)) byGroup.set(box.idx, []);
+        byGroup.get(box.idx).push(i);
+    });
+    byGroup.forEach(indices => {
+        if (indices.length <= 1) return;
+        const maxSide = { top: 0, bottom: 0, left: 0, right: 0 };
+        indices.forEach(i => {
+            for (const side of ['top', 'bottom', 'left', 'right']) {
+                maxSide[side] = Math.max(maxSide[side], extra[i][side]);
+            }
+        });
+        indices.forEach(i => {
+            for (const side of ['top', 'bottom', 'left', 'right']) {
+                extra[i][side] = maxSide[side];
+            }
+        });
+    });
+
     return extra;
 }
 
