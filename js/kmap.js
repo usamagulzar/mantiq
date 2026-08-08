@@ -2025,6 +2025,14 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
     const availW = wrapper.clientWidth;
     const availH = wrapper.clientHeight;
     
+    // +2 tiles is enough to cover the viewport itself, but a wrapped
+    // (cyclic) group's loop outline is deliberately drawn bleeding past its
+    // own tile's edge so it lines up with the next tile (see findCyclicRun
+    // below) - that bleed can be almost a full tile wide. Without an extra
+    // tile of headroom here, the trailing edge of the rendered buffer can
+    // scroll into view mid-pan with nothing behind it to bleed onto, which
+    // reads as the map suddenly jumping. +3 guarantees the bleed (always
+    // < 1 tile) always lands on real tile content.
     const tilesX = Math.ceil(availW / w) + 3;
     const tilesY = Math.ceil(availH / h) + 3;
     
@@ -2054,6 +2062,17 @@ function renderWrapKMap(numVars, variables, minterms, dontCares, activeSolution,
     headerHtml += `</div>`;
 
     wrapSurface.innerHTML = headerHtml + surfaceHtml;
+
+    // The SVG lives outside #kmap-wrap-surface in the static markup so the
+    // innerHTML rebuild above doesn't wipe it - but that makes it a sibling
+    // stacking context (both have their own `transform`) that paints above
+    // the *whole* surface on DOM order alone, including the headers' own
+    // z-index 20/30. Re-parent the same node (not a new one - appendChild
+    // on an existing node just moves it) back into the surface so it's
+    // ordered by z-index against the headers instead of by DOM order
+    // against the surface as a whole: cells (unpositioned) < loops
+    // (position:absolute, z-index:auto) < headers (z-index 20/30).
+    wrapSurface.appendChild(wrapSvg);
 
     const updateTransform = () => {
         let tx = wrapDragState.offX % w;
