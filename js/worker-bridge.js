@@ -254,7 +254,11 @@ const Module = {
                     });
                 }
                 if (typeof _exprDebounceTimeout !== 'undefined' && _exprDebounceTimeout) clearTimeout(_exprDebounceTimeout);
-                _exprDebounceTimeout = setTimeout(() => {
+                // KMap (2) and Truth Table (3) views need to reflect every keystroke
+                // immediately — debouncing them makes the grid feel laggy/stale while
+                // typing. Skip the debounce delay for those views only.
+                const _isLiveGridView = (_state.currentView === 2 || _state.currentView === 3);
+                const _runExpressionUpdate = () => {
                     _workerWriteCall('_setExpressionAndSnapshot', [expr]);
                     if (_proofTimeout) clearTimeout(_proofTimeout);
                     if (expr.trim() !== '' && !_isShorthandInput(expr)) {
@@ -263,7 +267,12 @@ const Module = {
                             _workerWriteCall('_runProofAndSnapshot', []);
                         }, 300);
                     }
-                }, 60);
+                };
+                if (_isLiveGridView) {
+                    _runExpressionUpdate();
+                } else {
+                    _exprDebounceTimeout = setTimeout(_runExpressionUpdate, 60);
+                }
                 return undefined;
             }
 
