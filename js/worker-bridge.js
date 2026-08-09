@@ -189,15 +189,55 @@ function _clearComputedState() {
  * eventually replies. The seq is passed to the worker so it can also skip
  * building the snapshot if a newer request already arrived.
  */
-function _workerWriteCall(fn, args, view) {
+function _workerWriteCall(fn, args, view, onDone) {
     const seq = ++_latestSeq;
     const id  = _nextId++;
-    _pending.set(id, { resolve: () => {}, reject: () => {} });
+    _pending.set(id, {
+        resolve: () => { if (onDone) onDone(); },
+        reject:  () => { if (onDone) onDone(); }
+    });
     // buildSnapshot() in the worker only marshals the heavy field(s) that `view`
     // needs (defaults to whatever view is currently on screen) — no point paying
     // for KMap/TruthTable/Circuit/Verilog JSON on every keystroke if none of
     // those views are visible.
     _worker.postMessage({ id, fn, args: args || [], seq, view: view !== undefined ? view : _state.currentView, addTestbenchGate: _state.addTestbenchGate, addTestbenchDataflow: _state.addTestbenchDataflow });
+}
+
+/**
+ * Coalesced dispatch for _setExpressionAndSnapshot: guarantees at most one
+ * is ever in flight in the worker. The worker processes messages strictly
+ * in order and each _setExpressionAndSnapshot re-runs full Quine-McCluskey
+ * synchronously — so firing one on every keystroke/click (e.g. for the live
+ * KMap/Truth Table views) can queue up a backlog of already-obsolete
+ * recomputes that the worker has to fully grind through before it even
+ * starts on the latest one, making the view look stuck.
+ *
+ * Extra requests that arrive while one is running don't queue up — they
+ * just mark that one more pass is needed, using whatever _state.expression
+ * is by the time the in-flight one completes.
+ */
+let _exprComputeInFlight = false;
+let _exprComputeQueued   = false;
+
+function _onExprComputeDone() {
+    _exprComputeInFlight = false;
+    if (_exprComputeQueued) {
+        _exprComputeQueued = false;
+        _dispatchExprComputeNow();
+    }
+}
+
+function _dispatchExprComputeNow() {
+    _exprComputeInFlight = true;
+    _workerWriteCall('_setExpressionAndSnapshot', [_state.expression], undefined, _onExprComputeDone);
+}
+
+function _requestExprCompute() {
+    if (_exprComputeInFlight) {
+        _exprComputeQueued = true;
+    } else {
+        _dispatchExprComputeNow();
+    }
 }
 
 /** Fire a regular (non-snapshot) call to the worker. */
@@ -269,7 +309,14 @@ const Module = {
                     }
                 };
                 if (_isLiveGridView) {
-                    _runExpressionUpdate();
+                    if (_proofTimeout) clearTimeout(_proofTimeout);
+                    if (expr.trim() !== '' && !_isShorthandInput(expr)) {
+                        window._proofStartTime = Date.now();
+                        _proofTimeout = setTimeout(() => {
+                            _workerWriteCall('_runProofAndSnapshot', []);
+                        }, 300);
+                    }
+                    _requestExprCompute();
                 } else {
                     _exprDebounceTimeout = setTimeout(_runExpressionUpdate, 60);
                 }
