@@ -1,7 +1,7 @@
 {
-  "name": "Mantiq - Turn Your Logic into Life",
+  "name": "Mantiq - K-Map Solver & Boolean Algebra Simplifier",
   "short_name": "Mantiq",
-  "description": "An advanced and intuitive logic circuit visualizer, simulator, and Boolean algebra solver. Master K-Maps, logic gates, Verilog, and beyond.",
+  "description": "A free K-Map solver, Boolean algebra simplifier, and truth table generator for Digital Logic Design (DLD) and Discrete Math. Master K-Maps, logic gates, Verilog, and beyond.",
   "start_url": "./",
   "display": "standalone",
   "orientation": "any",

@@ -6,13 +6,13 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' blob: data: https://www.google-analytics.com https://www.googletagmanager.com; worker-src 'self' blob:; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com;">
     
     <!-- PWA & Meta Tags -->
-    <meta name="description" content="Mantiq is a free online Boolean algebra simplifier and digital logic simulator. Instantly generate K-Maps, truth tables, circuit diagrams, and Verilog code from any logic expression — 100% offline in your browser.">
-    <meta name="keywords" content="boolean algebra simplifier, karnaugh map generator, k-map solver, truth table generator, logic circuit simulator, digital logic design, quine-mccluskey calculator, verilog generator, logic gate simulator, sop pos converter, boolean expression solver">
+    <meta name="description" content="Free online K-Map solver and Boolean algebra simplifier for Digital Logic Design (DLD) and Discrete Math. Instantly generate K-Maps, truth tables, circuit diagrams, and Verilog code from any logic expression — 100% offline in your browser.">
+    <meta name="keywords" content="k map solver, karnaugh map solver, karnaugh map generator, karnaugh map calculator, boolean algebra simplifier, boolean expression solver, boolean algebra calculator, truth table generator, digital logic design, dld kmap solver, dld boolean algebra, discrete math boolean algebra, discrete mathematics logic, propositional logic calculator, quine-mccluskey calculator, minterm maxterm calculator, sop pos converter, prime implicants calculator, logic gate simulator, logic circuit simulator, verilog generator, digital logic workbench">
     <meta name="author" content="Usama Gulzar">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#135494">
     <link rel="manifest" href="manifest.json">
-    <title>Mantiq – Free Boolean Algebra Simplifier, K-Map & Logic Circuit Simulator</title>
+    <title>K-Map Solver & Boolean Algebra Simplifier for DLD & Discrete Math | Mantiq</title>
 
     <!-- Icons -->
     <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
@@ -33,8 +33,8 @@
     <meta property="og:url" content="https://mantiq.usamagulzar.dev/">
     <meta property="og:site_name" content="Mantiq">
     <meta property="og:locale" content="en_US">
-    <meta property="og:title" content="Mantiq – Free Boolean Algebra Simplifier, K-Map & Logic Circuit Simulator">
-    <meta property="og:description" content="Simplify Boolean expressions and generate K-Maps, truth tables, circuit diagrams, and Verilog code instantly, right in your browser — free and offline-first.">
+    <meta property="og:title" content="K-Map Solver & Boolean Algebra Simplifier for DLD & Discrete Math | Mantiq">
+    <meta property="og:description" content="Free K-Map solver and Boolean algebra simplifier for Digital Logic Design and Discrete Math. Generate truth tables, circuit diagrams, and Verilog code instantly, right in your browser — free and offline-first.">
     <meta property="og:image" content="https://mantiq.usamagulzar.dev/banner.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
@@ -43,8 +43,8 @@
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://mantiq.usamagulzar.dev/">
-    <meta property="twitter:title" content="Mantiq – Free Boolean Algebra Simplifier, K-Map & Logic Circuit Simulator">
-    <meta property="twitter:description" content="Simplify Boolean expressions and generate K-Maps, truth tables, circuit diagrams, and Verilog code instantly, right in your browser — free and offline-first.">
+    <meta property="twitter:title" content="K-Map Solver & Boolean Algebra Simplifier for DLD & Discrete Math | Mantiq">
+    <meta property="twitter:description" content="Free K-Map solver and Boolean algebra simplifier for Digital Logic Design and Discrete Math. 100% offline, no signup.">
     <meta property="twitter:image" content="https://mantiq.usamagulzar.dev/banner.jpg">
     <meta property="twitter:image:alt" content="Mantiq digital logic workbench showing a simplified Boolean expression, Karnaugh map, and circuit diagram">
 
@@ -56,7 +56,7 @@
       "name": "Mantiq",
       "alternateName": "Mantiq Logic Workbench",
       "url": "https://mantiq.usamagulzar.dev/",
-      "description": "An offline-first digital logic workbench that simplifies Boolean expressions and generates K-Maps, truth tables, circuit diagrams, and Verilog code in the browser.",
+      "description": "An offline-first digital logic workbench for Digital Logic Design (DLD) and Discrete Mathematics coursework. Simplifies Boolean expressions and generates K-Maps, truth tables, circuit diagrams, and Verilog code in the browser.",
       "applicationCategory": ["EducationalApplication", "DeveloperApplication"],
       "applicationSubCategory": "Digital Logic Design Tool",
       "operatingSystem": "Any (Web Browser)",
@@ -81,6 +81,64 @@
       },
       "softwareVersion": "2.0.0",
       "license": "https://github.com/usamagulzar/mantiq/blob/main/LICENSE"
+    }
+    </script>
+
+    <!-- Structured Data: FAQPage -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is a K-Map solver used for in Digital Logic Design (DLD)?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "A K-Map (Karnaugh Map) solver groups the 1s and 0s of a Boolean expression or truth table into a color-coded map to find the minimal Sum-of-Products or Product-of-Sums form. Mantiq solves K-Maps for 2 to 6 variables directly in your browser, matching the range typically covered in a Digital Logic Design (DLD) or Computer Engineering course."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How do I simplify a Boolean algebra expression for discrete math or DLD homework?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Type your expression using standard notation (e.g. AB + A'C) and Mantiq instantly minimizes it with the Quine-McCluskey algorithm, showing the simplified SOP/POS form plus a step-by-step algebraic proof naming every law used - the same laws taught in Discrete Mathematics and Digital Logic Design."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Is Mantiq useful for Discrete Mathematics, or only for Digital Logic Design?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Both. Boolean algebra, truth tables, and logic simplification are shared topics between Discrete Mathematics and DLD. Mantiq covers propositional-logic fundamentals (truth tables, simplification, canonical forms) as well as the hardware side (circuit diagrams, gate-level simulation, Verilog)."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can Mantiq generate a truth table from a Boolean expression or minterms?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Enter an expression or minterms/maxterms directly (e.g. m(1,2,3) or M(0,2,4)), and Mantiq generates the full truth table with minterm/maxterm indices, exportable as CSV."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Does Mantiq require an account or an internet connection?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "No. Mantiq runs entirely client-side with no backend, no account, and no telemetry. It's an installable Progressive Web App, so after your first visit it keeps working fully offline."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Can Mantiq export Verilog code from a Boolean expression?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. Once your expression is simplified, Mantiq generates ready-to-use gate-level and dataflow Verilog HDL, with an optional testbench, that you can copy or download."
+          }
+        }
+      ]
     }
     </script>
 
@@ -302,8 +360,8 @@
                 </svg>
             </div>
 
-            <h1 class="sr-only">Mantiq: Free Online Boolean Algebra Simplifier, Karnaugh Map (K-Map) Generator &amp; Digital Logic Circuit Simulator</h1>
-            <p class="sr-only">Type any Boolean expression, minterm list, or K-Map size to instantly get a simplified SOP/POS result, a step-by-step algebraic and Quine-McCluskey proof, an auto-generated Karnaugh map, a full truth table, an interactive simulated circuit diagram, and exportable gate-level or dataflow Verilog code — all free, offline-capable, and running entirely in your browser.</p>
+            <h1 class="sr-only">Mantiq: Free K-Map Solver &amp; Boolean Algebra Simplifier for Digital Logic Design (DLD) and Discrete Math</h1>
+            <p class="sr-only">Type any Boolean expression, minterm list, or K-Map size to instantly get a simplified SOP/POS result, a step-by-step algebraic and Quine-McCluskey proof, an auto-generated Karnaugh map, a full truth table, an interactive simulated circuit diagram, and exportable gate-level or dataflow Verilog code. Built for Digital Logic Design (DLD) and Discrete Mathematics coursework — free, offline-capable, and running entirely in your browser.</p>
 
             <div class="topbar-search-area">
                 <div class="input-row">
@@ -913,7 +971,7 @@
 
                 <div class="about-scroll">
                     <p class="about-lede">
-                        <b>Mantiq</b> is a free, offline digital logic workbench. It turns abstract Boolean algebra into interactive proofs, K-Maps, and live circuits that you can see, simplify, and simulate right in your browser.
+                        <b>Mantiq</b> is a free, offline digital logic workbench built for Digital Logic Design (DLD) and Discrete Mathematics coursework. It turns abstract Boolean algebra into interactive proofs, K-Maps, and live circuits that you can see, simplify, and simulate right in your browser.
                     </p>
 
                     <div class="about-badges">
@@ -998,7 +1056,7 @@
                     <div class="about-callout">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z"></path><path d="M6 12v5c0 1.66 2.5 3 6 3s6-1.34 6-3v-5"></path></svg>
                         <p>
-                            <b>Built for the classroom and beyond.</b> Whether you're checking homework, prepping for an exam, or prototyping a circuit, Mantiq makes digital logic intuitive and fast.
+                            <b>Built for the classroom and beyond.</b> Whether you're checking DLD or Discrete Math homework, prepping for an exam, or prototyping a circuit, Mantiq makes digital logic intuitive and fast.
                         </p>
                     </div>
 
