@@ -479,27 +479,11 @@ function compareNaturalJS(a, b) {
     return String(a).localeCompare(String(b));
 }
 
-window.formatInputSubscriptsNative = function(inputEl) {
-    if (!inputEl || !inputEl.value) return;
-    const oldVal = inputEl.value;
-    const oldPos = inputEl.selectionStart;
-    const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
-    const newVal = oldVal.replace(/([a-zA-Z])(\d)/g, (m, p1, p2) => {
-        return p1 + (subMap[p2] || p2);
-    });
-    if (newVal !== oldVal) {
-        inputEl.value = newVal;
-        try {
-            inputEl.setSelectionRange(oldPos, oldPos);
-        } catch (e) {}
-    }
-};
-
 window.formatSubscript = function(str) {
     if (!str || typeof str !== 'string') return '';
     const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
-    return str.replace(/([a-zA-Z])(\d)/g, (m, p1, p2) => {
-        return p1 + (subMap[p2] || p2);
+    return str.replace(/([a-zA-Z])(\d{1,2})(?!\d)/g, (m, p1, p2) => {
+        return p1 + p2.split('').map(d => subMap[d] || d).join('');
     });
 };
 
