@@ -402,9 +402,21 @@ window.formatInputSubscriptsNative = function(inputEl) {
     const oldVal = inputEl.value;
     const oldPos = inputEl.selectionStart;
     const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
-    const newVal = oldVal.replace(/([a-zA-Z])(\d{1,2})(?!\d)/g, (m, p1, p2) => {
+    const revMap = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9' };
+
+    // Live typing converts digits to subscript characters as soon as they're
+    // typed. If we only ever matched plain digits, a digit typed after an
+    // already-subscripted one (e.g. the "2" in "a12", typed after "1" was
+    // already turned into "₁") would no longer sit next to a plain digit or
+    // letter, so it could never join the same run. Un-subscript everything
+    // back to plain digits first, then re-run the formatter over the whole
+    // (now normalized) string so runs of any length re-merge correctly.
+    const normalized = oldVal.replace(/[₀₁₂₃₄₅₆₇₈₉]/g, d => revMap[d]);
+
+    const newVal = normalized.replace(/([a-zA-Z])(\d+)/g, (m, p1, p2) => {
         return p1 + p2.split('').map(d => subMap[d] || d).join('');
     });
+
     if (newVal !== oldVal) {
         inputEl.value = newVal;
         try {
@@ -482,7 +494,11 @@ function compareNaturalJS(a, b) {
 window.formatSubscript = function(str) {
     if (!str || typeof str !== 'string') return '';
     const subMap = { '0': '₀', '1': '₁', '2': '₂', '3': '₃', '4': '₄', '5': '₅', '6': '₆', '7': '₇', '8': '₈', '9': '₉' };
-    return str.replace(/([a-zA-Z])(\d{1,2})(?!\d)/g, (m, p1, p2) => {
+    const revMap = { '₀': '0', '₁': '1', '₂': '2', '₃': '3', '₄': '4', '₅': '5', '₆': '6', '₇': '7', '₈': '8', '₉': '9' };
+    // Normalize any pre-existing subscript digits back to plain digits first
+    // so a full run of any length (not just 1-2 digits) formats as one unit.
+    const normalized = str.replace(/[₀₁₂₃₄₅₆₇₈₉]/g, d => revMap[d]);
+    return normalized.replace(/([a-zA-Z])(\d+)/g, (m, p1, p2) => {
         return p1 + p2.split('').map(d => subMap[d] || d).join('');
     });
 };
