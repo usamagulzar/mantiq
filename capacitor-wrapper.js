@@ -21,9 +21,9 @@
         /* Prevent ugly web artifacts on Android/iOS (text selection, highlights) */
         @media (max-width: 768px) {
             body {
-                zoom: 0.85 !important;
-                width: 117.647vw !important;
-                height: 117.647dvh !important;
+                zoom: 0.90 !important;
+                width: 111.111vw !important;
+                height: 111.111dvh !important;
                 overflow: hidden !important;
                 -webkit-user-select: none !important;
                 user-select: none !important;
@@ -41,8 +41,8 @@
             body .kmap-panel.kmap-panel-fullscreen, 
             body .tt-panel.panel-fullscreen, 
             body .wave-panel.panel-fullscreen {
-                width: 117.647vw !important;
-                height: 117.647dvh !important;
+                width: 111.111vw !important;
+                height: 111.111dvh !important;
                 right: auto !important;
                 bottom: auto !important;
                 max-width: none !important;
@@ -54,7 +54,7 @@
 
     // 1b. Polyfill DOM Coordinates to fix double-scaling bugs caused by zoom
     if (window.innerWidth <= 768) {
-        const SCALE = 0.85;
+        const SCALE = 0.90;
 
         // Patch getBoundingClientRect
         const originalGBCR = Element.prototype.getBoundingClientRect;
@@ -244,7 +244,7 @@
         // Force the OS Status Bar to match our dark slate theme (immersive)
         if (StatusBar) {
             try {
-                StatusBar.setBackgroundColor({ color: '#0f172a' });
+                StatusBar.setBackgroundColor({ color: '#000000' });
                 // Make the icons light colored so they contrast with the dark background
                 StatusBar.setStyle({ style: 'DARK' }); 
                 // PREVENT the status bar from overlapping the webview (push it down)

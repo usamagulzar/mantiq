@@ -13,9 +13,9 @@ public class MainActivity extends BridgeActivity {
             getWindow().setDecorFitsSystemWindows(true);
         }
         
-        // Apply native 85% zoom at the Java engine level
+        // Apply native 90% zoom at the Java engine level
         android.webkit.WebView webView = this.bridge.getWebView();
-        webView.setInitialScale(85);
+        webView.setInitialScale(90);
         android.webkit.WebSettings settings = webView.getSettings();
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
