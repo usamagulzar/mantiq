@@ -8,25 +8,19 @@
 
     console.log('[Capacitor Wrapper] Initializing native intercepts...');
 
-    // Force clear old cache once so the new viewport scaling applies
-    if (!localStorage.getItem('mantiq_viewport_fixed_v3')) {
-        caches.delete('mantiq-cache-v2.2.16').then(() => {
-            localStorage.setItem('mantiq_viewport_fixed_v3', 'true');
-            window.location.reload(true);
-        });
-        return;
-    }
+
 
     // 1. Auto-hide Install App buttons & Apply true CSS Zoom
     const style = document.createElement('style');
-    style.textContent = `
-        #landing-install-app-btn, #pwa-install-btn { display: none !important; }
+    style.innerHTML = `
+        /* Hide PWA install buttons in native app */
+        .install-btn, .install-pwa-btn, #install-app-btn {
+            display: none !important;
+        }
+
+        /* Prevent ugly web artifacts on Android/iOS (text selection, highlights) */
         @media (max-width: 768px) {
             body {
-                zoom: 0.85 !important;
-                width: 117.647vw !important;
-                height: 117.647dvh !important;
-                overflow: hidden !important;
                 -webkit-user-select: none !important;
                 user-select: none !important;
                 -webkit-touch-callout: none !important;
@@ -36,6 +30,13 @@
             input, textarea, [contenteditable="true"] {
                 -webkit-user-select: auto !important;
                 user-select: auto !important;
+            }
+            #app-root {
+                padding-top: env(safe-area-inset-top, 0px) !important;
+                padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+                padding-left: env(safe-area-inset-left, 0px) !important;
+                padding-right: env(safe-area-inset-right, 0px) !important;
+                box-sizing: border-box !important;
             }
             body .modal-overlay, 
             body .rule-modal-overlay,
@@ -49,6 +50,11 @@
                 bottom: auto !important;
                 max-width: none !important;
                 max-height: none !important;
+                padding-top: env(safe-area-inset-top, 0px) !important;
+                padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+                padding-left: env(safe-area-inset-left, 0px) !important;
+                padding-right: env(safe-area-inset-right, 0px) !important;
+                box-sizing: border-box !important;
             }
         }
     `;
@@ -57,7 +63,6 @@
     // 1b. Polyfill DOM Coordinates to fix double-scaling bugs caused by zoom
     if (window.innerWidth <= 768) {
         const SCALE = 0.85;
-        document.documentElement.style.zoom = SCALE;
 
         // Patch getBoundingClientRect
         const originalGBCR = Element.prototype.getBoundingClientRect;
@@ -98,7 +103,7 @@
         vp.name = 'viewport';
         document.head.appendChild(vp);
     }
-    vp.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=auto');
+    vp.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover');
 
     // 2. Helper for Native Downloads
     const nativeDownload = async (filename, dataUrl) => {
@@ -210,7 +215,7 @@
                                 // Force standard layout sizing
                                 htmlContent = htmlContent.replace(
                                     /<meta name="viewport" content="[^"]*"\s*\/?>/,
-                                    '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=auto"/>'
+                                    '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"/>'
                                 );
 
                                 response = new Response(htmlContent, {
