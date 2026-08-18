@@ -9,9 +9,9 @@
     console.log('[Capacitor Wrapper] Initializing native intercepts...');
 
     // Force clear old cache once so the new viewport scaling applies
-    if (!localStorage.getItem('mantiq_viewport_fixed_v1')) {
+    if (!localStorage.getItem('mantiq_viewport_fixed_v2')) {
         caches.delete('mantiq-cache-v2.2.16').then(() => {
-            localStorage.setItem('mantiq_viewport_fixed_v1', 'true');
+            localStorage.setItem('mantiq_viewport_fixed_v2', 'true');
             window.location.reload(true);
         });
         return;
@@ -209,7 +209,7 @@
                                 // Force standard layout sizing
                                 htmlContent = htmlContent.replace(
                                     /<meta name="viewport" content="[^"]*"\s*\/?>/,
-                                    '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"/>'
+                                    '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=auto"/>'
                                 );
 
                                 response = new Response(htmlContent, {
