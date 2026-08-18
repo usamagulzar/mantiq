@@ -8,14 +8,7 @@
 
     console.log('[Capacitor Wrapper] Initializing native intercepts...');
 
-    // Force clear old cache once so the new viewport scaling applies
-    if (!localStorage.getItem('mantiq_viewport_fixed_v2')) {
-        caches.delete('mantiq-cache-v2.2.16').then(() => {
-            localStorage.setItem('mantiq_viewport_fixed_v2', 'true');
-            window.location.reload(true);
-        });
-        return;
-    }
+
 
     // 1. Auto-hide Install App buttons & Apply true CSS Zoom
     const style = document.createElement('style');

@@ -9,6 +9,12 @@ public class MainActivity extends BridgeActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
+        // Force the app to strictly sit within the system bars (Status & Navigation) natively.
+        // This prevents the WebView from bleeding underneath Android gestures/buttons.
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+            getWindow().setDecorFitsSystemWindows(true);
+        }
+        
         // Apply native 85% zoom at the Java engine level
         android.webkit.WebView webView = this.bridge.getWebView();
         webView.setInitialScale(85);
