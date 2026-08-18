@@ -361,7 +361,7 @@ function openPanelFullscreen(panelType) {
         if (screen.orientation && screen.orientation.addEventListener) {
             screen.orientation.addEventListener('change', _fsRefitHandler);
         }
-    
+    }
 }
 
 function closePanelFullscreen() {
