@@ -637,7 +637,15 @@ if (exportKmapPngBtn) {
         requestAnimationFrame(() => requestAnimationFrame(() => {
             html2canvas(kmapVisualWrapper, {
                 backgroundColor: bgColor,
-                scale: 2 // High res
+                scale: 2, // High res
+                ignoreElements: (el) => {
+                    return el.classList && (
+                        el.classList.contains('kmap-3d-controls') ||
+                        el.classList.contains('kmap-controls') ||
+                        el.classList.contains('kmap-fs-btn') ||
+                        el.classList.contains('zoom-btn-fullscreen')
+                    );
+                }
             }).then(canvas => {
                 // Add padding at the bottom specifically for the watermark
                 const finalCanvas = document.createElement('canvas');

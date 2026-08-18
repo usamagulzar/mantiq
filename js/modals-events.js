@@ -117,7 +117,10 @@ elements.altClose.addEventListener('click', () => elements.altPopup.style.displa
 // Expression status button — handles both share popup and error feedback click
 document.getElementById('expr-status-btn').addEventListener('click', function() {
     if (this.classList.contains('state-share')) {
-        const shareUrl = window.location.origin + window.location.pathname + '#expr=' + encodeURIComponent(elements.input.value.trim());
+        const origin = (window.location.origin.includes('localhost') || window.location.origin.includes('capacitor://')) 
+            ? 'https://mantiq.usamagulzar.dev' 
+            : window.location.origin;
+        const shareUrl = origin + window.location.pathname.replace(/\/$/, '') + '/#expr=' + encodeURIComponent(elements.input.value.trim());
         const linkInput = document.getElementById('share-link-input');
         const copyBtn = document.getElementById('share-copy-btn');
 
