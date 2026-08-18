@@ -21,6 +21,10 @@
         /* Prevent ugly web artifacts on Android/iOS (text selection, highlights) */
         @media (max-width: 768px) {
             body {
+                zoom: 0.85 !important;
+                width: 117.647vw !important;
+                height: 117.647dvh !important;
+                overflow: hidden !important;
                 -webkit-user-select: none !important;
                 user-select: none !important;
                 -webkit-touch-callout: none !important;
@@ -30,13 +34,6 @@
             input, textarea, [contenteditable="true"] {
                 -webkit-user-select: auto !important;
                 user-select: auto !important;
-            }
-            #app-root {
-                padding-top: env(safe-area-inset-top, 0px) !important;
-                padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-                padding-left: env(safe-area-inset-left, 0px) !important;
-                padding-right: env(safe-area-inset-right, 0px) !important;
-                box-sizing: border-box !important;
             }
             body .modal-overlay, 
             body .rule-modal-overlay,
@@ -50,11 +47,6 @@
                 bottom: auto !important;
                 max-width: none !important;
                 max-height: none !important;
-                padding-top: env(safe-area-inset-top, 0px) !important;
-                padding-bottom: env(safe-area-inset-bottom, 0px) !important;
-                padding-left: env(safe-area-inset-left, 0px) !important;
-                padding-right: env(safe-area-inset-right, 0px) !important;
-                box-sizing: border-box !important;
             }
         }
     `;
@@ -103,7 +95,7 @@
         vp.name = 'viewport';
         document.head.appendChild(vp);
     }
-    vp.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover');
+    vp.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=auto');
 
     // 2. Helper for Native Downloads
     const nativeDownload = async (filename, dataUrl) => {
@@ -215,7 +207,7 @@
                                 // Force standard layout sizing
                                 htmlContent = htmlContent.replace(
                                     /<meta name="viewport" content="[^"]*"\s*\/?>/,
-                                    '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"/>'
+                                    '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=auto"/>'
                                 );
 
                                 response = new Response(htmlContent, {
