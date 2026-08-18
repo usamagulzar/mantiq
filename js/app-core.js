@@ -155,10 +155,16 @@ elements.input.addEventListener('input', (e) => {
         clearTimeout(inputDebounceTimer);
     }
     
-    inputDebounceTimer = setTimeout(() => {
+    // Quick buttons insert KMAP(n), which shouldn't feel laggy with a debounce.
+    if (expr.toUpperCase().includes('KMAP')) {
         Module.ccall('mantiq_setExpression', null, ['string'], [expr]);
         updateFrontend();
-    }, 250);
+    } else {
+        inputDebounceTimer = setTimeout(() => {
+            Module.ccall('mantiq_setExpression', null, ['string'], [expr]);
+            updateFrontend();
+        }, 250);
+    }
 });
 
 elements.input.addEventListener('scroll', () => {
