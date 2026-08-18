@@ -8,7 +8,14 @@
 
     console.log('[Capacitor Wrapper] Initializing native intercepts...');
 
-
+    // Force clear old cache once so the new viewport scaling applies
+    if (!localStorage.getItem('mantiq_viewport_fixed_v3')) {
+        caches.delete('mantiq-cache-v2.2.16').then(() => {
+            localStorage.setItem('mantiq_viewport_fixed_v3', 'true');
+            window.location.reload(true);
+        });
+        return;
+    }
 
     // 1. Auto-hide Install App buttons & Apply true CSS Zoom
     const style = document.createElement('style');
@@ -50,6 +57,7 @@
     // 1b. Polyfill DOM Coordinates to fix double-scaling bugs caused by zoom
     if (window.innerWidth <= 768) {
         const SCALE = 0.85;
+        document.documentElement.style.zoom = SCALE;
 
         // Patch getBoundingClientRect
         const originalGBCR = Element.prototype.getBoundingClientRect;
@@ -90,7 +98,7 @@
         vp.name = 'viewport';
         document.head.appendChild(vp);
     }
-    vp.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover');
+    vp.setAttribute('content', 'width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=auto');
 
     // 2. Helper for Native Downloads
     const nativeDownload = async (filename, dataUrl) => {
