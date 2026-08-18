@@ -13,14 +13,6 @@ public class MainActivity extends BridgeActivity {
             getWindow().setDecorFitsSystemWindows(true);
         }
         
-        // Natively force status bar to black
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            getWindow().setStatusBarColor(android.graphics.Color.BLACK);
-            // Ensure icons are light
-            android.view.View decorView = getWindow().getDecorView();
-            decorView.setSystemUiVisibility(decorView.getSystemUiVisibility() & ~android.view.View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
-        }
-        
         // Apply native 90% zoom at the Java engine level
         android.webkit.WebView webView = this.bridge.getWebView();
         webView.setInitialScale(90);

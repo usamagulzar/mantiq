@@ -239,18 +239,7 @@
 
     // 6. Native Status Bar & Hardware Back Button Interceptor
     if (window.Capacitor && window.Capacitor.Plugins) {
-        const { App, StatusBar } = window.Capacitor.Plugins;
-
-        // Force the OS Status Bar to match our dark slate theme (immersive)
-        if (StatusBar) {
-            try {
-                StatusBar.setBackgroundColor({ color: '#000000' });
-                // Make the icons light colored so they contrast with the dark background
-                StatusBar.setStyle({ style: 'DARK' }); 
-                // PREVENT the status bar from overlapping the webview (push it down)
-                StatusBar.setOverlaysWebView({ overlay: false });
-            } catch (e) { console.warn('StatusBar not available', e); }
-        }
+        const { App } = window.Capacitor.Plugins;
 
         // Intercept Android Hardware/Gesture Back Button
         if (App) {
