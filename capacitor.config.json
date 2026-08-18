@@ -2,5 +2,12 @@
   "appId": "dev.usamagulzar.mantiq",
   "appName": "Mantiq",
   "webDir": "www",
-  "backgroundColor": "#ffffff"
+  "backgroundColor": "#ffffff",
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#000000",
+      "overlaysWebView": false
+    }
+  }
 }
