@@ -1,6 +1,7 @@
 // SVG Circuit Rendering
 // ==========================================================================
 
+let _lastCircuitJsonStr = null;
 function renderHTMLCircuit() {
     if (!wasmReady) return;
     const jsonStr = queryWasmString('mantiq_getCircuitJSON');
@@ -10,6 +11,9 @@ function renderHTMLCircuit() {
     const container = document.getElementById('svg-circuit-container');
     
     if (!origScroll || !simpScroll || !origPanel || !container) return;
+    
+    if (jsonStr === _lastCircuitJsonStr && origScroll.innerHTML.length > 0) return;
+    _lastCircuitJsonStr = jsonStr;
     
     if (!jsonStr) {
         origScroll.innerHTML = getLoadingOrEmptyMsg('No expression processed yet');
@@ -323,26 +327,15 @@ function openPanelFullscreen(panelType) {
 
     _fsPanelType = panelType;
 
-    // Clone the content into the fullscreen scroll area
+    // Move the content into the fullscreen scroll area instead of cloning
+    // for much faster transitions on complex circuits.
     fsScroll.innerHTML = '';
-    const clone = srcWrap.cloneNode(true);
+    srcWrap.setAttribute('data-original-parent', scrollId);
+    
     // Remove any leftover transform — we'll re-fit in a moment
-    clone.style.transition = 'none';
-    clone.style.transform  = '';
-    fsScroll.appendChild(clone);
-
-    // Re-enable pointer events on all sim-toggle elements inside clone
-    clone.querySelectorAll('.sim-toggle').forEach(el => {
-        el.style.pointerEvents = 'auto';
-        el.addEventListener('click', () => {
-            const varName = el.getAttribute('data-var');
-            if (varName && typeof toggleSimInput === 'function') {
-                toggleSimInput(varName);
-                // Rebuild fullscreen content after state change
-                requestAnimationFrame(() => _refreshFsContent());
-            }
-        });
-    });
+    srcWrap.style.transition = 'none';
+    srcWrap.style.transform  = '';
+    fsScroll.appendChild(srcWrap);
 
     // Show overlay
     overlay.style.display = 'flex';
@@ -368,31 +361,7 @@ function openPanelFullscreen(panelType) {
         if (screen.orientation && screen.orientation.addEventListener) {
             screen.orientation.addEventListener('change', _fsRefitHandler);
         }
-    }
-}
-
-function _refreshFsContent() {
-    if (!_fsPanelType) return;
-    const scrollId = _fsScrollId(_fsPanelType);
-    const srcScroll = document.getElementById(scrollId);
-    const srcWrap   = srcScroll ? srcScroll.querySelector('.zoom-content-wrapper') : null;
-    const fsScroll  = document.getElementById('panel-fs-scroll');
-    if (!srcWrap || !fsScroll) return;
-    const clone = srcWrap.cloneNode(true);
-    clone.style.transition = 'none';
-    clone.style.transform  = `translate3d(${_fsState.x}px, ${_fsState.y}px, 0) scale3d(${_fsState.scale}, ${_fsState.scale}, 1)`;
-    fsScroll.innerHTML = '';
-    fsScroll.appendChild(clone);
-    clone.querySelectorAll('.sim-toggle').forEach(el => {
-        el.style.pointerEvents = 'auto';
-        el.addEventListener('click', () => {
-            const varName = el.getAttribute('data-var');
-            if (varName && typeof toggleSimInput === 'function') {
-                toggleSimInput(varName);
-                requestAnimationFrame(() => _refreshFsContent());
-            }
-        });
-    });
+    
 }
 
 function closePanelFullscreen() {
@@ -401,7 +370,21 @@ function closePanelFullscreen() {
     // _exitFsLandscape();
     overlay.style.display = 'none';
     document.body.style.overflow = '';
-    document.getElementById('panel-fs-scroll').innerHTML = '';
+    const fsScroll = document.getElementById('panel-fs-scroll');
+    const movedWrap = fsScroll.firstElementChild;
+    if (movedWrap) {
+        const origId = movedWrap.getAttribute('data-original-parent');
+        if (origId) {
+            const origParent = document.getElementById(origId);
+            if (origParent) {
+                origParent.appendChild(movedWrap);
+                if (_fsPanelType) {
+                    applyZoom(_fsPanelType, false);
+                }
+            }
+        }
+    }
+    fsScroll.innerHTML = '';
     _fsPanelType = null;
     _fsDragging  = false;
     _fsTouchDist = 0;
@@ -1030,7 +1013,11 @@ window.toggleSimInput = toggleSimInput; // Expose for events
 function updateSimulationColors(panelId, scrollElId) {
     const cache = _simLayoutCache[panelId];
     if (!cache) return false;
-    const scrollEl = document.getElementById(scrollElId);
+    let scrollEl = document.getElementById(scrollElId);
+    // If this panel is currently fullscreen, the active SVG is in panel-fs-scroll
+    if (_fsPanelType === (panelId === 'o' ? 'simOrig' : 'simSimp')) {
+        scrollEl = document.getElementById('panel-fs-scroll');
+    }
     if (!scrollEl || !scrollEl.querySelector('svg')) return false;
 
     const { root, posMap, dx, dy } = cache;
@@ -1130,6 +1117,7 @@ function evaluateSimLogic(node) {
     return false;
 }
 
+let _lastSimulationJsonStr = null;
 function renderHTMLSimulation(resetZoom = true) {
     const origSimScroll = document.getElementById('original-sim-scroll');
     const simpSimScroll = document.getElementById('simplified-sim-scroll');
@@ -1138,6 +1126,10 @@ function renderHTMLSimulation(resetZoom = true) {
     if (!origSimScroll || !simpSimScroll || !container) return;
     
     const jsonStr = queryWasmString('mantiq_getCircuitJSON');
+    
+    if (jsonStr === _lastSimulationJsonStr && origSimScroll.innerHTML.length > 0) return;
+    _lastSimulationJsonStr = jsonStr;
+    
     if (!jsonStr) {
         origSimScroll.innerHTML = getLoadingOrEmptyMsg('No expression processed yet');
         simpSimScroll.innerHTML = getLoadingOrEmptyMsg('No expression processed yet');
