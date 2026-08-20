@@ -719,27 +719,23 @@ if (exportKmapPngBtn) {
             let originalTransform = '';
             let p = null;
             
-                // Simplified: Just use the already drawn elements without unscaling/redrawing.
-                // We just need to ensure the wrapper bounds match the scaled grid so html2canvas doesn't clip it.
-                originalWrapperStyles = {
-                    width: kmapVisualWrapper.style.width,
-                    minWidth: kmapVisualWrapper.style.minWidth,
-                    height: kmapVisualWrapper.style.height,
-                    minHeight: kmapVisualWrapper.style.minHeight,
-                    display: kmapVisualWrapper.style.display
-                };
-                
-                const rect = gridContainer.getBoundingClientRect();
-                kmapVisualWrapper.style.width = rect.width + 'px';
-                kmapVisualWrapper.style.minWidth = rect.width + 'px';
-                kmapVisualWrapper.style.height = rect.height + 'px';
-                kmapVisualWrapper.style.minHeight = rect.height + 'px';
-                // temporarily disable flex centering so html2canvas origin is exact
-                kmapVisualWrapper.style.display = 'block';
-
+            const rect = gridContainer.getBoundingClientRect();
+            
             html2canvas(kmapVisualWrapper, {
                 backgroundColor: bgColor,
                 scale: 2, // High res
+                onclone: (clonedDoc) => {
+                    const clonedWrapper = clonedDoc.getElementById('kmap-visual-wrapper');
+                    if (clonedWrapper) {
+                        // Ensure the cloned wrapper bounds match the scaled grid exactly so html2canvas doesn't clip it
+                        clonedWrapper.style.width = rect.width + 'px';
+                        clonedWrapper.style.minWidth = rect.width + 'px';
+                        clonedWrapper.style.height = rect.height + 'px';
+                        clonedWrapper.style.minHeight = rect.height + 'px';
+                        // temporarily disable flex centering in the clone so origin is exact
+                        clonedWrapper.style.display = 'block';
+                    }
+                },
                 ignoreElements: (el) => {
                     return el.classList && (
                         el.classList.contains('kmap-3d-controls') ||
@@ -778,13 +774,6 @@ if (exportKmapPngBtn) {
                 console.error('Failed to export K-Map:', err);
                 showToast('Failed to export K-Map', 'error');
             }).finally(() => {
-                if (originalWrapperStyles) {
-                    kmapVisualWrapper.style.width = originalWrapperStyles.width;
-                    kmapVisualWrapper.style.minWidth = originalWrapperStyles.minWidth;
-                    kmapVisualWrapper.style.height = originalWrapperStyles.height;
-                    kmapVisualWrapper.style.minHeight = originalWrapperStyles.minHeight;
-                    kmapVisualWrapper.style.display = originalWrapperStyles.display;
-                }
                 finishExport();
             });
         }));
