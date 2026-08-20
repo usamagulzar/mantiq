@@ -16,6 +16,86 @@
 
     console.log('[Capacitor Wrapper] Initializing native intercepts...');
 
+    // ─── ON-SCREEN DEBUG LOG PANEL ───────────────────────────────────────────
+    // Floating panel that shows console output directly on screen for testing.
+    // Tap the "LOG" button (bottom-right) to toggle it open/closed.
+    (function setupLogPanel() {
+        const LOG_KEY = '__mantiq_log_panel_visible';
+        const logs = [];
+
+        // Create toggle button
+        const btn = document.createElement('div');
+        btn.id = '__log_btn';
+        btn.textContent = 'LOG';
+        btn.style.cssText = [
+            'position:fixed', 'bottom:80px', 'right:12px', 'z-index:2147483647',
+            'background:#1e40af', 'color:#fff', 'font-size:11px', 'font-weight:700',
+            'padding:6px 10px', 'border-radius:8px', 'cursor:pointer',
+            'font-family:monospace', 'box-shadow:0 2px 8px rgba(0,0,0,0.5)',
+            'user-select:none', '-webkit-user-select:none'
+        ].join(';');
+
+        // Create panel
+        const panel = document.createElement('div');
+        panel.id = '__log_panel';
+        const visible = sessionStorage.getItem(LOG_KEY) === '1';
+        panel.style.cssText = [
+            'position:fixed', 'bottom:120px', 'right:8px', 'left:8px',
+            'max-height:40vh', 'z-index:2147483646',
+            'background:rgba(0,0,0,0.88)', 'color:#d1fae5',
+            'font-size:10px', 'font-family:monospace',
+            'border-radius:10px', 'overflow-y:auto',
+            'padding:8px', 'box-shadow:0 4px 16px rgba(0,0,0,0.7)',
+            'display:' + (visible ? 'block' : 'none')
+        ].join(';');
+
+        const addEntry = (level, args) => {
+            const text = args.map(a => {
+                try { return typeof a === 'object' ? JSON.stringify(a) : String(a); }
+                catch(e) { return String(a); }
+            }).join(' ');
+            logs.push({ level, text });
+            if (logs.length > 200) logs.shift();
+
+            const line = document.createElement('div');
+            line.style.cssText = 'padding:1px 0;border-bottom:1px solid rgba(255,255,255,0.05);word-break:break-all;';
+            const colors = { log: '#d1fae5', warn: '#fde68a', error: '#fca5a5' };
+            line.style.color = colors[level] || '#d1fae5';
+            const now = new Date();
+            const ts = `${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+            line.textContent = `[${ts}] ${text}`;
+            panel.appendChild(line);
+            panel.scrollTop = panel.scrollHeight;
+        };
+
+        // Intercept console methods
+        ['log', 'warn', 'error'].forEach(level => {
+            const orig = console[level].bind(console);
+            console[level] = (...args) => {
+                orig(...args);
+                addEntry(level, args);
+            };
+        });
+
+        btn.addEventListener('click', () => {
+            const isVisible = panel.style.display !== 'none';
+            panel.style.display = isVisible ? 'none' : 'block';
+            sessionStorage.setItem(LOG_KEY, isVisible ? '0' : '1');
+            if (!isVisible) panel.scrollTop = panel.scrollHeight;
+        });
+
+        // Mount after DOM is ready
+        const mount = () => {
+            document.body.appendChild(btn);
+            document.body.appendChild(panel);
+        };
+        if (document.body) mount();
+        else document.addEventListener('DOMContentLoaded', mount);
+    })();
+    // ─────────────────────────────────────────────────────────────────────────
+
+
+
 
 
     // 1. Auto-hide Install App buttons & Apply true CSS Zoom
