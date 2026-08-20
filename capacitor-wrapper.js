@@ -5,6 +5,14 @@
 
 (function initCapacitorWrapper() {
     if (!window.Capacitor || !window.Capacitor.isNativePlatform()) return;
+    
+    if (window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater) {
+        window.Capacitor.Plugins.CapacitorUpdater.notifyAppReady().then(() => {
+            console.log('[Capacitor Wrapper] Capgo App Ready Notified!');
+        }).catch(e => {
+            console.warn('[Capacitor Wrapper] notifyAppReady failed', e);
+        });
+    }
 
     console.log('[Capacitor Wrapper] Initializing native intercepts...');
 
@@ -169,15 +177,6 @@
     const checkUpdates = async () => {
         try {
             console.log('[Capacitor Wrapper] Checking for remote updates...');
-            
-            if (window.Capacitor && window.Capacitor.Plugins.CapacitorUpdater) {
-                try {
-                    await window.Capacitor.Plugins.CapacitorUpdater.notifyAppReady();
-                    console.log('[Capacitor Wrapper] Capgo App Ready Notified!');
-                } catch(e) {
-                    console.warn('[Capacitor Wrapper] notifyAppReady failed', e);
-                }
-            }
             
             const remoteSw = await fetch('https://mantiq.usamagulzar.dev/sw.js?t=' + Date.now()).then(r => r.text());
             
