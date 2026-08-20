@@ -184,7 +184,7 @@
             if (!remoteVersionMatch) return;
             
             const remoteVersion = remoteVersionMatch[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.24';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.25';
             
             if (remoteVersion !== localVersion) {
                 console.log(`[Capacitor Wrapper] Update found! Downloading ${remoteVersion} via Capgo...`);
@@ -193,7 +193,7 @@
                     const { CapacitorUpdater } = window.Capacitor.Plugins;
                     try {
                         const version = await CapacitorUpdater.download({
-                            url: 'https://mantiq.usamagulzar.dev/update.zip',
+                            url: 'https://mantiq.usamagulzar.dev/update.zip?t=' + Date.now(),
                             version: remoteVersion
                         });
                         console.log('[Capacitor Wrapper] Update downloaded natively. Setting as active...');
