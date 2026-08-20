@@ -178,57 +178,25 @@
             const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.20';
             
             if (remoteVersion !== localVersion) {
-                console.log(`[Capacitor Wrapper] Update found! Downloading ${remoteVersion}...`);
+                console.log(`[Capacitor Wrapper] Update found! Downloading ${remoteVersion} via Capgo...`);
                 
-                const urlsMatch = remoteSw.match(/const\s+urlsToCache\s*=\s*\[([\s\S]*?)\];/);
-                if (!urlsMatch) return;
-                
-                const rawUrls = urlsMatch[1].split('\n')
-                    .map(line => line.trim())
-                    .filter(line => line.startsWith("'") || line.startsWith('"'))
-                    .map(line => line.replace(/['",]/g, ''));
-                    
-                // Use the currently active local cache so updates take effect immediately
-                const cache = await caches.open('mantiq-cache-v2.2.20');
-                
-                for (const url of rawUrls) {
+                if (window.Capacitor && window.Capacitor.Plugins.CapacitorUpdater) {
+                    const { CapacitorUpdater } = window.Capacitor.Plugins;
                     try {
-                        const remoteUrl = 'https://mantiq.usamagulzar.dev/' + url.replace('./', '');
-                        let response = await fetch(remoteUrl);
-                        
-                        if (response.ok) {
-                            // If it's index.html, inject our wrapper script!
-                            if (url === './index.html' || url === './') {
-                                let htmlContent = await response.text();
-                                // Inject before </body>
-                                if (htmlContent.includes('</body>')) {
-                                    htmlContent = htmlContent.replace('</body>', '<script src="js/capacitor-wrapper.js"></script></body>');
-                                } else {
-                                    htmlContent += '<script src="js/capacitor-wrapper.js"></script>';
-                                }
-
-                                // Force standard layout sizing
-                                htmlContent = htmlContent.replace(
-                                    /<meta name="viewport" content="[^"]*"\s*\/?>/,
-                                    '<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=auto"/>'
-                                );
-
-                                response = new Response(htmlContent, {
-                                    headers: response.headers,
-                                    status: response.status,
-                                    statusText: response.statusText
-                                });
-                            }
-                            
-                            await cache.put(new Request(url), response);
-                        }
+                        const version = await CapacitorUpdater.download({
+                            url: 'https://mantiq.usamagulzar.dev/update.zip',
+                            version: remoteVersion
+                        });
+                        console.log('[Capacitor Wrapper] Update downloaded natively. Setting as active...');
+                        await CapacitorUpdater.set({ id: version.id });
+                        localStorage.setItem('mantiq_app_version', remoteVersion);
+                        // The app will restart automatically after set()
                     } catch (err) {
-                        console.warn(`[Capacitor Wrapper] Failed to cache ${url}:`, err);
+                        console.error('[Capacitor Wrapper] Capgo download failed:', err);
                     }
+                } else {
+                    console.log('[Capacitor Wrapper] Capgo not found. PWA or missing plugin.');
                 }
-                
-                localStorage.setItem('mantiq_app_version', remoteVersion);
-                console.log('[Capacitor Wrapper] Update downloaded and cached. It will be applied on the next launch.');
             } else {
                 console.log('[Capacitor Wrapper] App is up to date.');
             }

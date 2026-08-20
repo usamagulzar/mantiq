@@ -72,3 +72,9 @@ if (fs.existsSync(indexPath)) {
 }
 
 console.log('Build complete. Files copied to www/ and Capacitor wrapper injected.');
+
+const AdmZip = require('adm-zip');
+const zip = new AdmZip();
+zip.addLocalFolder(destDir);
+zip.writeZip(path.join(__dirname, 'update.zip'));
+console.log('Created update.zip for Capgo auto-updater.');
