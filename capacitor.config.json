@@ -2,5 +2,10 @@
   "appId": "dev.usamagulzar.mantiq",
   "appName": "Mantiq",
   "webDir": "www",
-  "backgroundColor": "#ffffff"
+  "backgroundColor": "#ffffff",
+  "plugins": {
+    "CapacitorUpdater": {
+      "autoUpdate": false
+    }
+  }
 }
