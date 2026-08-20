@@ -256,41 +256,56 @@
     // 4. Background Updater
     const checkUpdates = async () => {
         try {
-            console.log('[Capacitor Wrapper] Checking for remote updates...');
-            
-            const remoteSw = await fetch('https://mantiq.usamagulzar.dev/sw.js?t=' + Date.now()).then(r => r.text());
-            
-            const remoteVersionMatch = remoteSw.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
-            if (!remoteVersionMatch) return;
-            
-            const remoteVersion = remoteVersionMatch[1];
+            // Step 1: Fetch remote sw.js
+            console.log('[Updater] Step 1: Fetching sw.js...');
+            let remoteSw;
+            try {
+                const res = await fetch('https://mantiq.usamagulzar.dev/sw.js?t=' + Date.now());
+                remoteSw = await res.text();
+                console.log('[Updater] Step 1 OK — got ' + remoteSw.length + ' bytes');
+            } catch (fetchErr) {
+                const msg = fetchErr ? (fetchErr.message || JSON.stringify(fetchErr) || String(fetchErr)) : 'unknown';
+                console.error('[Updater] Step 1 FAILED (fetch): ' + msg);
+                return;
+            }
+
+            // Step 2: Parse version and compare
+            const match = remoteSw.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
+            if (!match) { console.warn('[Updater] Step 2: Could not parse version from sw.js'); return; }
+            const remoteVersion = match[1];
             const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.28';
-            
-            if (remoteVersion !== localVersion) {
-                console.log(`[Capacitor Wrapper] Update found! Downloading ${remoteVersion} via Capgo...`);
-                
-                if (window.Capacitor && window.Capacitor.Plugins.CapacitorUpdater) {
-                    const { CapacitorUpdater } = window.Capacitor.Plugins;
-                    try {
-                        const version = await CapacitorUpdater.download({
-                            url: 'https://mantiq.usamagulzar.dev/update.zip?t=' + Date.now(),
-                            version: remoteVersion
-                        });
-                        console.log('[Capacitor Wrapper] Update downloaded natively. Setting as active...');
-                        localStorage.setItem('mantiq_app_version', remoteVersion);
-                        await CapacitorUpdater.set({ id: version.id });
-                        // The app will restart automatically after set()
-                    } catch (err) {
-                        console.error('[Capacitor Wrapper] Capgo download failed:', err);
-                    }
-                } else {
-                    console.log('[Capacitor Wrapper] Capgo not found. PWA or missing plugin.');
+            console.log('[Updater] Step 2: remote=' + remoteVersion + ' | local=' + localVersion);
+
+            if (remoteVersion === localVersion) {
+                console.log('[Updater] Already up to date!');
+                return;
+            }
+
+            // Step 3: Download update
+            console.log('[Updater] Step 3: Update found! Downloading...');
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater) {
+                const { CapacitorUpdater } = window.Capacitor.Plugins;
+                try {
+                    console.log('[Updater] Step 3a: Calling CapacitorUpdater.download()...');
+                    const version = await CapacitorUpdater.download({
+                        url: 'https://mantiq.usamagulzar.dev/update.zip?t=' + Date.now(),
+                        version: remoteVersion
+                    });
+                    console.log('[Updater] Step 3b: Download done! id=' + (version && version.id));
+                    localStorage.setItem('mantiq_app_version', remoteVersion);
+                    console.log('[Updater] Step 3c: Calling CapacitorUpdater.set() to apply...');
+                    await CapacitorUpdater.set({ id: version.id });
+                    // App will restart automatically after set()
+                } catch (dlErr) {
+                    const msg = dlErr ? (dlErr.message || JSON.stringify(dlErr) || String(dlErr)) : 'unknown';
+                    console.error('[Updater] Step 3 FAILED (download/set): ' + msg);
                 }
             } else {
-                console.log('[Capacitor Wrapper] App is up to date.');
+                console.warn('[Updater] CapacitorUpdater plugin not available');
             }
         } catch (e) {
-            console.error('[Capacitor Wrapper] Failed to check for updates', e);
+            const msg = e ? (e.message || JSON.stringify(e) || String(e)) : 'unknown';
+            console.error('[Updater] Outer catch: ' + msg);
         }
     };
 
