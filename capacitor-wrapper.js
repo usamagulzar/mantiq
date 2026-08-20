@@ -256,16 +256,20 @@
     // 4. Background Updater
     const checkUpdates = async () => {
         try {
-            // Step 1: Fetch remote sw.js
-            console.log('[Updater] Step 1: Fetching sw.js...');
+            // Step 1: Fetch remote sw.js via NATIVE http (bypasses Service Worker & WebView restrictions)
+            console.log('[Updater] Step 1: Fetching sw.js (native)...');
             let remoteSw;
             try {
-                const res = await fetch('https://raw.githubusercontent.com/usamagulzar/mantiq/main/sw.js?t=' + Date.now());
-                remoteSw = await res.text();
-                console.log('[Updater] Step 1 OK — got ' + remoteSw.length + ' bytes');
+                const { CapacitorHttp } = window.Capacitor.Plugins;
+                if (!CapacitorHttp) throw new Error('CapacitorHttp not available');
+                const response = await CapacitorHttp.get({
+                    url: 'https://raw.githubusercontent.com/usamagulzar/mantiq/main/sw.js?t=' + Date.now()
+                });
+                remoteSw = response.data;
+                console.log('[Updater] Step 1 OK — got ' + (remoteSw && remoteSw.length) + ' bytes');
             } catch (fetchErr) {
                 const msg = fetchErr ? (fetchErr.message || JSON.stringify(fetchErr) || String(fetchErr)) : 'unknown';
-                console.error('[Updater] Step 1 FAILED (fetch): ' + msg);
+                console.error('[Updater] Step 1 FAILED: ' + msg);
                 return;
             }
 
