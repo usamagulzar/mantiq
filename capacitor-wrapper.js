@@ -184,7 +184,7 @@
             if (!remoteVersionMatch) return;
             
             const remoteVersion = remoteVersionMatch[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.25';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.26';
             
             if (remoteVersion !== localVersion) {
                 console.log(`[Capacitor Wrapper] Update found! Downloading ${remoteVersion} via Capgo...`);
@@ -215,7 +215,9 @@
     };
 
     // Run updater after a short delay
+    // Run checkUpdates immediately, and then every 1 minute as requested
     setTimeout(checkUpdates, 2000);
+    setInterval(checkUpdates, 60000);
 
     // 6. Native Status Bar & Hardware Back Button Interceptor
     if (window.Capacitor && window.Capacitor.Plugins) {
