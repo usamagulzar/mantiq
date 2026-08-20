@@ -260,7 +260,7 @@
             console.log('[Updater] Step 1: Fetching sw.js...');
             let remoteSw;
             try {
-                const res = await fetch('https://mantiq.usamagulzar.dev/sw.js?t=' + Date.now());
+                const res = await fetch('https://raw.githubusercontent.com/usamagulzar/mantiq/main/sw.js?t=' + Date.now());
                 remoteSw = await res.text();
                 console.log('[Updater] Step 1 OK — got ' + remoteSw.length + ' bytes');
             } catch (fetchErr) {
@@ -288,7 +288,7 @@
                 try {
                     console.log('[Updater] Step 3a: Calling CapacitorUpdater.download()...');
                     const version = await CapacitorUpdater.download({
-                        url: 'https://mantiq.usamagulzar.dev/update.zip?t=' + Date.now(),
+                        url: 'https://raw.githubusercontent.com/usamagulzar/mantiq/main/update.zip?t=' + Date.now(),
                         version: remoteVersion
                     });
                     console.log('[Updater] Step 3b: Download done! id=' + (version && version.id));
