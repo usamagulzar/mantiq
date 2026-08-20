@@ -135,9 +135,17 @@ window.onMantiqInit = function() {
             const mantiqCache = keys.find(k => k.startsWith('mantiq-cache-v'));
             if (mantiqCache) {
                 const ver = mantiqCache.replace('mantiq-cache-', '');
+                const updateBadge = (b) => {
+                    b.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"></path><path d="m2 17 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path></svg> Version ${ver}`;
+                };
                 const badge = document.getElementById('app-version-badge');
                 if (badge) {
-                    badge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"></path><path d="m2 17 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path></svg> Version ${ver}`;
+                    updateBadge(badge);
+                } else {
+                    // Fallback for old APKs where index.html is intercepted natively and misses the ID
+                    document.querySelectorAll('.about-badge').forEach(b => {
+                        if (b.textContent.includes('Version ')) updateBadge(b);
+                    });
                 }
             }
         }).catch(err => console.warn('[AppCore] Could not read caches for version badge', err));

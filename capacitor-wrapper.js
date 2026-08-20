@@ -175,7 +175,7 @@
             if (!remoteVersionMatch) return;
             
             const remoteVersion = remoteVersionMatch[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.19';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.20';
             
             if (remoteVersion !== localVersion) {
                 console.log(`[Capacitor Wrapper] Update found! Downloading ${remoteVersion}...`);
@@ -189,7 +189,7 @@
                     .map(line => line.replace(/['",]/g, ''));
                     
                 // Use the currently active local cache so updates take effect immediately
-                const cache = await caches.open('mantiq-cache-v2.2.19');
+                const cache = await caches.open('mantiq-cache-v2.2.20');
                 
                 for (const url of rawUrls) {
                     try {
