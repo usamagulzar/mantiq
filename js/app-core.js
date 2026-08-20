@@ -719,14 +719,28 @@ if (exportKmapPngBtn) {
             let originalTransform = '';
             let p = null;
             
+            let originalWrapperStyles = null;
             if (gridContainer && gridContainer.style.display !== 'none' && svgOverlay && typeof _lastSVGDrawParams !== 'undefined' && _lastSVGDrawParams) {
                 p = _lastSVGDrawParams;
                 originalTransform = gridContainer.style.transform;
                 gridContainer.style.transform = 'scale(1)';
-                void gridContainer.offsetWidth;
+                void gridContainer.offsetWidth; // flush
                 
-                svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
-                svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
+                // html2canvas captures kmapVisualWrapper, but if we unscale the grid, the grid overflows the wrapper.
+                // We must unconstrain the wrapper so it fully contains the unscaled grid for the snapshot.
+                originalWrapperStyles = {
+                    width: kmapVisualWrapper.style.width,
+                    height: kmapVisualWrapper.style.height,
+                    overflow: kmapVisualWrapper.style.overflow
+                };
+                const gw = gridContainer.scrollWidth;
+                const gh = gridContainer.scrollHeight;
+                kmapVisualWrapper.style.width = gw + 'px';
+                kmapVisualWrapper.style.height = gh + 'px';
+                kmapVisualWrapper.style.overflow = 'visible';
+                
+                svgOverlay.setAttribute('width', gw);
+                svgOverlay.setAttribute('height', gh);
                 svgOverlay.innerHTML = '';
                 
                 if (typeof drawSVGLoops === 'function') {
@@ -781,6 +795,12 @@ if (exportKmapPngBtn) {
                 console.error('Failed to export K-Map:', err);
                 showToast('Failed to export K-Map', 'error');
             }).finally(() => {
+                if (originalWrapperStyles) {
+                    kmapVisualWrapper.style.width = originalWrapperStyles.width;
+                    kmapVisualWrapper.style.height = originalWrapperStyles.height;
+                    kmapVisualWrapper.style.overflow = originalWrapperStyles.overflow;
+                }
+                
                 if (p && gridContainer && originalTransform) {
                     gridContainer.style.transform = originalTransform;
                     void gridContainer.offsetWidth;

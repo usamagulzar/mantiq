@@ -175,7 +175,7 @@
             if (!remoteVersionMatch) return;
             
             const remoteVersion = remoteVersionMatch[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.20';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.21';
             
             if (remoteVersion !== localVersion) {
                 console.log(`[Capacitor Wrapper] Update found! Downloading ${remoteVersion} via Capgo...`);
