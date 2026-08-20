@@ -169,13 +169,23 @@
     const checkUpdates = async () => {
         try {
             console.log('[Capacitor Wrapper] Checking for remote updates...');
+            
+            if (window.Capacitor && window.Capacitor.Plugins.CapacitorUpdater) {
+                try {
+                    await window.Capacitor.Plugins.CapacitorUpdater.notifyAppReady();
+                    console.log('[Capacitor Wrapper] Capgo App Ready Notified!');
+                } catch(e) {
+                    console.warn('[Capacitor Wrapper] notifyAppReady failed', e);
+                }
+            }
+            
             const remoteSw = await fetch('https://mantiq.usamagulzar.dev/sw.js?t=' + Date.now()).then(r => r.text());
             
             const remoteVersionMatch = remoteSw.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
             if (!remoteVersionMatch) return;
             
             const remoteVersion = remoteVersionMatch[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.21';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.22';
             
             if (remoteVersion !== localVersion) {
                 console.log(`[Capacitor Wrapper] Update found! Downloading ${remoteVersion} via Capgo...`);
