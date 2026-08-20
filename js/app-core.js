@@ -719,40 +719,23 @@ if (exportKmapPngBtn) {
             let originalTransform = '';
             let p = null;
             
-            let originalWrapperStyles = null;
-            if (gridContainer && gridContainer.style.display !== 'none' && svgOverlay && typeof _lastSVGDrawParams !== 'undefined' && _lastSVGDrawParams) {
-                p = _lastSVGDrawParams;
-                originalTransform = gridContainer.style.transform;
-                gridContainer.style.transform = 'scale(1)';
-                void gridContainer.offsetWidth; // flush
-                
-                // html2canvas captures kmapVisualWrapper, but if we unscale the grid, the grid overflows the wrapper.
-                // We must unconstrain the wrapper so it fully contains the unscaled grid for the snapshot.
+                // Simplified: Just use the already drawn elements without unscaling/redrawing.
+                // We just need to ensure the wrapper bounds match the scaled grid so html2canvas doesn't clip it.
                 originalWrapperStyles = {
                     width: kmapVisualWrapper.style.width,
+                    minWidth: kmapVisualWrapper.style.minWidth,
                     height: kmapVisualWrapper.style.height,
-                    overflow: kmapVisualWrapper.style.overflow
+                    minHeight: kmapVisualWrapper.style.minHeight,
+                    display: kmapVisualWrapper.style.display
                 };
-                const gw = gridContainer.scrollWidth;
-                const gh = gridContainer.scrollHeight;
-                kmapVisualWrapper.style.width = gw + 'px';
-                kmapVisualWrapper.style.height = gh + 'px';
-                kmapVisualWrapper.style.overflow = 'visible';
                 
-                svgOverlay.setAttribute('width', gw);
-                svgOverlay.setAttribute('height', gh);
-                svgOverlay.innerHTML = '';
-                
-                if (typeof drawSVGLoops === 'function') {
-                    if (p.numPlanes > 1) {
-                        for (let z = 0; z < p.numPlanes; z++) {
-                            drawSVGLoops(p.solution, p.numVars, p.rowsBits, p.colsBits, p.rowGray, p.colGray, true, p.zGray[z], 1);
-                        }
-                    } else {
-                        drawSVGLoops(p.solution, p.numVars, p.rowsBits, p.colsBits, p.rowGray, p.colGray, false, '', 1);
-                    }
-                }
-            }
+                const rect = gridContainer.getBoundingClientRect();
+                kmapVisualWrapper.style.width = rect.width + 'px';
+                kmapVisualWrapper.style.minWidth = rect.width + 'px';
+                kmapVisualWrapper.style.height = rect.height + 'px';
+                kmapVisualWrapper.style.minHeight = rect.height + 'px';
+                // temporarily disable flex centering so html2canvas origin is exact
+                kmapVisualWrapper.style.display = 'block';
 
             html2canvas(kmapVisualWrapper, {
                 backgroundColor: bgColor,
@@ -797,27 +780,10 @@ if (exportKmapPngBtn) {
             }).finally(() => {
                 if (originalWrapperStyles) {
                     kmapVisualWrapper.style.width = originalWrapperStyles.width;
+                    kmapVisualWrapper.style.minWidth = originalWrapperStyles.minWidth;
                     kmapVisualWrapper.style.height = originalWrapperStyles.height;
-                    kmapVisualWrapper.style.overflow = originalWrapperStyles.overflow;
-                }
-                
-                if (p && gridContainer && originalTransform) {
-                    gridContainer.style.transform = originalTransform;
-                    void gridContainer.offsetWidth;
-                    
-                    svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
-                    svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
-                    svgOverlay.innerHTML = '';
-                    
-                    if (typeof drawSVGLoops === 'function') {
-                        if (p.numPlanes > 1) {
-                            for (let z = 0; z < p.numPlanes; z++) {
-                                drawSVGLoops(p.solution, p.numVars, p.rowsBits, p.colsBits, p.rowGray, p.colGray, true, p.zGray[z], p.scale);
-                            }
-                        } else {
-                            drawSVGLoops(p.solution, p.numVars, p.rowsBits, p.colsBits, p.rowGray, p.colGray, false, '', p.scale);
-                        }
-                    }
+                    kmapVisualWrapper.style.minHeight = originalWrapperStyles.minHeight;
+                    kmapVisualWrapper.style.display = originalWrapperStyles.display;
                 }
                 finishExport();
             });
