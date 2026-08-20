@@ -641,6 +641,32 @@ if (exportKmapPngBtn) {
         // disabled button + toast are actually on screen before html2canvas
         // starts its heavy synchronous work.
         requestAnimationFrame(() => requestAnimationFrame(() => {
+            const gridContainer = document.getElementById('kmap-grid-container');
+            const svgOverlay = document.getElementById('kmap-svg-overlay');
+            let originalTransform = '';
+            let p = null;
+            
+            if (gridContainer && gridContainer.style.display !== 'none' && svgOverlay && typeof _lastSVGDrawParams !== 'undefined' && _lastSVGDrawParams) {
+                p = _lastSVGDrawParams;
+                originalTransform = gridContainer.style.transform;
+                gridContainer.style.transform = 'scale(1)';
+                void gridContainer.offsetWidth;
+                
+                svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
+                svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
+                svgOverlay.innerHTML = '';
+                
+                if (typeof drawSVGLoops === 'function') {
+                    if (p.numPlanes > 1) {
+                        for (let z = 0; z < p.numPlanes; z++) {
+                            drawSVGLoops(p.solution, p.numVars, p.rowsBits, p.colsBits, p.rowGray, p.colGray, true, p.zGray[z], 1);
+                        }
+                    } else {
+                        drawSVGLoops(p.solution, p.numVars, p.rowsBits, p.colsBits, p.rowGray, p.colGray, false, '', 1);
+                    }
+                }
+            }
+
             html2canvas(kmapVisualWrapper, {
                 backgroundColor: bgColor,
                 scale: 2, // High res
@@ -681,7 +707,27 @@ if (exportKmapPngBtn) {
             }).catch(err => {
                 console.error('Failed to export K-Map:', err);
                 showToast('Failed to export K-Map', 'error');
-            }).finally(finishExport);
+            }).finally(() => {
+                if (p && gridContainer && originalTransform) {
+                    gridContainer.style.transform = originalTransform;
+                    void gridContainer.offsetWidth;
+                    
+                    svgOverlay.setAttribute('width', svgOverlay.parentElement.clientWidth);
+                    svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
+                    svgOverlay.innerHTML = '';
+                    
+                    if (typeof drawSVGLoops === 'function') {
+                        if (p.numPlanes > 1) {
+                            for (let z = 0; z < p.numPlanes; z++) {
+                                drawSVGLoops(p.solution, p.numVars, p.rowsBits, p.colsBits, p.rowGray, p.colGray, true, p.zGray[z], p.scale);
+                            }
+                        } else {
+                            drawSVGLoops(p.solution, p.numVars, p.rowsBits, p.colsBits, p.rowGray, p.colGray, false, '', p.scale);
+                        }
+                    }
+                }
+                finishExport();
+            });
         }));
     });
 }

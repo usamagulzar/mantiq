@@ -103,22 +103,26 @@
             const { Filesystem, Share } = window.Capacitor.Plugins;
             let fileData = dataUrl;
             
-            // If it's a data URL, extract the base64 part
-            if (dataUrl.includes(',')) {
-                fileData = dataUrl.split(',')[1];
+            if (dataUrl.startsWith('data:')) {
+                if (dataUrl.includes(';base64,')) {
+                    fileData = dataUrl.split(';base64,')[1];
+                } else {
+                    // Plain text data URL (like CSV)
+                    const decoded = decodeURIComponent(dataUrl.substring(dataUrl.indexOf(',') + 1));
+                    fileData = btoa(unescape(encodeURIComponent(decoded)));
+                }
             } else if (dataUrl.startsWith('blob:')) {
                 // Read blob to base64
                 fileData = await new Promise((resolve, reject) => {
                     fetch(dataUrl).then(r => r.blob()).then(blob => {
                         const reader = new FileReader();
-                        reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                        reader.onloadend = () => resolve(reader.result.substring(reader.result.indexOf(',') + 1));
                         reader.onerror = reject;
                         reader.readAsDataURL(blob);
                     }).catch(reject);
                 });
             } else {
-                // If it's plain text (like CSV content but passed as encodedURI)
-                // Decode it first, then convert to base64
+                // Fallback
                 const decoded = decodeURIComponent(dataUrl.replace(/^data:.*?,/, ''));
                 fileData = btoa(unescape(encodeURIComponent(decoded)));
             }
@@ -126,13 +130,12 @@
             const result = await Filesystem.writeFile({
                 path: filename,
                 data: fileData,
-                directory: 'DOCUMENTS' // Use Documents dir to allow direct saving
+                directory: 'CACHE' // CACHE allows direct saving without Android 11+ storage permissions
             });
 
-            // Alert user it was saved successfully before sharing
-            console.log('[Capacitor Wrapper] Saved to Documents: ' + result.uri);
+            console.log('[Capacitor Wrapper] Saved to Cache: ' + result.uri);
             if (window.showToast) {
-                window.showToast('Saved to Documents folder!');
+                window.showToast('Ready to share or save!');
             }
             
             try {
