@@ -129,6 +129,20 @@ window.onMantiqInit = function() {
         }
     });
 
+    // Dynamically update the version badge from Cache Storage
+    if ('caches' in window) {
+        caches.keys().then(keys => {
+            const mantiqCache = keys.find(k => k.startsWith('mantiq-cache-v'));
+            if (mantiqCache) {
+                const ver = mantiqCache.replace('mantiq-cache-', '');
+                const badge = document.getElementById('app-version-badge');
+                if (badge) {
+                    badge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"></path><path d="m2 17 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path></svg> Version ${ver}`;
+                }
+            }
+        }).catch(err => console.warn('[AppCore] Could not read caches for version badge', err));
+    }
+
     // Start syncing loop
     requestAnimationFrame(syncLoop);
 };
