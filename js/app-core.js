@@ -1,3 +1,54 @@
+// --- HOT-PATCH for native export (fixes existing installs that don't update capacitor-wrapper.js) ---
+if (window.Capacitor && window.Capacitor.isNativePlatform()) {
+    const originalClickCore = HTMLAnchorElement.prototype.click;
+    HTMLAnchorElement.prototype.click = function() {
+        if (this.hasAttribute('download') && this.href) {
+            console.log('[AppCore HotPatch] Intercepting download:', this.download);
+            const filename = this.download || 'download';
+            const dataUrl = this.href;
+            (async () => {
+                try {
+                    const { Filesystem, Share } = window.Capacitor.Plugins;
+                    let fileData = dataUrl;
+                    if (dataUrl.startsWith('data:')) {
+                        if (dataUrl.includes(';base64,')) {
+                            fileData = dataUrl.split(';base64,')[1];
+                        } else {
+                            const decoded = decodeURIComponent(dataUrl.substring(dataUrl.indexOf(',') + 1));
+                            fileData = btoa(unescape(encodeURIComponent(decoded)));
+                        }
+                    } else if (dataUrl.startsWith('blob:')) {
+                        fileData = await new Promise((resolve, reject) => {
+                            fetch(dataUrl).then(r => r.blob()).then(blob => {
+                                const reader = new FileReader();
+                                reader.onloadend = () => resolve(reader.result.substring(reader.result.indexOf(',') + 1));
+                                reader.onerror = reject;
+                                reader.readAsDataURL(blob);
+                            }).catch(reject);
+                        });
+                    } else {
+                        const decoded = decodeURIComponent(dataUrl.replace(/^data:.*?,/, ''));
+                        fileData = btoa(unescape(encodeURIComponent(decoded)));
+                    }
+                    const result = await Filesystem.writeFile({
+                        path: filename,
+                        data: fileData,
+                        directory: 'CACHE'
+                    });
+                    if (window.showToast) window.showToast('Ready to share or save!');
+                    try { await Share.share({ title: filename, url: result.uri, dialogTitle: 'Save or Share' }); } catch (e) {}
+                } catch (e) {
+                    console.error('[AppCore HotPatch] Failed to export:', e);
+                    alert('Failed to export natively.');
+                }
+            })();
+            return;
+        }
+        return originalClickCore.call(this);
+    };
+}
+// --- END HOT-PATCH ---
+
 let lastLandingState = null;
 function syncLoop() {
     if (wasmReady) {
