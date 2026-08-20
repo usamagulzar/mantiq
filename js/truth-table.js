@@ -388,9 +388,9 @@ function initExportButtons() {
 
 function saveCodeToFile(code, prefix) {
     const filename = `mantiq_${prefix}_${new Date().toISOString().slice(0,19).replace(/[-T:]/g,"_")}.v`;
-    const blob = new Blob([code], { type: 'text/plain' });
+    const dataUrl = 'data:text/plain;charset=utf-8,' + encodeURIComponent(code);
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    link.href = dataUrl;
     link.download = filename;
     document.body.appendChild(link);
     link.click();
