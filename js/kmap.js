@@ -945,6 +945,11 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
     svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
     svgOverlay.innerHTML = '';
     for (let z = 0; z < numPlanes; z++) {
+        drawSVGLoops(activeSolution, numVars, 2, 2, rowGray, colGray, true, zGray[z], scale);
+    }
+    _lastSVGDrawParams = { solution: activeSolution, numVars, rowsBits: 2, colsBits: 2, rowGray, colGray, numPlanes, zGray, scale };
+}
+
 /** Draws one piece of a group loop on 2D Canvas with wrap dashes, sharp wrap corners, and rounded real corners. */
 function drawLoopPieceCanvas(ctx, x, y, w, h, color, wrapSides, scale) {
     const r = Math.min(12 * scale, w / 2, h / 2);
