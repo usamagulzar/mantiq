@@ -1026,12 +1026,11 @@ function exportKMapPNGDirect() {
     const { variables, minterms, dontCares } = lastKMapData;
     const { solution, numVars, rowsBits, colsBits, rowGray, colGray, numPlanes, zGray } = _lastSVGDrawParams;
 
-    const SCALE = 2; // 2x Retina high-DPI scaling
-
-    const cellW = 75 * SCALE;
-    const cellH = 75 * SCALE;
-    const cornerW = 70 * SCALE;
-    const cornerH = 70 * SCALE;
+    const SCALE = 2;
+    const cellW = 80 * SCALE;
+    const cellH = 80 * SCALE;
+    const cornerW = 50 * SCALE;
+    const cornerH = 50 * SCALE;
 
     const numRows = rowGray.length;
     const numCols = colGray.length;
@@ -1122,7 +1121,7 @@ function exportKMapPNGDirect() {
         ctx.lineWidth = 2 * SCALE;
         ctx.beginPath();
         if (typeof ctx.roundRect === 'function') {
-            ctx.roundRect(tableX, tableY, tableW, tableH, 8 * SCALE);
+            ctx.roundRect(tableX, tableY, tableW, tableH, 14 * SCALE);
         } else {
             ctx.rect(tableX, tableY, tableW, tableH);
         }
@@ -1139,10 +1138,10 @@ function exportKMapPNGDirect() {
         ctx.fillStyle = textPrimary;
         // Col vars (top-right of corner)
         ctx.textAlign = 'right';
-        ctx.fillText(colVars.join(''), tableX + cornerW - 6 * SCALE, tableY + 22 * SCALE);
+        ctx.fillText(colVars.join(''), tableX + cornerW - 6 * SCALE, tableY + 18 * SCALE);
         // Row vars (bottom-left of corner)
         ctx.textAlign = 'left';
-        ctx.fillText(rowVars.join(''), tableX + 8 * SCALE, tableY + cornerH - 8 * SCALE);
+        ctx.fillText(rowVars.join(''), tableX + 6 * SCALE, tableY + cornerH - 6 * SCALE);
 
         // Column Headers
         ctx.font = `600 ${15 * SCALE}px "Outfit", sans-serif`;
@@ -1176,7 +1175,7 @@ function exportKMapPNGDirect() {
                 const binStr = zPrefix + rowGray[r] + colGray[c];
                 const mintermIndex = parseInt(binStr, 2);
 
-                ctx.font = `500 ${11 * SCALE}px "Outfit", sans-serif`;
+                ctx.font = `500 ${12 * SCALE}px "Outfit", sans-serif`;
                 ctx.fillStyle = textMuted;
                 ctx.textAlign = 'left';
                 ctx.fillText(String(mintermIndex), cx + 6 * SCALE, cy + 16 * SCALE);
@@ -1186,14 +1185,14 @@ function exportKMapPNGDirect() {
                 if (minterms && minterms.includes(mintermIndex)) val = '1';
                 if (dontCares && dontCares.includes(mintermIndex)) val = 'X';
 
-                ctx.font = `700 ${30 * SCALE}px "Outfit", sans-serif`;
+                ctx.font = `700 ${32 * SCALE}px "Outfit", sans-serif`;
                 ctx.textAlign = 'center';
                 if (val === '1') {
-                    ctx.fillStyle = '#10B981'; // Emerald Green
+                    ctx.fillStyle = '#30d158'; // Neon iOS Green (matches on-screen .val-1)
                 } else if (val === 'X') {
-                    ctx.fillStyle = '#F59E0B'; // Amber Orange
+                    ctx.fillStyle = '#8e8e93'; // iOS Gray (matches on-screen .val-X)
                 } else {
-                    ctx.fillStyle = isDark ? '#475569' : '#EF4444'; // Red/Muted
+                    ctx.fillStyle = '#ff453a'; // Neon iOS Red (matches on-screen .val-0)
                 }
                 ctx.fillText(val, cx + cellW / 2, cy + cellH / 2 + 10 * SCALE);
             }
