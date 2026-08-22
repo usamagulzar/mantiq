@@ -952,6 +952,7 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
 
 /** Pure 2D Canvas direct K-Map PNG exporter — renders K-Map grid and group loops directly onto canvas with 100% sub-pixel accuracy, zero DOM dependencies, and zero html2canvas/SVG rasterization issues. */
 function exportKMapPNGDirect() {
+    console.log('[KMap Exporter v2.2.37] Direct 2D Canvas rendering starting...');
     if (!lastKMapData || !_lastSVGDrawParams) {
         if (typeof showToast === 'function') showToast('No K-Map available to export', 'error');
         return;
