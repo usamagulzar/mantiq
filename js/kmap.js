@@ -1137,11 +1137,23 @@ function exportKMapPNGDirect() {
         }
         ctx.stroke();
 
-        // Corner Diagonal Line
+        // Corner Diagonal Line (clipped to table rounded rect so line start never leaks past rounded corner)
+        ctx.save();
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(tableX, tableY, tableW, tableH, 14 * SCALE);
+        } else {
+            ctx.rect(tableX, tableY, tableW, tableH);
+        }
+        ctx.clip();
+
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 1.5 * SCALE;
         ctx.beginPath();
         ctx.moveTo(tableX, tableY);
         ctx.lineTo(tableX + cornerW, tableY + cornerH);
         ctx.stroke();
+        ctx.restore();
 
         // Corner Labels
         ctx.font = `700 ${13 * SCALE}px "Outfit", sans-serif`;
