@@ -1297,6 +1297,10 @@ function exportKMapPNGDirect() {
 
     if (typeof showToast === 'function') showToast('K-Map exported as PNG!');
 }
+window.exportKMapPNGDirect = exportKMapPNGDirect;
+
+function binaryToVariables(binaryStr, variables, isPOS) {
+    let term = isPOS ? "(" : "";
     let first = true;
     for (let j = 0; j < Math.min(binaryStr.length, variables.length); j++) {
         let bit = binaryStr[j];
