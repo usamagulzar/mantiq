@@ -719,141 +719,71 @@ if (exportKmapPngBtn) {
         // disabled button + toast are actually on screen before html2canvas
         // starts its heavy synchronous work.
         requestAnimationFrame(() => requestAnimationFrame(() => {
-            const gridContainer = document.getElementById('kmap-grid-container');
+            const kmapVisualWrapper = document.getElementById('kmap-visual-wrapper');
+            const svgOverlay = document.getElementById('kmap-svg-overlay');
 
-            // Capture just the grid container — no wrapper layout changes needed,
-            // so CSS zoom and SVG coordinate patches never cause misalignment.
-            html2canvas(gridContainer, {
+            // Step 1: Capture kmapVisualWrapper using html2canvas.
+            // We ignore the SVG overlay during html2canvas capture because html2canvas
+            // has known issues rendering SVG overlays in scaled containers.
+            html2canvas(kmapVisualWrapper, {
                 backgroundColor: bgColor,
                 scale: 2,
                 ignoreElements: (el) => {
-                    return el.classList && (
+                    return el.id === 'kmap-svg-overlay' || (el.classList && (
                         el.classList.contains('kmap-3d-controls') ||
                         el.classList.contains('kmap-controls') ||
                         el.classList.contains('kmap-fs-btn') ||
                         el.classList.contains('zoom-btn-fullscreen')
-                    );
+                    ));
                 }
-            }).then(gridCanvas => {
-                // Build the final canvas: grid + groups drawn manually + watermark
-                const PAD = 40; // bottom padding for watermark
+            }).then(async wrapperCanvas => {
+                // Step 2: Overlay the exact live SVG onto the canvas by converting
+                // the SVG DOM node into an image URL and drawing it on top.
+                if (svgOverlay && svgOverlay.children.length > 0) {
+                    try {
+                        const clonedSvg = svgOverlay.cloneNode(true);
+                        clonedSvg.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+                        
+                        const w = svgOverlay.clientWidth || kmapVisualWrapper.clientWidth;
+                        const h = svgOverlay.clientHeight || kmapVisualWrapper.clientHeight;
+                        clonedSvg.setAttribute('width', w);
+                        clonedSvg.setAttribute('height', h);
+                        clonedSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+                        const svgString = new XMLSerializer().serializeToString(clonedSvg);
+                        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                        const blobUrl = URL.createObjectURL(svgBlob);
+                        
+                        await new Promise((resolve) => {
+                            const img = new Image();
+                            img.onload = () => {
+                                const ctx = wrapperCanvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, wrapperCanvas.width, wrapperCanvas.height);
+                                URL.revokeObjectURL(blobUrl);
+                                resolve();
+                            };
+                            img.onerror = (e) => {
+                                console.warn('[KMap Export] SVG rasterization failed:', e);
+                                URL.revokeObjectURL(blobUrl);
+                                resolve();
+                            };
+                            img.src = blobUrl;
+                        });
+                    } catch (e) {
+                        console.warn('[KMap Export] Failed to process SVG overlay:', e);
+                    }
+                }
+
+                // Step 3: Create final canvas with extra padding for watermark
+                const PAD = 40;
                 const finalCanvas = document.createElement('canvas');
-                finalCanvas.width  = gridCanvas.width;
-                finalCanvas.height = gridCanvas.height + PAD * 2;
+                finalCanvas.width  = wrapperCanvas.width;
+                finalCanvas.height = wrapperCanvas.height + PAD * 2;
                 const ctx = finalCanvas.getContext('2d');
 
                 ctx.fillStyle = bgColor;
                 ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-                ctx.drawImage(gridCanvas, 0, PAD);
-
-                // Draw the group loops manually on top of the grid image.
-                // On Android, getBoundingClientRect() is patched (divides by zoom=0.90).
-                // html2canvas uses the raw (visual/zoomed) coordinates, so we must too.
-                // Use __rawGBCR if available (set by capacitor-wrapper.js), otherwise
-                // fall back to the normal (possibly patched) version.
-                const rawGBCR = (el) => window.__rawGBCR ? window.__rawGBCR(el) : el.getBoundingClientRect();
-                const SCALE = 2;
-                const gridRect = rawGBCR(gridContainer);
-
-                // Use _lastSVGDrawParams to replay the loop geometry without
-                // touching the SVG overlay at all.
-                if (window._lastSVGDrawParams) {
-                    const { solution, numVars, rowsBits, colsBits, rowGray, colGray, numPlanes, zGray } = window._lastSVGDrawParams;
-                    const LOOP_COLORS_LOCAL = [
-                        '#007AFF','#34C759','#FF3B30','#FF9500','#AF52DE',
-                        '#5856D6','#FF2D55','#5AC8FA','#FFCC00','#00C7BE',
-                        '#A2845E','#FF6B22','#E586C6','#8D99AE','#4B8A08','#B53A15'
-                    ];
-                    const zBits = numVars - rowsBits - colsBits;
-
-                    solution.forEach((term, idx) => {
-                        const color = LOOP_COLORS_LOCAL[idx % LOOP_COLORS_LOCAL.length];
-                        const zPart = term.slice(0, zBits);
-
-                        const planesForTerm = [];
-                        if (numPlanes > 1) {
-                            for (let z = 0; z < numPlanes; z++) {
-                                const zOffset = zGray[z];
-                                let match = true;
-                                for (let k = 0; k < zBits; k++) {
-                                    if (zPart[k] !== '-' && zPart[k] !== zOffset[k]) { match = false; break; }
-                                }
-                                if (match) planesForTerm.push(zOffset);
-                            }
-                        } else {
-                            planesForTerm.push('');
-                        }
-
-                        planesForTerm.forEach(zOffset => {
-                            const rowBits = term.slice(zBits, zBits + rowsBits);
-                            const colBits = term.slice(zBits + rowsBits);
-
-                            const rowPresent = rowGray.map(g => {
-                                for (let k = 0; k < rowsBits; k++) if (rowBits[k] !== '-' && rowBits[k] !== g[k]) return false;
-                                return true;
-                            });
-                            const colPresent = colGray.map(g => {
-                                for (let k = 0; k < colsBits; k++) if (colBits[k] !== '-' && colBits[k] !== g[k]) return false;
-                                return true;
-                            });
-
-                            // Find bounding cells
-                            const rowIndices = rowPresent.reduce((a, v, i) => v ? [...a, i] : a, []);
-                            const colIndices = colPresent.reduce((a, v, i) => v ? [...a, i] : a, []);
-                            if (!rowIndices.length || !colIndices.length) return;
-
-                            const rLo = Math.min(...rowIndices), rHi = Math.max(...rowIndices);
-                            const cLo = Math.min(...colIndices), cHi = Math.max(...colIndices);
-
-                            const tlBin = zOffset + rowGray[rLo] + colGray[cLo];
-                            const brBin = zOffset + rowGray[rHi] + colGray[cHi];
-                            const tlCell = document.getElementById(`kmap-cell-${parseInt(tlBin, 2)}`);
-                            const brCell = document.getElementById(`kmap-cell-${parseInt(brBin, 2)}`);
-                            if (!tlCell || !brCell) return;
-
-                            const tlR = rawGBCR(tlCell);
-                            const brR = rawGBCR(brCell);
-
-                            // Positions relative to grid container, scaled by canvas scale.
-                            // Grid is drawn at y=PAD on finalCanvas, so add PAD (not PAD*SCALE).
-                            const x = (tlR.left - gridRect.left) * SCALE;
-                            const y = PAD + (tlR.top  - gridRect.top) * SCALE;
-                            const w = (brR.right  - tlR.left) * SCALE;
-                            const h = (brR.bottom - tlR.top)  * SCALE;
-
-                            const PAD_PX = 5 * SCALE;
-                            const rx = 10 * SCALE;
-                            const bx = x + PAD_PX, by = y + PAD_PX;
-                            const bw = w - PAD_PX*2,  bh = h - PAD_PX*2;
-
-                            ctx.save();
-                            ctx.strokeStyle = color;
-                            ctx.lineWidth = 3 * SCALE;
-                            ctx.setLineDash([]);
-
-                            // roundRect polyfill for older Android WebViews
-                            ctx.beginPath();
-                            if (typeof ctx.roundRect === 'function') {
-                                ctx.roundRect(bx, by, bw, bh, rx);
-                            } else {
-                                ctx.moveTo(bx + rx, by);
-                                ctx.lineTo(bx + bw - rx, by);
-                                ctx.arcTo(bx + bw, by, bx + bw, by + rx, rx);
-                                ctx.lineTo(bx + bw, by + bh - rx);
-                                ctx.arcTo(bx + bw, by + bh, bx + bw - rx, by + bh, rx);
-                                ctx.lineTo(bx + rx, by + bh);
-                                ctx.arcTo(bx, by + bh, bx, by + bh - rx, rx);
-                                ctx.lineTo(bx, by + rx);
-                                ctx.arcTo(bx, by, bx + rx, by, rx);
-                                ctx.closePath();
-                            }
-                            ctx.fillStyle = color + '28'; // ~16% opacity
-                            ctx.fill();
-                            ctx.stroke();
-                            ctx.restore();
-                        });
-                    });
-                }
+                ctx.drawImage(wrapperCanvas, 0, 0);
 
                 // Watermark
                 ctx.font = '500 16px "Outfit", sans-serif';
