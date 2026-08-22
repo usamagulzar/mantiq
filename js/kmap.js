@@ -950,10 +950,269 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
     _lastSVGDrawParams = { solution: activeSolution, numVars, rowsBits: 2, colsBits: 2, rowGray, colGray, numPlanes, zGray, scale };
 }
 
+/** Pure 2D Canvas direct K-Map PNG exporter — renders K-Map grid and group loops directly onto canvas with 100% sub-pixel accuracy, zero DOM dependencies, and zero html2canvas/SVG rasterization issues. */
+function exportKMapPNGDirect() {
+    if (!lastKMapData || !_lastSVGDrawParams) {
+        if (typeof showToast === 'function') showToast('No K-Map available to export', 'error');
+        return;
+    }
+
+    const { variables, minterms, dontCares } = lastKMapData;
+    const { solution, numVars, rowsBits, colsBits, rowGray, colGray, numPlanes, zGray } = _lastSVGDrawParams;
+
+    const SCALE = 2; // 2x Retina high-DPI scaling
+
+    const cellW = 70 * SCALE;
+    const cellH = 70 * SCALE;
+    const cornerW = 65 * SCALE;
+    const cornerH = 65 * SCALE;
+
+    const numRows = rowGray.length;
+    const numCols = colGray.length;
+
+    const tableW = cornerW + numCols * cellW;
+    const tableH = cornerH + numRows * cellH;
+
+    const cardPaddingX = 24 * SCALE;
+    const cardPaddingTop = (numPlanes > 1 ? 55 : 30) * SCALE;
+    const cardPaddingBottom = 25 * SCALE;
+
+    const cardW = tableW + cardPaddingX * 2;
+    const cardH = tableH + cardPaddingTop + cardPaddingBottom;
+
+    const gapBetweenCards = 30 * SCALE;
+    const outerMargin = 30 * SCALE;
+    const watermarkH = 50 * SCALE;
+
+    const planesCount = numPlanes || 1;
+    const totalW = outerMargin * 2 + planesCount * cardW + (planesCount - 1) * gapBetweenCards;
+    const totalH = outerMargin * 2 + cardH + watermarkH;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = totalW;
+    canvas.height = totalH;
+    const ctx = canvas.getContext('2d');
+
+    // Theme colors
+    const rootStyle = getComputedStyle(document.documentElement);
+    const isDark = document.body.classList.contains('dark-theme') || 
+                   (rootStyle.getPropertyValue('--bg-primary') && rootStyle.getPropertyValue('--bg-primary').trim().startsWith('#0'));
+    
+    const bgColor = isDark ? '#0F172A' : '#F8FAFC';
+    const cardBgColor = isDark ? '#1E293B' : '#FFFFFF';
+    const borderColor = isDark ? '#334155' : '#E2E8F0';
+    const textPrimary = isDark ? '#F8FAFC' : '#1E293B';
+    const textMuted = isDark ? '#94A3B8' : '#64748B';
+    const accentColor = isDark ? '#3B82F6' : '#2563EB';
+
+    // 1. Draw Canvas Background
+    ctx.fillStyle = bgColor;
+    ctx.fillRect(0, 0, totalW, totalH);
+
+    // Variable splits
+    const subVars = variables.slice(numVars - (rowsBits + colsBits));
+    const rowVars = subVars.slice(0, rowsBits);
+    const colVars = subVars.slice(rowsBits);
+    const zVars = variables.slice(0, Math.max(0, numVars - (rowsBits + colsBits)));
+
+    // Render each plane
+    for (let p = 0; p < planesCount; p++) {
+        const cardX = outerMargin + p * (cardW + gapBetweenCards);
+        const cardY = outerMargin;
+
+        // Plane Card Background
+        ctx.fillStyle = cardBgColor;
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 2 * SCALE;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(cardX, cardY, cardW, cardH, 16 * SCALE);
+        } else {
+            ctx.rect(cardX, cardY, cardW, cardH);
+        }
+        ctx.fill();
+        ctx.stroke();
+
+        // Plane Title (e.g. A=0, A=1 for 5-var)
+        if (planesCount > 1 && zGray && zGray[p] !== undefined) {
+            const zPrefix = zGray[p];
+            const planeName = zVars.map((v, idx) => `${v}=${zPrefix[idx] || '0'}`).join(', ');
+            ctx.font = `700 ${18 * SCALE}px "Outfit", sans-serif`;
+            ctx.fillStyle = accentColor;
+            ctx.textAlign = 'center';
+            ctx.fillText(planeName, cardX + cardW / 2, cardY + 36 * SCALE);
+        }
+
+        const tableX = cardX + cardPaddingX;
+        const tableY = cardY + cardPaddingTop;
+
+        // Outer Table Border
+        ctx.strokeStyle = borderColor;
+        ctx.lineWidth = 2 * SCALE;
+        ctx.beginPath();
+        if (typeof ctx.roundRect === 'function') {
+            ctx.roundRect(tableX, tableY, tableW, tableH, 8 * SCALE);
+        } else {
+            ctx.rect(tableX, tableY, tableW, tableH);
+        }
+        ctx.stroke();
+
+        // Corner Diagonal Line
+        ctx.beginPath();
+        ctx.moveTo(tableX, tableY);
+        ctx.lineTo(tableX + cornerW, tableY + cornerH);
+        ctx.stroke();
+
+        // Corner Labels
+        ctx.font = `700 ${13 * SCALE}px "Outfit", sans-serif`;
+        ctx.fillStyle = textPrimary;
+        // Col vars (top-right of corner)
+        ctx.textAlign = 'right';
+        ctx.fillText(colVars.join(''), tableX + cornerW - 6 * SCALE, tableY + 22 * SCALE);
+        // Row vars (bottom-left of corner)
+        ctx.textAlign = 'left';
+        ctx.fillText(rowVars.join(''), tableX + 8 * SCALE, tableY + cornerH - 8 * SCALE);
+
+        // Column Headers
+        ctx.font = `600 ${15 * SCALE}px "Outfit", sans-serif`;
+        ctx.fillStyle = textMuted;
+        ctx.textAlign = 'center';
+        for (let c = 0; c < numCols; c++) {
+            const cx = tableX + cornerW + c * cellW + cellW / 2;
+            ctx.fillText(colGray[c], cx, tableY + cornerH / 2 + 5 * SCALE);
+        }
+
+        // Row Headers
+        ctx.textAlign = 'right';
+        for (let r = 0; r < numRows; r++) {
+            const ry = tableY + cornerH + r * cellH + cellH / 2 + 5 * SCALE;
+            ctx.fillText(rowGray[r], tableX + cornerW - 12 * SCALE, ry);
+        }
+
+        // Cell Borders & Values
+        const zPrefix = (zGray && zGray[p] !== undefined) ? zGray[p] : '';
+        for (let r = 0; r < numRows; r++) {
+            for (let c = 0; c < numCols; c++) {
+                const cx = tableX + cornerW + c * cellW;
+                const cy = tableY + cornerH + r * cellH;
+
+                // Inner Grid Lines
+                ctx.strokeStyle = borderColor;
+                ctx.lineWidth = 1 * SCALE;
+                ctx.strokeRect(cx, cy, cellW, cellH);
+
+                // Minterm Number (small top-left)
+                const binStr = zPrefix + rowGray[r] + colGray[c];
+                const mintermIndex = parseInt(binStr, 2);
+
+                ctx.font = `500 ${11 * SCALE}px "Outfit", sans-serif`;
+                ctx.fillStyle = textMuted;
+                ctx.textAlign = 'left';
+                ctx.fillText(String(mintermIndex), cx + 6 * SCALE, cy + 16 * SCALE);
+
+                // Minterm Value (1, 0, or X)
+                let val = '0';
+                if (minterms && minterms.includes(mintermIndex)) val = '1';
+                if (dontCares && dontCares.includes(mintermIndex)) val = 'X';
+
+                ctx.font = `700 ${28 * SCALE}px "Outfit", sans-serif`;
+                ctx.textAlign = 'center';
+                if (val === '1') {
+                    ctx.fillStyle = '#10B981'; // Green
+                } else if (val === 'X') {
+                    ctx.fillStyle = '#F59E0B'; // Orange
+                } else {
+                    ctx.fillStyle = isDark ? '#475569' : '#EF4444'; // Red/Muted
+                }
+                ctx.fillText(val, cx + cellW / 2, cy + cellH / 2 + 10 * SCALE);
+            }
+        }
+
+        // Draw Group Loops on this plane
+        if (solution && solution.length > 0) {
+            const zBits = numVars - (rowsBits + colsBits);
+            solution.forEach((term, idx) => {
+                const color = LOOP_COLORS[idx % LOOP_COLORS.length];
+                const zPart = term.slice(0, zBits);
+
+                // Check if term touches this plane
+                let planeMatches = true;
+                for (let k = 0; k < zBits; k++) {
+                    if (zPart[k] !== '-' && zPart[k] !== zPrefix[k]) { planeMatches = false; break; }
+                }
+                if (!planeMatches) return;
+
+                const rowBits = term.slice(zBits, zBits + rowsBits);
+                const colBits = term.slice(zBits + rowsBits);
+
+                const rowPresent = rowGray.map(g => {
+                    for (let k = 0; k < rowsBits; k++) if (rowBits[k] !== '-' && rowBits[k] !== g[k]) return false;
+                    return true;
+                });
+                const colPresent = colGray.map(g => {
+                    for (let k = 0; k < colsBits; k++) if (colBits[k] !== '-' && colBits[k] !== g[k]) return false;
+                    return true;
+                });
+
+                if (!rowPresent.some(Boolean) || !colPresent.some(Boolean)) return;
+
+                const rowRuns = computeAxisRuns(rowPresent);
+                const colRuns = computeAxisRuns(colPresent);
+
+                rowRuns.forEach(rowRun => {
+                    colRuns.forEach(colRun => {
+                        const lx = tableX + cornerW + colRun.lo * cellW;
+                        const ly = tableY + cornerH + rowRun.lo * cellH;
+                        const lw = (colRun.hi - colRun.lo + 1) * cellW;
+                        const lh = (rowRun.hi - rowRun.lo + 1) * cellH;
+
+                        const pad = 6 * SCALE;
+                        const rx = lx + pad;
+                        const ry = ly + pad;
+                        const rw = lw - pad * 2;
+                        const rh = lh - pad * 2;
+                        const radius = Math.min(12 * SCALE, rw / 2, rh / 2);
+
+                        ctx.save();
+                        ctx.strokeStyle = color;
+                        ctx.lineWidth = 3 * SCALE;
+                        ctx.fillStyle = color + '28';
+
+                        ctx.beginPath();
+                        if (typeof ctx.roundRect === 'function') {
+                            ctx.roundRect(rx, ry, rw, rh, radius);
+                        } else {
+                            ctx.rect(rx, ry, rw, rh);
+                        }
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.restore();
+                    });
+                });
+            });
+        }
+    }
+
+    // Watermark
+    ctx.font = `500 ${14 * SCALE}px "Outfit", sans-serif`;
+    ctx.fillStyle = textMuted;
+    ctx.textAlign = 'right';
+    ctx.fillText('Generated by Mantiq (https://mantiq.usamagulzar.dev)', totalW - outerMargin, totalH - outerMargin + 10 * SCALE);
+
+    // Trigger PNG Download
+    const dataUrl = canvas.toDataURL('image/png');
+    const link = document.createElement('a');
+    link.download = `mantiq_kmap_${new Date().toISOString().slice(0,19).replace(/[-T:]/g,'_')}.png`;
+    link.href = dataUrl;
+    link.click();
+
+    if (typeof showToast === 'function') showToast('K-Map exported as PNG!');
+}
+window.exportKMapPNGDirect = exportKMapPNGDirect;
+
 function binaryToVariables(binaryStr, variables, isPOS) {
     let term = isPOS ? "(" : "";
     let first = true;
-    for (let j = 0; j < Math.min(binaryStr.length, variables.length); j++) {
         let bit = binaryStr[j];
         if (bit !== '-') {
             if (!first && isPOS) {
