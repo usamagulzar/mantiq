@@ -945,14 +945,74 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
     svgOverlay.setAttribute('height', svgOverlay.parentElement.clientHeight);
     svgOverlay.innerHTML = '';
     for (let z = 0; z < numPlanes; z++) {
-        drawSVGLoops(activeSolution, numVars, 2, 2, rowGray, colGray, true, zGray[z], scale);
-    }
-    _lastSVGDrawParams = { solution: activeSolution, numVars, rowsBits: 2, colsBits: 2, rowGray, colGray, numPlanes, zGray, scale };
+/** Draws one piece of a group loop on 2D Canvas with wrap dashes, sharp wrap corners, and rounded real corners. */
+function drawLoopPieceCanvas(ctx, x, y, w, h, color, wrapSides, scale) {
+    const r = Math.min(12 * scale, w / 2, h / 2);
+    const strokeWidth = Math.max(1, 3 * scale);
+    const x2 = x + w, y2 = y + h;
+
+    const roundTL = !(wrapSides.top || wrapSides.left);
+    const roundTR = !(wrapSides.top || wrapSides.right);
+    const roundBR = !(wrapSides.bottom || wrapSides.right);
+    const roundBL = !(wrapSides.bottom || wrapSides.left);
+
+    const rTL = roundTL ? r : 0;
+    const rTR = roundTR ? r : 0;
+    const rBR = roundBR ? r : 0;
+    const rBL = roundBL ? r : 0;
+
+    ctx.save();
+
+    // Fill path (single closed path matching chopped pill shape)
+    ctx.beginPath();
+    ctx.moveTo(x + rTL, y);
+    ctx.lineTo(x2 - rTR, y);
+    if (rTR > 0) ctx.arcTo(x2, y, x2, y + rTR, rTR); else ctx.lineTo(x2, y);
+    ctx.lineTo(x2, y2 - rBR);
+    if (rBR > 0) ctx.arcTo(x2, y2, x2 - rBR, y2, rBR); else ctx.lineTo(x2, y2);
+    ctx.lineTo(x + rBL, y2);
+    if (rBL > 0) ctx.arcTo(x, y2, x, y2 - rBL, rBL); else ctx.lineTo(x, y2);
+    ctx.lineTo(x, y + rTL);
+    if (rTL > 0) ctx.arcTo(x, y, x + rTL, y, rTL); else ctx.lineTo(x, y);
+    ctx.closePath();
+    ctx.fillStyle = color + '33'; // ~20% fill opacity
+    ctx.fill();
+
+    // Helper for drawing individual stroke segments
+    const drawSeg = (x1, y1, x2, y2, isWrap) => {
+        ctx.beginPath();
+        ctx.setLineDash(isWrap ? [4 * scale, 4 * scale] : []);
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    };
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = strokeWidth;
+
+    // Top
+    drawSeg(x + rTL, y, x2 - rTR, y, wrapSides.top);
+    // TR Corner
+    if (roundTR) { ctx.beginPath(); ctx.setLineDash([]); ctx.arcTo(x2, y, x2, y + rTR, rTR); ctx.stroke(); }
+    // Right
+    drawSeg(x2, y + rTR, x2, y2 - rBR, wrapSides.right);
+    // BR Corner
+    if (roundBR) { ctx.beginPath(); ctx.setLineDash([]); ctx.arcTo(x2, y2, x2 - rBR, y2, rBR); ctx.stroke(); }
+    // Bottom
+    drawSeg(x2 - rBR, y2, x + rBL, y2, wrapSides.bottom);
+    // BL Corner
+    if (roundBL) { ctx.beginPath(); ctx.setLineDash([]); ctx.arcTo(x, y2, x, y2 - rBL, rBL); ctx.stroke(); }
+    // Left
+    drawSeg(x, y2 - rBL, x, y + rTL, wrapSides.left);
+    // TL Corner
+    if (roundTL) { ctx.beginPath(); ctx.setLineDash([]); ctx.arcTo(x, y, x + rTL, y, rTL); ctx.stroke(); }
+
+    ctx.restore();
 }
 
 /** Pure 2D Canvas direct K-Map PNG exporter — renders K-Map grid and group loops directly onto canvas with 100% sub-pixel accuracy, zero DOM dependencies, and zero html2canvas/SVG rasterization issues. */
 function exportKMapPNGDirect() {
-    console.log('[KMap Exporter v2.2.37] Direct 2D Canvas rendering starting...');
+    console.log('[KMap Exporter v2.2.39] Direct 2D Canvas rendering starting...');
     if (!lastKMapData || !_lastSVGDrawParams) {
         if (typeof showToast === 'function') showToast('No K-Map available to export', 'error');
         return;
@@ -963,10 +1023,10 @@ function exportKMapPNGDirect() {
 
     const SCALE = 2; // 2x Retina high-DPI scaling
 
-    const cellW = 70 * SCALE;
-    const cellH = 70 * SCALE;
-    const cornerW = 65 * SCALE;
-    const cornerH = 65 * SCALE;
+    const cellW = 75 * SCALE;
+    const cellH = 75 * SCALE;
+    const cornerW = 70 * SCALE;
+    const cornerH = 70 * SCALE;
 
     const numRows = rowGray.length;
     const numCols = colGray.length;
@@ -994,7 +1054,7 @@ function exportKMapPNGDirect() {
     canvas.height = totalH;
     const ctx = canvas.getContext('2d');
 
-    // Theme colors
+    // Theme colors matching app UI
     const rootStyle = getComputedStyle(document.documentElement);
     const isDark = document.body.classList.contains('dark-theme') || 
                    (rootStyle.getPropertyValue('--bg-primary') && rootStyle.getPropertyValue('--bg-primary').trim().startsWith('#0'));
@@ -1021,7 +1081,11 @@ function exportKMapPNGDirect() {
         const cardX = outerMargin + p * (cardW + gapBetweenCards);
         const cardY = outerMargin;
 
-        // Plane Card Background
+        // Plane Card Shadow + Background
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
+        ctx.shadowBlur = 16 * SCALE;
+        ctx.shadowOffsetY = 4 * SCALE;
         ctx.fillStyle = cardBgColor;
         ctx.strokeStyle = borderColor;
         ctx.lineWidth = 2 * SCALE;
@@ -1033,6 +1097,7 @@ function exportKMapPNGDirect() {
         }
         ctx.fill();
         ctx.stroke();
+        ctx.restore();
 
         // Plane Title (e.g. A=0, A=1 for 5-var)
         if (planesCount > 1 && zGray && zGray[p] !== undefined) {
@@ -1116,12 +1181,12 @@ function exportKMapPNGDirect() {
                 if (minterms && minterms.includes(mintermIndex)) val = '1';
                 if (dontCares && dontCares.includes(mintermIndex)) val = 'X';
 
-                ctx.font = `700 ${28 * SCALE}px "Outfit", sans-serif`;
+                ctx.font = `700 ${30 * SCALE}px "Outfit", sans-serif`;
                 ctx.textAlign = 'center';
                 if (val === '1') {
-                    ctx.fillStyle = '#10B981'; // Green
+                    ctx.fillStyle = '#10B981'; // Emerald Green
                 } else if (val === 'X') {
-                    ctx.fillStyle = '#F59E0B'; // Orange
+                    ctx.fillStyle = '#F59E0B'; // Amber Orange
                 } else {
                     ctx.fillStyle = isDark ? '#475569' : '#EF4444'; // Red/Muted
                 }
@@ -1129,14 +1194,13 @@ function exportKMapPNGDirect() {
             }
         }
 
-        // Draw Group Loops on this plane
+        // Draw Group Loops on this plane using exact piece & anti-overlap shrink geometry
         if (solution && solution.length > 0) {
             const zBits = numVars - (rowsBits + colsBits);
-            solution.forEach((term, idx) => {
-                const color = LOOP_COLORS[idx % LOOP_COLORS.length];
-                const zPart = term.slice(0, zBits);
+            const pieces = [];
 
-                // Check if term touches this plane
+            solution.forEach((term, idx) => {
+                const zPart = term.slice(0, zBits);
                 let planeMatches = true;
                 for (let k = 0; k < zBits; k++) {
                     if (zPart[k] !== '-' && zPart[k] !== zPrefix[k]) { planeMatches = false; break; }
@@ -1162,35 +1226,54 @@ function exportKMapPNGDirect() {
 
                 rowRuns.forEach(rowRun => {
                     colRuns.forEach(colRun => {
-                        const lx = tableX + cornerW + colRun.lo * cellW;
-                        const ly = tableY + cornerH + rowRun.lo * cellH;
-                        const lw = (colRun.hi - colRun.lo + 1) * cellW;
-                        const lh = (rowRun.hi - rowRun.lo + 1) * cellH;
-
-                        const pad = 6 * SCALE;
-                        const rx = lx + pad;
-                        const ry = ly + pad;
-                        const rw = lw - pad * 2;
-                        const rh = lh - pad * 2;
-                        const radius = Math.min(12 * SCALE, rw / 2, rh / 2);
-
-                        ctx.save();
-                        ctx.strokeStyle = color;
-                        ctx.lineWidth = 3 * SCALE;
-                        ctx.fillStyle = color + '28';
-
-                        ctx.beginPath();
-                        if (typeof ctx.roundRect === 'function') {
-                            ctx.roundRect(rx, ry, rw, rh, radius);
-                        } else {
-                            ctx.rect(rx, ry, rw, rh);
-                        }
-                        ctx.fill();
-                        ctx.stroke();
-                        ctx.restore();
+                        pieces.push({
+                            idx,
+                            rowLo: rowRun.lo, rowHi: rowRun.hi,
+                            colLo: colRun.lo, colHi: colRun.hi,
+                            wrapTop: rowRun.wrapLow,
+                            wrapBottom: rowRun.wrapHigh,
+                            wrapLeft: colRun.wrapLow,
+                            wrapRight: colRun.wrapHigh
+                        });
                     });
                 });
             });
+
+            if (pieces.length > 0) {
+                // Compute anti-overlap shrinking offsets
+                const extraShrink = computeAntiOverlapShrinkGrid(pieces.map(p => ({
+                    idx: p.idx, rowLo: p.rowLo, rowHi: p.rowHi, colLo: p.colLo, colHi: p.colHi
+                })));
+
+                pieces.forEach((piece, i) => {
+                    const color = LOOP_COLORS[piece.idx % LOOP_COLORS.length];
+                    const s = extraShrink[i];
+
+                    const rawLx = tableX + cornerW + piece.colLo * cellW;
+                    const rawLy = tableY + cornerH + piece.rowLo * cellH;
+                    const rawLw = (piece.colHi - piece.colLo + 1) * cellW;
+                    const rawLh = (piece.rowHi - piece.rowLo + 1) * cellH;
+
+                    const padTop = piece.wrapTop ? 0 : (5 + s.top) * SCALE;
+                    const padBottom = piece.wrapBottom ? 0 : (5 + s.bottom) * SCALE;
+                    const padLeft = piece.wrapLeft ? 0 : (5 + s.left) * SCALE;
+                    const padRight = piece.wrapRight ? 0 : (5 + s.right) * SCALE;
+
+                    const px = rawLx + padLeft;
+                    const py = rawLy + padTop;
+                    const pw = Math.max(4 * SCALE, rawLw - padLeft - padRight);
+                    const ph = Math.max(4 * SCALE, rawLh - padTop - padBottom);
+
+                    const wrapSides = {
+                        top: piece.wrapTop,
+                        bottom: piece.wrapBottom,
+                        left: piece.wrapLeft,
+                        right: piece.wrapRight
+                    };
+
+                    drawLoopPieceCanvas(ctx, px, py, pw, ph, color, wrapSides, SCALE);
+                });
+            }
         }
     }
 
@@ -1209,10 +1292,6 @@ function exportKMapPNGDirect() {
 
     if (typeof showToast === 'function') showToast('K-Map exported as PNG!');
 }
-window.exportKMapPNGDirect = exportKMapPNGDirect;
-
-function binaryToVariables(binaryStr, variables, isPOS) {
-    let term = isPOS ? "(" : "";
     let first = true;
     for (let j = 0; j < Math.min(binaryStr.length, variables.length); j++) {
         let bit = binaryStr[j];
