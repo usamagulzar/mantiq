@@ -751,23 +751,20 @@ if (exportKmapPngBtn) {
                         clonedSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
 
                         const svgString = new XMLSerializer().serializeToString(clonedSvg);
-                        const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-                        const blobUrl = URL.createObjectURL(svgBlob);
+                        const dataUrl = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgString);
                         
                         await new Promise((resolve) => {
                             const img = new Image();
                             img.onload = () => {
                                 const ctx = wrapperCanvas.getContext('2d');
                                 ctx.drawImage(img, 0, 0, wrapperCanvas.width, wrapperCanvas.height);
-                                URL.revokeObjectURL(blobUrl);
                                 resolve();
                             };
                             img.onerror = (e) => {
                                 console.warn('[KMap Export] SVG rasterization failed:', e);
-                                URL.revokeObjectURL(blobUrl);
                                 resolve();
                             };
-                            img.src = blobUrl;
+                            img.src = dataUrl;
                         });
                     } catch (e) {
                         console.warn('[KMap Export] Failed to process SVG overlay:', e);
