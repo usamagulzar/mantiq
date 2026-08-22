@@ -1,3 +1,6 @@
+// Global App Domain URL
+window.url = 'mantiq.usamagulzar.dev';
+
 // Global Cached Data Snapshots
 var lastKMapData = null;
 var lastTruthTableData = null;

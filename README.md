@@ -113,7 +113,7 @@ More screenshots are available in the [`/screenshots`](screenshots) directory.
 
 The fastest way to try Mantiq is to open the hosted app in your browser:
 
-**→ [usamagulzar.github.io/mantiq](https://usamagulzar.github.io/mantiq)**
+**→ [mantiq.usamagulzar.dev](https://mantiq.usamagulzar.dev)**
 
 ### Install as an App (PWA)
 
