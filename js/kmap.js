@@ -967,6 +967,9 @@ function drawLoopPieceCanvas(ctx, x, y, w, h, color, wrapSides, scale) {
     const rBL = roundBL ? r : 0;
 
     ctx.save();
+    ctx.setLineDash([]);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
 
@@ -1001,6 +1004,7 @@ function drawLoopPieceCanvas(ctx, x, y, w, h, color, wrapSides, scale) {
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
             ctx.stroke();
+            ctx.setLineDash([]);
         };
 
         if (wrapSides.top) drawDashEdge(x + rTL, y, x2 - rTR, y);
@@ -1009,12 +1013,13 @@ function drawLoopPieceCanvas(ctx, x, y, w, h, color, wrapSides, scale) {
         if (wrapSides.left) drawDashEdge(x, y2 - rBL, x, y + rTL);
     }
 
+    ctx.setLineDash([]);
     ctx.restore();
 }
 
 /** Pure 2D Canvas direct K-Map PNG exporter — renders K-Map grid and group loops directly onto canvas with 100% sub-pixel accuracy, zero DOM dependencies, and zero html2canvas/SVG rasterization issues. */
 function exportKMapPNGDirect() {
-    console.log('[KMap Exporter v2.2.43] Direct 2D Canvas rendering starting...');
+    console.log('[KMap Exporter v2.2.47] Direct 2D Canvas rendering starting...');
     if (!lastKMapData || !_lastSVGDrawParams) {
         if (typeof showToast === 'function') showToast('No K-Map available to export', 'error');
         return;
@@ -1065,6 +1070,11 @@ function exportKMapPNGDirect() {
     canvas.height = totalH;
     const ctx = canvas.getContext('2d');
 
+    // Reset line dash and shadow state
+    ctx.setLineDash([]);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+
     // Theme colors matching app UI
     const rootStyle = getComputedStyle(document.documentElement);
     const isDark = document.body.classList.contains('dark-theme') || 
@@ -1100,6 +1110,7 @@ function exportKMapPNGDirect() {
         ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
         ctx.shadowBlur = 16 * SCALE;
         ctx.shadowOffsetY = 4 * SCALE;
+        ctx.setLineDash([]);
         ctx.fillStyle = cardBgColor;
         ctx.strokeStyle = borderColor;
         ctx.lineWidth = 2 * SCALE;
@@ -1112,6 +1123,11 @@ function exportKMapPNGDirect() {
         ctx.fill();
         ctx.stroke();
         ctx.restore();
+
+        // Reset state explicitly after card shadow restore
+        ctx.setLineDash([]);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
 
         // Plane Title (e.g. A=0, A=1 for 5-var)
         if (planesCount > 1 && zGray && zGray[p] !== undefined) {
