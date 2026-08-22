@@ -323,26 +323,14 @@
     color: var(--error) !important;
 }
 
-.output-cell.out-zero:hover {
-    background-color: rgba(239, 68, 68, 0.25) !important;
-}
-
 .output-cell.out-one {
     background-color: var(--success-light) !important;
     color: var(--success) !important;
 }
 
-.output-cell.out-one:hover {
-    background-color: rgba(16, 185, 129, 0.25) !important;
-}
-
 .output-cell.out-dontcare {
     background-color: rgba(148, 163, 184, 0.15) !important;
     color: var(--text-secondary) !important;
-}
-
-.output-cell.out-dontcare:hover {
-    background-color: rgba(148, 163, 184, 0.25) !important;
 }
 
 /* Waveform Canvas */
@@ -745,9 +733,6 @@
 }
 .kmap-table { border-collapse: collapse; margin: 20px auto; width: auto; border-radius: 14px; overflow: hidden; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12); transform: translateZ(0); }
 .kmap-cell { border: 1px solid var(--border); width: 60px; height: 60px; min-width: 60px; min-height: 60px; text-align: center; vertical-align: middle; cursor: pointer; user-select: none; transition: background 0.2s; font-family: monospace; font-size: 1.2rem; box-sizing: border-box; }  
-@media (hover: hover) and (pointer: fine) {
-    .kmap-cell:hover { background-color: var(--accent-light); }
-}
 .kmap-table th { padding: 10px; font-weight: bold; background: var(--bg-primary); min-width: 60px; height: 60px; text-align: center; vertical-align: middle; box-sizing: border-box; } 
 
 /* Rounded outer corners for the K-map grid. border-collapse merges adjacent
@@ -1018,9 +1003,6 @@
 .term-box.selectable-implicant {
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-}
-.term-box.selectable-implicant:hover {
-    transform: translateY(-1px);
 }
 .term-box.selectable-implicant.selected {
     box-shadow: 0 0 0 2px currentColor, 0 2px 8px rgba(0, 0, 0, 0.25);

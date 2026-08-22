@@ -656,12 +656,7 @@ html:not(.light-mode) .kmap-cell {
     background-color: var(--bg-primary);
 }
 
-/* Ensure hover effect is maintained for the new cell color */
-@media (hover: hover) and (pointer: fine) {
-    html:not(.light-mode) .kmap-cell:hover {
-        background-color: var(--accent-light);
-    }
-}
+/* Hover effect disabled for kmap cells */
 
 /* ============================================================
    Tutorial & Pro-Tips System
@@ -804,12 +799,7 @@ html:not(.light-mode) .kmap-cell {
     background-color: var(--bg-primary);
 }
 
-/* Ensure hover effect is maintained for the new cell color */
-@media (hover: hover) and (pointer: fine) {
-    html:not(.light-mode) .kmap-cell:hover {
-        background-color: var(--accent-light);
-    }
-}
+/* Hover effect disabled for kmap cells */
 
 /* ============================================================
    Tutorial & Pro-Tips System

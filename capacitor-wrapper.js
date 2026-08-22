@@ -288,7 +288,7 @@
         return originalClick.call(this);
     };
 
-    const CURRENT_BUILTIN_VERSION = 'mantiq-cache-v2.2.54';
+    const CURRENT_BUILTIN_VERSION = 'mantiq-cache-v2.2.55';
 
     // 0. Automatically reset stale disk bundles when a new APK build is installed
     (async function syncBuiltinVersion() {

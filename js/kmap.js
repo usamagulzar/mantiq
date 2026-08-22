@@ -2772,26 +2772,6 @@ function _redrawActiveKMapView() {
 // those are what we listen for here. closest('.selectable-implicant') plus
 // checking relatedTarget is what keeps this from firing repeatedly as the
 // mouse moves between child nodes inside the same term-box.
-document.addEventListener('mouseover', (e) => {
-    const implicant = e.target.closest('.selectable-implicant');
-    if (!implicant || !implicant.hasAttribute('data-term')) return;
-    if (implicant.contains(e.relatedTarget)) return; // moved within the same box, ignore
-    const term = implicant.getAttribute('data-term');
-    if (!term || term === _hoveredImplicantTerm) return;
-    _hoveredImplicantTerm = term;
-    _redrawActiveKMapView();
-});
-
-document.addEventListener('mouseout', (e) => {
-    const implicant = e.target.closest('.selectable-implicant');
-    if (!implicant || !implicant.hasAttribute('data-term')) return;
-    if (implicant.contains(e.relatedTarget)) return; // moved within the same box, ignore
-    if (_hoveredImplicantTerm === null) return;
-    _hoveredImplicantTerm = null;
-    _redrawActiveKMapView();
-});
-
-
 
 
 
