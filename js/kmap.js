@@ -1047,8 +1047,18 @@ function exportKMapPNGDirect() {
     const watermarkH = 50 * SCALE;
 
     const planesCount = numPlanes || 1;
-    const totalW = outerMargin * 2 + planesCount * cardW + (planesCount - 1) * gapBetweenCards;
-    const totalH = outerMargin * 2 + cardH + watermarkH;
+    let gridCols = 1;
+    let gridRows = 1;
+    if (planesCount === 2) {
+        gridCols = 1;
+        gridRows = 2;
+    } else if (planesCount > 2) {
+        gridCols = 2;
+        gridRows = Math.ceil(planesCount / 2);
+    }
+
+    const totalW = outerMargin * 2 + gridCols * cardW + (gridCols - 1) * gapBetweenCards;
+    const totalH = outerMargin * 2 + gridRows * cardH + (gridRows - 1) * gapBetweenCards + watermarkH;
 
     const canvas = document.createElement('canvas');
     canvas.width = totalW;
@@ -1079,8 +1089,11 @@ function exportKMapPNGDirect() {
 
     // Render each plane
     for (let p = 0; p < planesCount; p++) {
-        const cardX = outerMargin + p * (cardW + gapBetweenCards);
-        const cardY = outerMargin;
+        const colIndex = p % gridCols;
+        const rowIndex = Math.floor(p / gridCols);
+
+        const cardX = outerMargin + colIndex * (cardW + gapBetweenCards);
+        const cardY = outerMargin + rowIndex * (cardH + gapBetweenCards);
 
         // Plane Card Shadow + Background
         ctx.save();

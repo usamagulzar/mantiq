@@ -283,7 +283,7 @@
             const match = remoteSw.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
             if (!match) { console.warn('[Updater] Step 2: Could not parse version from sw.js'); return; }
             const remoteVersion = match[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.43';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.44';
             console.log('[Updater] Step 2: remote=' + remoteVersion + ' | local=' + localVersion);
 
             if (remoteVersion === localVersion) {
