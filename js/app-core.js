@@ -747,10 +747,13 @@ if (exportKmapPngBtn) {
                 ctx.drawImage(gridCanvas, 0, PAD);
 
                 // Draw the group loops manually on top of the grid image.
-                // We compute each cell's position relative to gridContainer,
-                // then scale by html2canvas's pixel ratio (scale: 2).
+                // On Android, getBoundingClientRect() is patched (divides by zoom=0.90).
+                // html2canvas uses the raw (visual/zoomed) coordinates, so we must too.
+                // Use __rawGBCR if available (set by capacitor-wrapper.js), otherwise
+                // fall back to the normal (possibly patched) version.
+                const rawGBCR = (el) => window.__rawGBCR ? window.__rawGBCR(el) : el.getBoundingClientRect();
                 const SCALE = 2;
-                const gridRect = gridContainer.getBoundingClientRect();
+                const gridRect = rawGBCR(gridContainer);
 
                 // Use _lastSVGDrawParams to replay the loop geometry without
                 // touching the SVG overlay at all.
@@ -808,8 +811,8 @@ if (exportKmapPngBtn) {
                             const brCell = document.getElementById(`kmap-cell-${parseInt(brBin, 2)}`);
                             if (!tlCell || !brCell) return;
 
-                            const tlR = tlCell.getBoundingClientRect();
-                            const brR = brCell.getBoundingClientRect();
+                            const tlR = rawGBCR(tlCell);
+                            const brR = rawGBCR(brCell);
 
                             // Positions relative to grid container, scaled by canvas scale.
                             // Grid is drawn at y=PAD on finalCanvas, so add PAD (not PAD*SCALE).

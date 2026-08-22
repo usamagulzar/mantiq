@@ -146,6 +146,12 @@
 
         // Patch getBoundingClientRect
         const originalGBCR = Element.prototype.getBoundingClientRect;
+
+        // Expose raw (pre-patch) GBCR and zoom scale for the K-Map PNG export,
+        // which needs unscaled visual coordinates to match what html2canvas sees.
+        window.__rawGBCR = function(el) { return originalGBCR.call(el); };
+        window.__zoomScale = SCALE;
+
         Element.prototype.getBoundingClientRect = function() {
             const rect = originalGBCR.call(this);
             return {
@@ -277,7 +283,7 @@
             const match = remoteSw.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
             if (!match) { console.warn('[Updater] Step 2: Could not parse version from sw.js'); return; }
             const remoteVersion = match[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.32';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.33';
             console.log('[Updater] Step 2: remote=' + remoteVersion + ' | local=' + localVersion);
 
             if (remoteVersion === localVersion) {
