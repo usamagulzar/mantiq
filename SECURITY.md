@@ -36,7 +36,7 @@ Instead, report it privately using one of the following methods:
 1. **Preferred:** Open a [GitHub Security Advisory](../../security/advisories/new) for this
    repository (Security tab → "Report a vulnerability"). This creates a private discussion
    thread visible only to maintainers until a fix is ready.
-2. **Alternative:** Email the maintainers at **ugulzar.pk@gmail.com** with a clear
+2. **Alternative:** Email the maintainers at **hello@usamagulzar.dev** with a clear
    description of the issue.
 
 Please include:
