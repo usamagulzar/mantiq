@@ -73,6 +73,14 @@ if (fs.existsSync(indexPath)) {
 
 console.log('Build complete. Files copied to www/ and Capacitor wrapper injected.');
 
+// Sync www/ to native Android assets directory
+const androidAssetsDir = path.join(__dirname, 'android', 'app', 'src', 'main', 'assets', 'public');
+if (fs.existsSync(path.join(__dirname, 'android'))) {
+    if (!fs.existsSync(androidAssetsDir)) fs.mkdirSync(androidAssetsDir, { recursive: true });
+    copyRecursiveSync(destDir, androidAssetsDir);
+    console.log('Synced www/ to android/app/src/main/assets/public.');
+}
+
 const AdmZip = require('adm-zip');
 const zip = new AdmZip();
 zip.addLocalFolder(destDir);

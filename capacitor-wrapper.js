@@ -64,6 +64,12 @@
             }
         };
 
+        window.addEventListener('mantiqVolumeKey', (e) => {
+            if (e && e.detail && e.detail.type) {
+                handleVol(e.detail.type);
+            }
+        });
+
         window.addEventListener('keydown', (e) => {
             const k = (e.key || e.code || '').toLowerCase();
             if (k.includes('volumeup') || e.keyCode === 175 || e.keyCode === 24) {
@@ -282,6 +288,23 @@
         return originalClick.call(this);
     };
 
+    const CURRENT_BUILTIN_VERSION = 'mantiq-cache-v2.2.54';
+
+    // 0. Automatically reset stale disk bundles when a new APK build is installed
+    (async function syncBuiltinVersion() {
+        if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.CapacitorUpdater) {
+            const { CapacitorUpdater } = window.Capacitor.Plugins;
+            const stored = localStorage.getItem('mantiq_app_version');
+            if (stored && stored < CURRENT_BUILTIN_VERSION) {
+                console.log('[Capacitor Wrapper] Resetting stale disk bundle ' + stored + ' -> ' + CURRENT_BUILTIN_VERSION);
+                localStorage.setItem('mantiq_app_version', CURRENT_BUILTIN_VERSION);
+                try { await CapacitorUpdater.reset(); } catch(e) {}
+            } else if (!stored) {
+                localStorage.setItem('mantiq_app_version', CURRENT_BUILTIN_VERSION);
+            }
+        }
+    })();
+
     // 4. Background Updater
     const checkUpdates = async () => {
         try {
@@ -306,7 +329,7 @@
             const match = remoteSw.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
             if (!match) { console.warn('[Updater] Step 2: Could not parse version from sw.js'); return; }
             const remoteVersion = match[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.52';
+            const localVersion = localStorage.getItem('mantiq_app_version') || CURRENT_BUILTIN_VERSION;
             console.log('[Updater] Step 2: remote=' + remoteVersion + ' | local=' + localVersion);
 
             if (remoteVersion === localVersion) {
