@@ -720,40 +720,12 @@ if (exportKmapPngBtn) {
         // starts its heavy synchronous work.
         requestAnimationFrame(() => requestAnimationFrame(() => {
             const gridContainer = document.getElementById('kmap-grid-container');
-            const svgOverlay = document.getElementById('kmap-svg-overlay');
-            let originalTransform = '';
-            let p = null;
-            
-            // Save the wrapper's current styles so we can restore after export
-            const rect = gridContainer.getBoundingClientRect();
-            const savedStyles = {
-                width:      kmapVisualWrapper.style.width,
-                minWidth:   kmapVisualWrapper.style.minWidth,
-                height:     kmapVisualWrapper.style.height,
-                minHeight:  kmapVisualWrapper.style.minHeight,
-                display:    kmapVisualWrapper.style.display,
-            };
 
-            // Temporarily fix the wrapper to exactly the grid's bounding box and
-            // disable flex-centering so html2canvas sees the same layout the SVG
-            // was drawn against.  We MUST do this on the real DOM so that
-            // _redrawSVGOnly() can call getBoundingClientRect() on real cells and
-            // produce coordinates that match what html2canvas will capture.
-            kmapVisualWrapper.style.width    = rect.width  + 'px';
-            kmapVisualWrapper.style.minWidth = rect.width  + 'px';
-            kmapVisualWrapper.style.height   = rect.height + 'px';
-            kmapVisualWrapper.style.minHeight= rect.height + 'px';
-            kmapVisualWrapper.style.display  = 'block';
-
-            // Redraw the SVG overlay now that the layout has changed so its
-            // coordinates are consistent with the layout html2canvas will see.
-            if (typeof _redrawSVGOnly === 'function') _redrawSVGOnly();
-
-            // Give the browser one frame to flush the layout before capturing.
-            requestAnimationFrame(() => {
-            html2canvas(kmapVisualWrapper, {
+            // Capture just the grid container — no wrapper layout changes needed,
+            // so CSS zoom and SVG coordinate patches never cause misalignment.
+            html2canvas(gridContainer, {
                 backgroundColor: bgColor,
-                scale: 2, // High res
+                scale: 2,
                 ignoreElements: (el) => {
                     return el.classList && (
                         el.classList.contains('kmap-3d-controls') ||
@@ -762,21 +734,110 @@ if (exportKmapPngBtn) {
                         el.classList.contains('zoom-btn-fullscreen')
                     );
                 }
-            }).then(canvas => {
-                // Add padding at the bottom specifically for the watermark
+            }).then(gridCanvas => {
+                // Build the final canvas: grid + groups drawn manually + watermark
+                const PAD = 40; // bottom padding for watermark
                 const finalCanvas = document.createElement('canvas');
-                finalCanvas.width = canvas.width;
-                finalCanvas.height = canvas.height + 40;
+                finalCanvas.width  = gridCanvas.width;
+                finalCanvas.height = gridCanvas.height + PAD * 2;
                 const ctx = finalCanvas.getContext('2d');
 
-                // Fill background
                 ctx.fillStyle = bgColor;
                 ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+                ctx.drawImage(gridCanvas, 0, PAD);
 
-                // Draw original K-Map
-                ctx.drawImage(canvas, 0, 0);
+                // Draw the group loops manually on top of the grid image.
+                // We compute each cell's position relative to gridContainer,
+                // then scale by html2canvas's pixel ratio (scale: 2).
+                const SCALE = 2;
+                const gridRect = gridContainer.getBoundingClientRect();
 
-                // Draw watermark in the padded area
+                // Use _lastSVGDrawParams to replay the loop geometry without
+                // touching the SVG overlay at all.
+                if (window._lastSVGDrawParams) {
+                    const { solution, numVars, rowsBits, colsBits, rowGray, colGray, numPlanes, zGray } = window._lastSVGDrawParams;
+                    const LOOP_COLORS_LOCAL = [
+                        '#007AFF','#34C759','#FF3B30','#FF9500','#AF52DE',
+                        '#5856D6','#FF2D55','#5AC8FA','#FFCC00','#00C7BE',
+                        '#A2845E','#FF6B22','#E586C6','#8D99AE','#4B8A08','#B53A15'
+                    ];
+                    const zBits = numVars - rowsBits - colsBits;
+
+                    solution.forEach((term, idx) => {
+                        const color = LOOP_COLORS_LOCAL[idx % LOOP_COLORS_LOCAL.length];
+                        const zPart = term.slice(0, zBits);
+
+                        const planesForTerm = [];
+                        if (numPlanes > 1) {
+                            for (let z = 0; z < numPlanes; z++) {
+                                const zOffset = zGray[z];
+                                let match = true;
+                                for (let k = 0; k < zBits; k++) {
+                                    if (zPart[k] !== '-' && zPart[k] !== zOffset[k]) { match = false; break; }
+                                }
+                                if (match) planesForTerm.push(zOffset);
+                            }
+                        } else {
+                            planesForTerm.push('');
+                        }
+
+                        planesForTerm.forEach(zOffset => {
+                            const rowBits = term.slice(zBits, zBits + rowsBits);
+                            const colBits = term.slice(zBits + rowsBits);
+
+                            const rowPresent = rowGray.map(g => {
+                                for (let k = 0; k < rowsBits; k++) if (rowBits[k] !== '-' && rowBits[k] !== g[k]) return false;
+                                return true;
+                            });
+                            const colPresent = colGray.map(g => {
+                                for (let k = 0; k < colsBits; k++) if (colBits[k] !== '-' && colBits[k] !== g[k]) return false;
+                                return true;
+                            });
+
+                            // Find bounding cells
+                            const rowIndices = rowPresent.reduce((a, v, i) => v ? [...a, i] : a, []);
+                            const colIndices = colPresent.reduce((a, v, i) => v ? [...a, i] : a, []);
+                            if (!rowIndices.length || !colIndices.length) return;
+
+                            const rLo = Math.min(...rowIndices), rHi = Math.max(...rowIndices);
+                            const cLo = Math.min(...colIndices), cHi = Math.max(...colIndices);
+
+                            const tlBin = zOffset + rowGray[rLo] + colGray[cLo];
+                            const brBin = zOffset + rowGray[rHi] + colGray[cHi];
+                            const tlCell = document.getElementById(`kmap-cell-${parseInt(tlBin, 2)}`);
+                            const brCell = document.getElementById(`kmap-cell-${parseInt(brBin, 2)}`);
+                            if (!tlCell || !brCell) return;
+
+                            const tlR = tlCell.getBoundingClientRect();
+                            const brR = brCell.getBoundingClientRect();
+
+                            // Positions relative to grid container, scaled by canvas scale
+                            const x = (tlR.left - gridRect.left) * SCALE;
+                            const y = (tlR.top  - gridRect.top)  * SCALE + PAD * SCALE;
+                            const w = (brR.right  - tlR.left) * SCALE;
+                            const h = (brR.bottom - tlR.top)  * SCALE;
+
+                            const PAD_PX = 5 * SCALE;
+                            const rx = 10 * SCALE;
+
+                            // Parse color to rgba for fill
+                            ctx.save();
+                            ctx.strokeStyle = color;
+                            ctx.lineWidth = 3 * SCALE;
+                            ctx.setLineDash([]);
+
+                            // Fill
+                            ctx.fillStyle = color + '28'; // ~16% opacity
+                            ctx.beginPath();
+                            ctx.roundRect(x + PAD_PX, y + PAD_PX, w - PAD_PX*2, h - PAD_PX*2, rx);
+                            ctx.fill();
+                            ctx.stroke();
+                            ctx.restore();
+                        });
+                    });
+                }
+
+                // Watermark
                 ctx.font = '500 16px "Outfit", sans-serif';
                 ctx.fillStyle = rootStyle.getPropertyValue('--text-muted').trim() || '#8e97a3';
                 ctx.textAlign = 'right';
@@ -784,7 +845,7 @@ if (exportKmapPngBtn) {
 
                 const dataUrl = finalCanvas.toDataURL('image/png');
                 const link = document.createElement('a');
-                link.download = `mantiq_kmap_${new Date().toISOString().slice(0,19).replace(/[-T:]/g,"_")}.png`;
+                link.download = `mantiq_kmap_${new Date().toISOString().slice(0,19).replace(/[-T:]/g,'_')}.png`;
                 link.href = dataUrl;
                 link.click();
                 showToast('K-Map exported as PNG!');
@@ -792,17 +853,8 @@ if (exportKmapPngBtn) {
                 console.error('Failed to export K-Map:', err);
                 showToast('Failed to export K-Map', 'error');
             }).finally(() => {
-                // Restore the wrapper's original styles
-                kmapVisualWrapper.style.width     = savedStyles.width;
-                kmapVisualWrapper.style.minWidth  = savedStyles.minWidth;
-                kmapVisualWrapper.style.height    = savedStyles.height;
-                kmapVisualWrapper.style.minHeight = savedStyles.minHeight;
-                kmapVisualWrapper.style.display   = savedStyles.display;
-                // Redraw SVG so on-screen groups snap back to correct positions
-                if (typeof _redrawSVGOnly === 'function') _redrawSVGOnly();
                 finishExport();
             });
-            }); // end requestAnimationFrame
         }));
     });
 }

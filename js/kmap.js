@@ -44,6 +44,12 @@ function _effectiveImplicantTerm() {
 // Cached parameters from the most recent successful render, used by the
 // fast SVG-only redraw path so term selection never rebuilds the DOM.
 let _lastSVGDrawParams = null;
+// Expose on window so the PNG export in app-core.js can read it without touching the SVG overlay
+Object.defineProperty(window, '_lastSVGDrawParams', {
+    get() { return _lastSVGDrawParams; },
+    set(v) { _lastSVGDrawParams = v; },
+    configurable: true
+});
 
 // Same idea as _lastSVGDrawParams, but for the Wrap view's tiled loop
 // overlay, so selecting a term there redraws just the loops instead of
