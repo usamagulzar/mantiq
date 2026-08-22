@@ -950,10 +950,10 @@ function renderMultiple2DKMaps(numVars, variables, minterms, dontCares, activeSo
     _lastSVGDrawParams = { solution: activeSolution, numVars, rowsBits: 2, colsBits: 2, rowGray, colGray, numPlanes, zGray, scale };
 }
 
-/** Draws one piece of a group loop on 2D Canvas with wrap dashes, sharp wrap corners, and rounded real corners. */
+/** Draws one piece of a group loop on 2D Canvas with smooth continuous corners, rounded real corners, and wrapped dashes. */
 function drawLoopPieceCanvas(ctx, x, y, w, h, color, wrapSides, scale) {
-    const r = Math.min(12 * scale, w / 2, h / 2);
-    const strokeWidth = Math.max(1, 3 * scale);
+    const r = Math.min(14 * scale, w / 2, h / 2);
+    const strokeWidth = Math.max(1.5, 3 * scale);
     const x2 = x + w, y2 = y + h;
 
     const roundTL = !(wrapSides.top || wrapSides.left);
@@ -967,8 +967,10 @@ function drawLoopPieceCanvas(ctx, x, y, w, h, color, wrapSides, scale) {
     const rBL = roundBL ? r : 0;
 
     ctx.save();
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
 
-    // Fill path (single closed path matching chopped pill shape)
+    // 1. Build the single continuous outline path
     ctx.beginPath();
     ctx.moveTo(x + rTL, y);
     ctx.lineTo(x2 - rTR, y);
@@ -980,44 +982,39 @@ function drawLoopPieceCanvas(ctx, x, y, w, h, color, wrapSides, scale) {
     ctx.lineTo(x, y + rTL);
     if (rTL > 0) ctx.arcTo(x, y, x + rTL, y, rTL); else ctx.lineTo(x, y);
     ctx.closePath();
-    ctx.fillStyle = color + '33'; // ~20% fill opacity
+
+    // 2. Fill background
+    ctx.fillStyle = color + '30'; // ~19% fill opacity
     ctx.fill();
 
-    // Helper for drawing individual stroke segments
-    const drawSeg = (x1, y1, x2, y2, isWrap) => {
-        ctx.beginPath();
-        ctx.setLineDash(isWrap ? [4 * scale, 4 * scale] : []);
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-    };
-
+    // 3. Stroke entire continuous contour for unbroken round corners
     ctx.strokeStyle = color;
     ctx.lineWidth = strokeWidth;
+    ctx.stroke();
 
-    // Top
-    drawSeg(x + rTL, y, x2 - rTR, y, wrapSides.top);
-    // TR Corner
-    if (roundTR) { ctx.beginPath(); ctx.setLineDash([]); ctx.arcTo(x2, y, x2, y + rTR, rTR); ctx.stroke(); }
-    // Right
-    drawSeg(x2, y + rTR, x2, y2 - rBR, wrapSides.right);
-    // BR Corner
-    if (roundBR) { ctx.beginPath(); ctx.setLineDash([]); ctx.arcTo(x2, y2, x2 - rBR, y2, rBR); ctx.stroke(); }
-    // Bottom
-    drawSeg(x2 - rBR, y2, x + rBL, y2, wrapSides.bottom);
-    // BL Corner
-    if (roundBL) { ctx.beginPath(); ctx.setLineDash([]); ctx.arcTo(x, y2, x, y2 - rBL, rBL); ctx.stroke(); }
-    // Left
-    drawSeg(x, y2 - rBL, x, y + rTL, wrapSides.left);
-    // TL Corner
-    if (roundTL) { ctx.beginPath(); ctx.setLineDash([]); ctx.arcTo(x, y, x + rTL, y, rTL); ctx.stroke(); }
+    // 4. Overlay dashed lines over wrapped edges (if any)
+    const hasWrap = wrapSides.top || wrapSides.right || wrapSides.bottom || wrapSides.left;
+    if (hasWrap) {
+        const drawDashEdge = (x1, y1, x2, y2) => {
+            ctx.beginPath();
+            ctx.setLineDash([4 * scale, 4 * scale]);
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        };
+
+        if (wrapSides.top) drawDashEdge(x + rTL, y, x2 - rTR, y);
+        if (wrapSides.right) drawDashEdge(x2, y + rTR, x2, y2 - rBR);
+        if (wrapSides.bottom) drawDashEdge(x2 - rBR, y2, x + rBL, y2);
+        if (wrapSides.left) drawDashEdge(x, y2 - rBL, x, y + rTL);
+    }
 
     ctx.restore();
 }
 
 /** Pure 2D Canvas direct K-Map PNG exporter — renders K-Map grid and group loops directly onto canvas with 100% sub-pixel accuracy, zero DOM dependencies, and zero html2canvas/SVG rasterization issues. */
 function exportKMapPNGDirect() {
-    console.log('[KMap Exporter v2.2.39] Direct 2D Canvas rendering starting...');
+    console.log('[KMap Exporter v2.2.43] Direct 2D Canvas rendering starting...');
     if (!lastKMapData || !_lastSVGDrawParams) {
         if (typeof showToast === 'function') showToast('No K-Map available to export', 'error');
         return;
@@ -1027,10 +1024,10 @@ function exportKMapPNGDirect() {
     const { solution, numVars, rowsBits, colsBits, rowGray, colGray, numPlanes, zGray } = _lastSVGDrawParams;
 
     const SCALE = 2;
-    const cellW = 80 * SCALE;
-    const cellH = 80 * SCALE;
-    const cornerW = 50 * SCALE;
-    const cornerH = 50 * SCALE;
+    const cellW = 75 * SCALE;
+    const cellH = 75 * SCALE;
+    const cornerW = 42 * SCALE;
+    const cornerH = 38 * SCALE;
 
     const numRows = rowGray.length;
     const numCols = colGray.length;
@@ -1138,13 +1135,13 @@ function exportKMapPNGDirect() {
         ctx.fillStyle = textPrimary;
         // Col vars (top-right of corner)
         ctx.textAlign = 'right';
-        ctx.fillText(colVars.join(''), tableX + cornerW - 6 * SCALE, tableY + 18 * SCALE);
+        ctx.fillText(colVars.join(''), tableX + cornerW - 4 * SCALE, tableY + 16 * SCALE);
         // Row vars (bottom-left of corner)
         ctx.textAlign = 'left';
-        ctx.fillText(rowVars.join(''), tableX + 6 * SCALE, tableY + cornerH - 6 * SCALE);
+        ctx.fillText(rowVars.join(''), tableX + 4 * SCALE, tableY + cornerH - 4 * SCALE);
 
         // Column Headers
-        ctx.font = `600 ${15 * SCALE}px "Outfit", sans-serif`;
+        ctx.font = `600 ${14 * SCALE}px "Outfit", sans-serif`;
         ctx.fillStyle = textMuted;
         ctx.textAlign = 'center';
         for (let c = 0; c < numCols; c++) {
@@ -1156,7 +1153,7 @@ function exportKMapPNGDirect() {
         ctx.textAlign = 'right';
         for (let r = 0; r < numRows; r++) {
             const ry = tableY + cornerH + r * cellH + cellH / 2 + 5 * SCALE;
-            ctx.fillText(rowGray[r], tableX + cornerW - 12 * SCALE, ry);
+            ctx.fillText(rowGray[r], tableX + cornerW - 10 * SCALE, ry);
         }
 
         // Cell Borders & Values
@@ -1175,26 +1172,26 @@ function exportKMapPNGDirect() {
                 const binStr = zPrefix + rowGray[r] + colGray[c];
                 const mintermIndex = parseInt(binStr, 2);
 
-                ctx.font = `500 ${12 * SCALE}px "Outfit", sans-serif`;
+                ctx.font = `500 ${11 * SCALE}px "Outfit", sans-serif`;
                 ctx.fillStyle = textMuted;
                 ctx.textAlign = 'left';
-                ctx.fillText(String(mintermIndex), cx + 6 * SCALE, cy + 16 * SCALE);
+                ctx.fillText(String(mintermIndex), cx + 5 * SCALE, cy + 15 * SCALE);
 
                 // Minterm Value (1, 0, or X)
                 let val = '0';
                 if (minterms && minterms.includes(mintermIndex)) val = '1';
                 if (dontCares && dontCares.includes(mintermIndex)) val = 'X';
 
-                ctx.font = `700 ${32 * SCALE}px "Outfit", sans-serif`;
+                ctx.font = `700 ${30 * SCALE}px "Outfit", sans-serif`;
                 ctx.textAlign = 'center';
                 if (val === '1') {
-                    ctx.fillStyle = '#30d158'; // Neon iOS Green (matches on-screen .val-1)
+                    ctx.fillStyle = '#30d158'; // Neon iOS Green
                 } else if (val === 'X') {
-                    ctx.fillStyle = '#8e8e93'; // iOS Gray (matches on-screen .val-X)
+                    ctx.fillStyle = '#8e8e93'; // iOS Gray
                 } else {
-                    ctx.fillStyle = '#ff453a'; // Neon iOS Red (matches on-screen .val-0)
+                    ctx.fillStyle = '#ff453a'; // Neon iOS Red
                 }
-                ctx.fillText(val, cx + cellW / 2, cy + cellH / 2 + 10 * SCALE);
+                ctx.fillText(val, cx + cellW / 2, cy + cellH / 2 + 9 * SCALE);
             }
         }
 
