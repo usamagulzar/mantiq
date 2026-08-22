@@ -775,39 +775,48 @@
 #kmap-svg-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; } 
 
 /* 3D KMap CSS — a real WebGL cube lattice, one cube per K-map cell */
-#kmap-3d-container { position: relative; width: 100%; height: 100%; min-height: 380px; }
+#kmap-3d-container { position: relative; width: 100%; height: 100%; min-height: 320px; box-sizing: border-box; overflow: hidden; }
 
 .kmap-3d-canvas-wrap {
-    width: 100%; height: 100%; min-height: 380px;
+    width: 100%; height: 100%; min-height: 320px;
     display: flex; align-items: center; justify-content: center;
     box-sizing: border-box;
 }
 .kmap-3d-canvas-wrap canvas { display: block; }
 
-.kmap-3d-toolbar { position: absolute; top: 8px; right: 8px; display: flex; gap: 6px; z-index: 50; }
+.kmap-3d-toolbar { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; z-index: 60; }
 .kmap-3d-tbtn {
-    width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-    background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px;
-    color: var(--text-secondary); cursor: pointer;
+    width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text-primary); cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
     transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 @media (hover: hover) and (pointer: fine) {
     .kmap-3d-tbtn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
 }
 .kmap-3d-tbtn.active { background: var(--accent); color: #fff; border-color: var(--accent-hover); }
-.kmap-3d-tbtn svg { width: 15px; height: 15px; }
+.kmap-3d-tbtn svg { width: 16px; height: 16px; }
 
 .kmap-3d-legend {
-    position: absolute; top: 8px; left: 8px; z-index: 50;
-    display: flex; gap: 12px;
-    background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 6px;
-    padding: 6px 10px; font-size: 0.78em; color: var(--text-secondary);
+    position: absolute; top: 12px; left: 12px; z-index: 60;
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px;
+    padding: 6px 12px; font-size: 12px; font-weight: 600; color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(8px);
+    pointer-events: auto;
 }
 .kmap-3d-legend span { display: flex; align-items: center; gap: 5px; }
 .kmap-3d-legend i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
 
-.kmap-3d-controls { text-align: center; margin-top: 10px; font-size: 0.8em; color: var(--text-secondary); }
-.kmap-3d-controls .ctrl-hint { opacity: 0.85; }
+.kmap-3d-controls {
+    position: absolute; bottom: 12px; left: 12px; right: 120px;
+    text-align: left; font-size: 11px; color: var(--text-muted);
+    pointer-events: none; z-index: 60;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.kmap-3d-controls .ctrl-hint { opacity: 0.9; font-weight: 500; }
 
 /* K-Map fullscreen toggle - sits bottom-right so it never collides with the
    3D toolbar (top-right) or legend (top-left) in any view mode. */

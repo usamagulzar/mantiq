@@ -536,6 +536,33 @@
         bottom: 14px;
         right: 14px;
     }
+
+    /* 3D K-Map mobile safe positioning */
+    .kmap-3d-legend {
+        top: 8px;
+        left: 8px;
+        padding: 4px 8px;
+        font-size: 11px;
+        gap: 6px;
+    }
+
+    .kmap-3d-toolbar {
+        top: 8px;
+        right: 8px;
+        gap: 4px;
+    }
+
+    .kmap-3d-tbtn {
+        width: 28px;
+        height: 28px;
+    }
+
+    .kmap-3d-controls {
+        bottom: 8px;
+        left: 8px;
+        right: 100px;
+        font-size: 10px;
+    }
 }
 
 /* ==========================================================================
