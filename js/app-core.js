@@ -811,25 +811,40 @@ if (exportKmapPngBtn) {
                             const tlR = tlCell.getBoundingClientRect();
                             const brR = brCell.getBoundingClientRect();
 
-                            // Positions relative to grid container, scaled by canvas scale
+                            // Positions relative to grid container, scaled by canvas scale.
+                            // Grid is drawn at y=PAD on finalCanvas, so add PAD (not PAD*SCALE).
                             const x = (tlR.left - gridRect.left) * SCALE;
-                            const y = (tlR.top  - gridRect.top)  * SCALE + PAD * SCALE;
+                            const y = PAD + (tlR.top  - gridRect.top) * SCALE;
                             const w = (brR.right  - tlR.left) * SCALE;
                             const h = (brR.bottom - tlR.top)  * SCALE;
 
                             const PAD_PX = 5 * SCALE;
                             const rx = 10 * SCALE;
+                            const bx = x + PAD_PX, by = y + PAD_PX;
+                            const bw = w - PAD_PX*2,  bh = h - PAD_PX*2;
 
-                            // Parse color to rgba for fill
                             ctx.save();
                             ctx.strokeStyle = color;
                             ctx.lineWidth = 3 * SCALE;
                             ctx.setLineDash([]);
 
-                            // Fill
-                            ctx.fillStyle = color + '28'; // ~16% opacity
+                            // roundRect polyfill for older Android WebViews
                             ctx.beginPath();
-                            ctx.roundRect(x + PAD_PX, y + PAD_PX, w - PAD_PX*2, h - PAD_PX*2, rx);
+                            if (typeof ctx.roundRect === 'function') {
+                                ctx.roundRect(bx, by, bw, bh, rx);
+                            } else {
+                                ctx.moveTo(bx + rx, by);
+                                ctx.lineTo(bx + bw - rx, by);
+                                ctx.arcTo(bx + bw, by, bx + bw, by + rx, rx);
+                                ctx.lineTo(bx + bw, by + bh - rx);
+                                ctx.arcTo(bx + bw, by + bh, bx + bw - rx, by + bh, rx);
+                                ctx.lineTo(bx + rx, by + bh);
+                                ctx.arcTo(bx, by + bh, bx, by + bh - rx, rx);
+                                ctx.lineTo(bx, by + rx);
+                                ctx.arcTo(bx, by, bx + rx, by, rx);
+                                ctx.closePath();
+                            }
+                            ctx.fillStyle = color + '28'; // ~16% opacity
                             ctx.fill();
                             ctx.stroke();
                             ctx.restore();
