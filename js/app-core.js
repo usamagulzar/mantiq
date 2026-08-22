@@ -724,23 +724,36 @@ if (exportKmapPngBtn) {
             let originalTransform = '';
             let p = null;
             
+            // Save the wrapper's current styles so we can restore after export
             const rect = gridContainer.getBoundingClientRect();
-            
+            const savedStyles = {
+                width:      kmapVisualWrapper.style.width,
+                minWidth:   kmapVisualWrapper.style.minWidth,
+                height:     kmapVisualWrapper.style.height,
+                minHeight:  kmapVisualWrapper.style.minHeight,
+                display:    kmapVisualWrapper.style.display,
+            };
+
+            // Temporarily fix the wrapper to exactly the grid's bounding box and
+            // disable flex-centering so html2canvas sees the same layout the SVG
+            // was drawn against.  We MUST do this on the real DOM so that
+            // _redrawSVGOnly() can call getBoundingClientRect() on real cells and
+            // produce coordinates that match what html2canvas will capture.
+            kmapVisualWrapper.style.width    = rect.width  + 'px';
+            kmapVisualWrapper.style.minWidth = rect.width  + 'px';
+            kmapVisualWrapper.style.height   = rect.height + 'px';
+            kmapVisualWrapper.style.minHeight= rect.height + 'px';
+            kmapVisualWrapper.style.display  = 'block';
+
+            // Redraw the SVG overlay now that the layout has changed so its
+            // coordinates are consistent with the layout html2canvas will see.
+            if (typeof _redrawSVGOnly === 'function') _redrawSVGOnly();
+
+            // Give the browser one frame to flush the layout before capturing.
+            requestAnimationFrame(() => {
             html2canvas(kmapVisualWrapper, {
                 backgroundColor: bgColor,
                 scale: 2, // High res
-                onclone: (clonedDoc) => {
-                    const clonedWrapper = clonedDoc.getElementById('kmap-visual-wrapper');
-                    if (clonedWrapper) {
-                        // Ensure the cloned wrapper bounds match the scaled grid exactly so html2canvas doesn't clip it
-                        clonedWrapper.style.width = rect.width + 'px';
-                        clonedWrapper.style.minWidth = rect.width + 'px';
-                        clonedWrapper.style.height = rect.height + 'px';
-                        clonedWrapper.style.minHeight = rect.height + 'px';
-                        // temporarily disable flex centering in the clone so origin is exact
-                        clonedWrapper.style.display = 'block';
-                    }
-                },
                 ignoreElements: (el) => {
                     return el.classList && (
                         el.classList.contains('kmap-3d-controls') ||
@@ -779,8 +792,17 @@ if (exportKmapPngBtn) {
                 console.error('Failed to export K-Map:', err);
                 showToast('Failed to export K-Map', 'error');
             }).finally(() => {
+                // Restore the wrapper's original styles
+                kmapVisualWrapper.style.width     = savedStyles.width;
+                kmapVisualWrapper.style.minWidth  = savedStyles.minWidth;
+                kmapVisualWrapper.style.height    = savedStyles.height;
+                kmapVisualWrapper.style.minHeight = savedStyles.minHeight;
+                kmapVisualWrapper.style.display   = savedStyles.display;
+                // Redraw SVG so on-screen groups snap back to correct positions
+                if (typeof _redrawSVGOnly === 'function') _redrawSVGOnly();
                 finishExport();
             });
+            }); // end requestAnimationFrame
         }));
     });
 }
