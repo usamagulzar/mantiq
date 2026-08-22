@@ -306,7 +306,7 @@
             const match = remoteSw.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
             if (!match) { console.warn('[Updater] Step 2: Could not parse version from sw.js'); return; }
             const remoteVersion = match[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.51';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.52';
             console.log('[Updater] Step 2: remote=' + remoteVersion + ' | local=' + localVersion);
 
             if (remoteVersion === localVersion) {
@@ -393,4 +393,15 @@
             });
         }
     }
+
+    // Dismiss startup loader veil smoothly after native scale calculation finishes
+    const hideInitLoader = () => {
+        const loader = document.getElementById('init-loader-screen');
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+            setTimeout(() => { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 300);
+        }
+    };
+    setTimeout(hideInitLoader, 250);
 })();

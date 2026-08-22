@@ -196,6 +196,12 @@
 
   <body>
 
+    <!-- Instant Native Init Loader Veil -->
+    <div id="init-loader-screen" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999999;background:var(--bg-primary, #0F172A);display:flex;align-items:center;justify-content:center;transition:opacity 0.25s ease, visibility 0.25s ease;">
+        <div style="width:36px;height:36px;border:3px solid rgba(59,130,246,0.2);border-top-color:#3b82f6;border-radius:50%;animation:initSpin 0.6s linear infinite;"></div>
+    </div>
+    <style>@keyframes initSpin { to { transform: rotate(360deg); } }</style>
+
     <noscript>
       <div style="max-width:640px;margin:60px auto;padding:24px;font-family:sans-serif;line-height:1.6;">
         <h1>Mantiq – Boolean Algebra Simplifier &amp; Digital Logic Circuit Simulator</h1>

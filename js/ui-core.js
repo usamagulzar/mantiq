@@ -1,6 +1,18 @@
 // Global App Domain URL
 window.url = 'mantiq.usamagulzar.dev';
 
+// Dismiss startup loader veil
+window.addEventListener('load', function() {
+    setTimeout(function() {
+        var loader = document.getElementById('init-loader-screen');
+        if (loader) {
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+            setTimeout(function() { if (loader.parentNode) loader.parentNode.removeChild(loader); }, 300);
+        }
+    }, 250);
+});
+
 // Global Cached Data Snapshots
 var lastKMapData = null;
 var lastTruthTableData = null;
