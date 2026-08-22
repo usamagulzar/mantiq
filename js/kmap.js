@@ -1105,12 +1105,11 @@ function exportKMapPNGDirect() {
         const cardX = outerMargin + colIndex * (cardW + gapBetweenCards);
         const cardY = outerMargin + rowIndex * (cardH + gapBetweenCards);
 
-        // Plane Card Shadow + Background
+        // Plane Card Background (solid crisp rounded card, no alpha-shadow blur bleed)
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.08)';
-        ctx.shadowBlur = 16 * SCALE;
-        ctx.shadowOffsetY = 4 * SCALE;
         ctx.setLineDash([]);
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
         ctx.fillStyle = cardBgColor;
         ctx.strokeStyle = borderColor;
         ctx.lineWidth = 2 * SCALE;
