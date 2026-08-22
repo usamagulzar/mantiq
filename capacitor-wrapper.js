@@ -17,13 +17,11 @@
     console.log('[Capacitor Wrapper] Initializing native intercepts...');
 
     // ─── ON-SCREEN DEBUG LOG PANEL ───────────────────────────────────────────
-    // Floating panel that shows console output directly on screen for testing.
-    // Tap the "LOG" button (bottom-right) to toggle it open/closed.
+    // Hidden by default. Unlocked transiently when user presses Volume Up and Volume Down 3 times in a row.
     (function setupLogPanel() {
-        const LOG_KEY = '__mantiq_log_panel_visible';
         const logs = [];
 
-        // Create toggle button
+        // Create toggle button (hidden by default)
         const btn = document.createElement('div');
         btn.id = '__log_btn';
         btn.textContent = 'LOG';
@@ -32,13 +30,12 @@
             'background:#1e40af', 'color:#fff', 'font-size:11px', 'font-weight:700',
             'padding:6px 10px', 'border-radius:8px', 'cursor:pointer',
             'font-family:monospace', 'box-shadow:0 2px 8px rgba(0,0,0,0.5)',
-            'user-select:none', '-webkit-user-select:none'
+            'user-select:none', '-webkit-user-select:none', 'display:none'
         ].join(';');
 
-        // Create panel
+        // Create panel (hidden by default)
         const panel = document.createElement('div');
         panel.id = '__log_panel';
-        const visible = sessionStorage.getItem(LOG_KEY) === '1';
         panel.style.cssText = [
             'position:fixed', 'bottom:120px', 'right:8px', 'left:8px',
             'max-height:40vh', 'z-index:2147483646',
@@ -46,8 +43,35 @@
             'font-size:10px', 'font-family:monospace',
             'border-radius:10px', 'overflow-y:auto',
             'padding:8px', 'box-shadow:0 4px 16px rgba(0,0,0,0.7)',
-            'display:' + (visible ? 'block' : 'none')
+            'display:none'
         ].join(';');
+
+        // Secret unlock trigger: Volume Up + Volume Down 3 times in a row
+        let volSequence = [];
+        let volTimer = null;
+        const handleVol = (type) => {
+            volSequence.push(type);
+            if (volTimer) clearTimeout(volTimer);
+            volTimer = setTimeout(() => { volSequence = []; }, 4000);
+
+            const ups = volSequence.filter(v => v === 'up').length;
+            const downs = volSequence.filter(v => v === 'down').length;
+
+            if (ups >= 3 && downs >= 3) {
+                btn.style.display = 'block';
+                volSequence = [];
+                console.log('[LogPanel] Unlocked via secret volume sequence');
+            }
+        };
+
+        window.addEventListener('keydown', (e) => {
+            const k = (e.key || e.code || '').toLowerCase();
+            if (k.includes('volumeup') || e.keyCode === 175 || e.keyCode === 24) {
+                handleVol('up');
+            } else if (k.includes('volumedown') || e.keyCode === 174 || e.keyCode === 25) {
+                handleVol('down');
+            }
+        });
 
         const addEntry = (level, args) => {
             const text = args.map(a => {
@@ -80,7 +104,6 @@
         btn.addEventListener('click', () => {
             const isVisible = panel.style.display !== 'none';
             panel.style.display = isVisible ? 'none' : 'block';
-            sessionStorage.setItem(LOG_KEY, isVisible ? '0' : '1');
             if (!isVisible) panel.scrollTop = panel.scrollHeight;
         });
 
@@ -283,7 +306,7 @@
             const match = remoteSw.match(/const\s+CACHE_NAME\s*=\s*['"]([^'"]+)['"]/);
             if (!match) { console.warn('[Updater] Step 2: Could not parse version from sw.js'); return; }
             const remoteVersion = match[1];
-            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.50';
+            const localVersion = localStorage.getItem('mantiq_app_version') || 'mantiq-cache-v2.2.51';
             console.log('[Updater] Step 2: remote=' + remoteVersion + ' | local=' + localVersion);
 
             if (remoteVersion === localVersion) {
@@ -320,9 +343,9 @@
     };
 
     // Run updater after a short delay
-    // Run checkUpdates immediately, and then every 1 minute as requested
+    // Run checkUpdates immediately, and then every 120 seconds
     setTimeout(checkUpdates, 2000);
-    setInterval(checkUpdates, 60000);
+    setInterval(checkUpdates, 120 * 1000);
 
     // 6. Native Status Bar & Hardware Back Button Interceptor
     if (window.Capacitor && window.Capacitor.Plugins) {
