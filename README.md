@@ -15,7 +15,7 @@ truth tables, interactive circuit simulation, and Verilog export, all in your br
 [![Made with vanilla JS](https://img.shields.io/badge/frontend-vanilla%20JS-f7df1e)](#-tech-stack)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-[Live Demo](https://mantiq.usamagulzar.dev/) · [Report a Bug](../../issues/new?template=bug_report.md) · [Request a Feature](../../issues/new?template=feature_request.md) · [Documentation](#-table-of-contents)
+[Live Demo](https://mantiq.usamagulzar.com/) · [Report a Bug](../../issues/new?template=bug_report.md) · [Request a Feature](../../issues/new?template=feature_request.md) · [Documentation](#-table-of-contents)
 
 <br/>
 
@@ -113,7 +113,7 @@ More screenshots are available in the [`/screenshots`](screenshots) directory.
 
 The fastest way to try Mantiq is to open the hosted app in your browser:
 
-**→ [mantiq.usamagulzar.dev](https://mantiq.usamagulzar.dev)**
+**→ [mantiq.usamagulzar.com](https://mantiq.usamagulzar.com)**
 
 ### Install as an App (PWA)
 

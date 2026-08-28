@@ -1,5 +1,5 @@
 // Global App Domain URL
-window.url = 'mantiq.usamagulzar.dev';
+window.url = 'mantiq.usamagulzar.com';
 
 // Dismiss startup loader veil
 window.addEventListener('load', function() {

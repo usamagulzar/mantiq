@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mantiq.usamagulzar.dev/sitemap.xml
+Sitemap: https://mantiq.usamagulzar.com/sitemap.xml
