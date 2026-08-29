@@ -2,7 +2,7 @@
   "name": "Mantiq - K-Map Solver & Boolean Algebra Simplifier",
   "short_name": "Mantiq",
   "description": "A free K-Map solver, Boolean algebra simplifier, and truth table generator for Digital Logic Design (DLD) and Discrete Math. Master K-Maps, logic gates, Verilog, and beyond.",
-  "start_url": "./",
+  "start_url": "./app.html",
   "display": "standalone",
   "orientation": "any",
   "background_color": "#FAFAFA",

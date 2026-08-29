@@ -1,8 +1,9 @@
-const CACHE_NAME = 'mantiq-cache-v2.2.56'; // bumped so existing installs pick up the fix
+const CACHE_NAME = 'mantiq-cache-v2.2.57'; // bumped for landing page split
 
 const urlsToCache = [
   './',
   './index.html',
+  './app.html',
   './manifest.json',
   './icons/icon-16.png',
   './icons/icon-32.png',
@@ -18,7 +19,7 @@ const urlsToCache = [
   './wasm/mantiq-worker.js',
   './wasm/index.js',
   './wasm/index.wasm',
-  // CSS
+  // App CSS
   './css/fonts.css',
   './css/vars.css',
   './css/layout.css',
@@ -30,7 +31,19 @@ const urlsToCache = [
   './css/about.css',
   './css/responsive.css',
   './css/integrity.css',
-  // JS
+  // Landing CSS + JS
+  './css/landing.css',
+  './js/landing.js',
+  // Landing assets
+  './assets/logo.svg',
+  './assets/shots/diagram.jpg',
+  './assets/shots/kmap.jpg',
+  './assets/shots/landing.jpg',
+  './assets/shots/proofs.jpg',
+  './assets/shots/simulation.jpg',
+  './assets/shots/truthtable.jpg',
+  './assets/shots/verilog.jpg',
+  // App JS
   './js/integrity-gate.js',
   './js/three.min.js',
   './js/svg-icons.js',
@@ -96,11 +109,10 @@ self.addEventListener('fetch', event => {
         }
         // Otherwise, try to fetch from network
         return fetch(event.request).catch(() => {
-          // No cache hit and no network — fail gracefully instead of an
-          // unhandled rejection (which is what triggers the browser's own
-          // native "You're Offline" interstitial).
+          // No cache hit and no network — fall back to the app shell
+          // (not the marketing page) so users can still use the app offline.
           if (event.request.mode === 'navigate') {
-            return caches.match('./index.html');
+            return caches.match('./app.html');
           }
           return new Response('', { status: 504, statusText: 'Offline' });
         });

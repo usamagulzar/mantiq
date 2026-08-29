@@ -1,1491 +1,560 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=auto"/>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://www.googletagmanager.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' blob: data: https://www.google-analytics.com https://www.googletagmanager.com; worker-src 'self' blob:; connect-src 'self' https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com;">
-    
-    <!-- PWA & Meta Tags -->
-    <meta name="description" content="Free online K-Map solver and Boolean algebra simplifier for Digital Logic Design (DLD) and Discrete Math. Instantly generate K-Maps, truth tables, circuit diagrams, and Verilog code from any logic expression — 100% offline in your browser.">
-    <meta name="keywords" content="k map solver, karnaugh map solver, karnaugh map generator, karnaugh map calculator, boolean algebra simplifier, boolean expression solver, boolean algebra calculator, truth table generator, digital logic design, dld kmap solver, dld boolean algebra, discrete math boolean algebra, discrete mathematics logic, propositional logic calculator, quine-mccluskey calculator, minterm maxterm calculator, sop pos converter, prime implicants calculator, logic gate simulator, logic circuit simulator, verilog generator, digital logic workbench">
-    <meta name="author" content="Usama Gulzar">
-    <meta name="robots" content="index, follow, max-image-preview:large">
-    <meta name="theme-color" content="#135494">
-    <link rel="manifest" href="manifest.json">
-    <title>K-Map Solver & Boolean Algebra Simplifier for DLD & Discrete Math | Mantiq</title>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self';">
 
-    <!-- Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
-    <link rel="shortcut icon" href="icons/icon.svg">
+<!-- SEO & Meta Tags (mirrored from the app's own index.html, now app.html) -->
+<meta name="description" content="An advanced and intuitive logic circuit visualizer, simulator, and Boolean algebra solver. Master K-Maps, logic gates, Verilog, and beyond.">
+<meta name="theme-color" content="#135494">
+<link rel="canonical" href="https://mantiq.usamagulzar.com/">
+<title>Mantiq - Turn Your Logic into Life</title>
 
-    <!-- Apple iOS PWA -->
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Mantiq">
-    <meta name="mobile-web-app-capable" content="yes">
+<!-- Icons (shared with the app, from the repo's /icons folder) -->
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="icons/icon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="shortcut icon" href="icons/icon.svg">
 
-    <link rel="canonical" href="https://mantiq.usamagulzar.com/">
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mantiq.usamagulzar.com/">
+<meta property="og:title" content="Mantiq - Turn Your Logic into Life">
+<meta property="og:description" content="An advanced and intuitive logic circuit visualizer, simulator, and Boolean algebra solver. Master K-Maps, logic gates, Verilog, and beyond.">
+<meta property="og:image" content="https://mantiq.usamagulzar.com/banner.jpg">
 
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://mantiq.usamagulzar.com/">
-    <meta property="og:site_name" content="Mantiq">
-    <meta property="og:locale" content="en_US">
-    <meta property="og:title" content="K-Map Solver & Boolean Algebra Simplifier for DLD & Discrete Math | Mantiq">
-    <meta property="og:description" content="Free K-Map solver and Boolean algebra simplifier for Digital Logic Design and Discrete Math. Generate truth tables, circuit diagrams, and Verilog code instantly, right in your browser — free and offline-first.">
-    <meta property="og:image" content="https://mantiq.usamagulzar.com/banner.jpg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="Mantiq digital logic workbench showing a simplified Boolean expression, Karnaugh map, and circuit diagram">
+<!-- Twitter -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="https://mantiq.usamagulzar.com/">
+<meta property="twitter:title" content="Mantiq - Turn Your Logic into Life">
+<meta property="twitter:description" content="An advanced and intuitive logic circuit visualizer, simulator, and Boolean algebra solver. Master K-Maps, logic gates, Verilog, and beyond.">
+<meta property="twitter:image" content="https://mantiq.usamagulzar.com/banner.jpg">
 
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://mantiq.usamagulzar.com/">
-    <meta property="twitter:title" content="K-Map Solver & Boolean Algebra Simplifier for DLD & Discrete Math | Mantiq">
-    <meta property="twitter:description" content="Free K-Map solver and Boolean algebra simplifier for Digital Logic Design and Discrete Math. 100% offline, no signup.">
-    <meta property="twitter:image" content="https://mantiq.usamagulzar.com/banner.jpg">
-    <meta property="twitter:image:alt" content="Mantiq digital logic workbench showing a simplified Boolean expression, Karnaugh map, and circuit diagram">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Structured Data: WebApplication / SoftwareApplication -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": ["WebApplication", "SoftwareApplication"],
-      "name": "Mantiq",
-      "alternateName": "Mantiq Logic Workbench",
-      "url": "https://mantiq.usamagulzar.com/",
-      "description": "An offline-first digital logic workbench for Digital Logic Design (DLD) and Discrete Mathematics coursework. Simplifies Boolean expressions and generates K-Maps, truth tables, circuit diagrams, and Verilog code in the browser.",
-      "applicationCategory": ["EducationalApplication", "DeveloperApplication"],
-      "applicationSubCategory": "Digital Logic Design Tool",
-      "operatingSystem": "Any (Web Browser)",
-      "browserRequirements": "Requires JavaScript and WebAssembly support",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "featureList": [
-        "Boolean expression simplification (SOP/POS)",
-        "Karnaugh Map (K-Map) generation for 2-6 variables",
-        "Truth table generation",
-        "Quine-McCluskey algebraic proofs",
-        "Interactive logic circuit diagrams and simulation",
-        "Verilog HDL export (gate-level and dataflow)"
-      ],
-      "author": {
-        "@type": "Person",
-        "name": "Usama Gulzar",
-        "url": "https://www.linkedin.com/in/usamagulzarpk/"
-      },
-      "softwareVersion": "2.0.0",
-      "license": "https://github.com/usamagulzar/mantiq/blob/main/LICENSE"
-    }
-    </script>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
 
-    <!-- Structured Data: FAQPage -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      "mainEntity": [
-        {
-          "@type": "Question",
-          "name": "What is a K-Map solver used for in Digital Logic Design (DLD)?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "A K-Map (Karnaugh Map) solver groups the 1s and 0s of a Boolean expression or truth table into a color-coded map to find the minimal Sum-of-Products or Product-of-Sums form. Mantiq solves K-Maps for 2 to 6 variables directly in your browser, matching the range typically covered in a Digital Logic Design (DLD) or Computer Engineering course."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "How do I simplify a Boolean algebra expression for discrete math or DLD homework?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Type your expression using standard notation (e.g. AB + A'C) and Mantiq instantly minimizes it with the Quine-McCluskey algorithm, showing the simplified SOP/POS form plus a step-by-step algebraic proof naming every law used - the same laws taught in Discrete Mathematics and Digital Logic Design."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Is Mantiq useful for Discrete Mathematics, or only for Digital Logic Design?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Both. Boolean algebra, truth tables, and logic simplification are shared topics between Discrete Mathematics and DLD. Mantiq covers propositional-logic fundamentals (truth tables, simplification, canonical forms) as well as the hardware side (circuit diagrams, gate-level simulation, Verilog)."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can Mantiq generate a truth table from a Boolean expression or minterms?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Enter an expression or minterms/maxterms directly (e.g. m(1,2,3) or M(0,2,4)), and Mantiq generates the full truth table with minterm/maxterm indices, exportable as CSV."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Does Mantiq require an account or an internet connection?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "No. Mantiq runs entirely client-side with no backend, no account, and no telemetry. It's an installable Progressive Web App, so after your first visit it keeps working fully offline."
-          }
-        },
-        {
-          "@type": "Question",
-          "name": "Can Mantiq export Verilog code from a Boolean expression?",
-          "acceptedAnswer": {
-            "@type": "Answer",
-            "text": "Yes. Once your expression is simplified, Mantiq generates ready-to-use gate-level and dataflow Verilog HDL, with an optional testbench, that you can copy or download."
-          }
-        }
-      ]
-    }
-    </script>
+<!-- ============ NAV (mirrors the app's own topbar) ============ -->
+<header class="nav" id="top">
+  <div class="wrap nav__inner">
+    <a class="brand" href="#top" aria-label="Mantiq home">
+      <img class="brand__mark" src="assets/logo.svg" alt="" width="34" height="34">
+      <span class="brand__word">mantiq</span>
+    </a>
 
-    <!-- Initialize theme immediately before CSS loads to prevent flash of wrong theme -->
-    <script>
-      (function() {
-        try {
-          var saved = localStorage.getItem('mantiq_theme');
-          var isDark = saved ? (saved === 'dark') : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-          if (isDark) document.documentElement.classList.add('dark-mode');
-          else document.documentElement.classList.add('light-mode');
-        } catch(e) {}
-      })();
-    </script>
+    <nav class="nav__links" aria-label="Primary">
+      <a href="#views">What it does</a>
+      <a href="#showcase">See it in action</a>
+      <a href="#formats">Formats</a>
+      <a href="#faq">FAQ</a>
+    </nav>
 
-    <link rel="preconnect" href="https://www.googletagmanager.com">
-    <link rel="preconnect" href="https://www.google-analytics.com">
-
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-L19VRWY17T"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-L19VRWY17T');
-    </script>
-
-    <style>
-      .sr-only {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        padding: 0;
-        margin: -1px;
-        overflow: hidden;
-        clip: rect(0, 0, 0, 0);
-        white-space: nowrap;
-        border: 0;
-      }
-    </style>
-
-    <link rel="stylesheet" href="css/fonts.css?v=2.0.3">
-    <link rel="stylesheet" href="css/vars.css?v=2.0.3">
-    <link rel="stylesheet" href="css/layout.css?v=2.0.3">
-    <link rel="stylesheet" href="css/topbar.css?v=2.0.3">
-    <link rel="stylesheet" href="css/panels.css?v=2.0.3">
-    <link rel="stylesheet" href="css/solution.css?v=2.0.3">
-    <link rel="stylesheet" href="css/views.css?v=2.0.3">
-    <link rel="stylesheet" href="css/kmap.css?v=2.0.3">
-    <link rel="stylesheet" href="css/about.css?v=2.0.3">
-    <link rel="stylesheet" href="css/responsive.css?v=2.0.3">
-    <link rel="stylesheet" href="css/integrity.css?v=1.0.2">
-  </head>
-
-  <body>
-
-    <!-- Instant Native Init Loader Veil -->
-    <div id="init-loader-screen" style="position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9999999;background:var(--bg-primary, #0F172A);display:flex;align-items:center;justify-content:center;transition:opacity 0.25s ease, visibility 0.25s ease;">
-        <div style="width:36px;height:36px;border:3px solid rgba(59,130,246,0.2);border-top-color:#3b82f6;border-radius:50%;animation:initSpin 0.6s linear infinite;"></div>
+    <div class="nav__cta">
+      <a class="btn btn--support" href="https://pay.usamagulzar.com/" target="_blank" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Support
+      </a>
+      <a class="btn btn--solid" href="app.html" rel="noopener">Launch Mantiq</a>
     </div>
-    <style>@keyframes initSpin { to { transform: rotate(360deg); } }</style>
 
-    <noscript>
-      <div style="max-width:640px;margin:60px auto;padding:24px;font-family:sans-serif;line-height:1.6;">
-        <h1>Mantiq – Boolean Algebra Simplifier &amp; Digital Logic Circuit Simulator</h1>
-        <p>Mantiq is a free, offline-capable digital logic workbench for students, educators, and engineers. Type a Boolean expression and get a minimized SOP/POS solution, a step-by-step algebraic and Quine-McCluskey proof, a Karnaugh map (K-Map) for 2-6 variables, a full truth table, an interactive simulated circuit diagram, and exportable gate-level or dataflow Verilog HDL code.</p>
-        <p>This app requires JavaScript and WebAssembly to run. Please enable JavaScript in your browser to use Mantiq.</p>
+    <button class="nav__burger" id="burgerBtn" aria-expanded="false" aria-controls="mobileMenu" aria-label="Toggle menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#views">What it does</a>
+    <a href="#showcase">See it in action</a>
+    <a href="#formats">Formats</a>
+    <a href="#faq">FAQ</a>
+    <a href="https://pay.usamagulzar.com/" target="_blank" rel="noopener">Support the project</a>
+    <a class="btn btn--solid" href="app.html" rel="noopener">Launch Mantiq</a>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ HERO (recreated as the app's own landing screen) ============ -->
+  <section class="hero wrap">
+    <div class="hero__logo-wrap">
+      <img src="assets/logo.svg" alt="Mantiq" class="hero__logo" width="180" height="180">
+    </div>
+
+    <h1 class="sr-only">Mantiq: Free K-Map Solver and Boolean Algebra Simplifier for Digital Logic Design (DLD) and Discrete Math</h1>
+    <p class="lede">A free, offline-capable logic workbench: type an expression and get a
+    simplified result, a step-by-step proof, a Karnaugh map, a truth table, a live circuit
+    simulation, and Verilog, all in your browser.</p>
+
+    <div class="hero__quicklinks">
+      <span class="hero__quicklinks-label">Quick K-Map:</span>
+      <a class="pill-link pill-link--sm" href="app.html#expr=KMAP(3)" target="_blank" rel="noopener">3 Var</a>
+      <a class="pill-link pill-link--sm" href="app.html#expr=KMAP(4)" target="_blank" rel="noopener">4 Var</a>
+      <a class="pill-link pill-link--sm" href="app.html#expr=KMAP(5)" target="_blank" rel="noopener">5 Var</a>
+      <span class="divider" aria-hidden="true"></span>
+      <a class="pill-link pill-link--sm" href="#formats">Learn Formats</a>
+    </div>
+
+    <div class="hero__cta">
+      <a class="btn btn--solid btn--lg" href="app.html" rel="noopener">
+        Launch Mantiq
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a class="btn btn--ghost btn--lg js-apk-download" href="https://raw.githubusercontent.com/usamagulzar/mantiq/refs/heads/main/mantiq-app-release.apk" rel="noopener">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        Download APK
+      </a>
+    </div>
+
+    <div class="hero__banner">
+      <img src="banner.jpg" alt="Mantiq: Turn Your Logic Into Life — screenshots of the K-Map, circuit simulation, waveform, and code editor views" width="1200" height="630" loading="eager">
+    </div>
+  </section>
+
+  <!-- ============ ABOUT ============ -->
+  <section class="about wrap" id="about">
+    <div class="section-head">
+      <p class="eyebrow">What's Mantiq?</p>
+      <h2>A logic workbench that fits in a browser tab.</h2>
+      <p class="section-sub">Type a Boolean expression, a minterm list, or a K-Map size, and get
+      a minimized SOP/POS result, a step-by-step proof, a Karnaugh map, a truth table, a live
+      simulated circuit, and exportable Verilog, computed instantly and entirely on your own
+      device.</p>
+    </div>
+  </section>
+
+  <!-- ============ SIDEBAR VIEWS ============ -->
+  <section class="views wrap" id="views">
+    <div class="section-head">
+      <p class="eyebrow">What you can do</p>
+      <h2>One expression. Six views, all in sync.</h2>
+      <p class="section-sub">These are the exact tabs in Mantiq's sidebar. Every one of them
+      reads from the same simplification engine, so your proof, map, circuit, and Verilog
+      never disagree with each other.</p>
+    </div>
+
+    <div class="views-grid">
+      <article class="view-card">
+        <span class="view-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 15c.2-.8.5-1.4 1.2-2C17.2 12.1 18 10.7 18 9a6 6 0 0 0-12 0c0 1.7.8 3.1 1.8 4 .7.6 1 1.2 1.2 2"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/><path d="M10 9.5l2-2 2 2"/><line x1="12" y1="1" x2="12" y2="2.5"/><line x1="4.8" y1="2" x2="6.2" y2="3.4"/><line x1="19.2" y1="2" x2="17.8" y2="3.4"/><line x1="2" y1="9" x2="3.5" y2="9"/><line x1="22" y1="9" x2="20.5" y2="9"/></svg>
+        </span>
+        <h3>Simulation</h3>
+        <p>Toggle inputs on an interactive PCB-style board and watch signal states and the
+        output LED update live, propagated through the real gate network.</p>
+      </article>
+
+      <article class="view-card">
+        <span class="view-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="2" y1="9" x2="8" y2="9"/><line x1="2" y1="15" x2="8" y2="15"/><path d="M8 7h5a5 5 0 0 1 0 10H8z"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+        </span>
+        <h3>Diagram</h3>
+        <p>A clean, auto-routed gate-level schematic generated straight from your expression,
+        original and simplified, side by side.</p>
+      </article>
+
+      <article class="view-card">
+        <span class="view-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/><line x1="10" y1="18" x2="14" y2="6"/></svg>
+        </span>
+        <h3>Verilog</h3>
+        <p>Ready-to-drop-in gate-level or dataflow Verilog HDL, with an optional generated
+        testbench, one click away.</p>
+      </article>
+
+      <article class="view-card">
+        <span class="view-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><line x1="12" y1="3" x2="12" y2="21"/><line x1="3" y1="12" x2="21" y2="12"/></svg>
+        </span>
+        <h3>KMAP</h3>
+        <p>Auto-grouped, colour-coded Karnaugh maps for 2 to 6 variables, with prime
+        implicants and essential groupings called out beside the grid.</p>
+      </article>
+
+      <article class="view-card">
+        <span class="view-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="1.5"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="12" y1="3" x2="12" y2="21"/></svg>
+        </span>
+        <h3>Truth Table</h3>
+        <p>Instantly generated truth tables with minterm callouts, plus a waveform diagram
+        showing every signal over time.</p>
+      </article>
+
+      <article class="view-card">
+        <span class="view-card__icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg>
+        </span>
+        <h3>Proofs</h3>
+        <p>A guided algebraic derivation naming the law used at every step, alongside a full
+        Quine-McCluskey walkthrough.</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============ SHOWCASE (real screenshots) ============ -->
+  <section class="showcase wrap" id="showcase">
+    <div class="section-head">
+      <p class="eyebrow">See it in action</p>
+      <h2>Exactly what you will see when you open it.</h2>
+      <p class="section-sub">No mockups. These are unedited screenshots of Mantiq itself,
+      solving <code>ABC + ABC' + AB'C + A'BC</code>.</p>
+    </div>
+
+    <div class="shot-block">
+      <div class="shot-block__copy">
+        <span class="shot-block__tag">Simulation</span>
+        <h3>A circuit you can actually touch.</h3>
+        <p>Every input is a physical-looking toggle on a simulated PCB. Flip a switch and
+        the trace glow, gate states, and output LED update instantly, for both the
+        original and the simplified circuit, so you can see exactly what minimization saved you.</p>
       </div>
-    </noscript>
+      <img class="shot-block__img" src="assets/shots/simulation.jpg" alt="Mantiq's PCB simulation view showing an original and simplified circuit with toggle switches and a glowing output LED" loading="lazy">
+    </div>
 
-    <!-- Academic Integrity Gate -->
-    <script src="js/integrity-gate.js?v=1.0.0"></script>
-    <div id="integrity-popup" class="modal-overlay integrity-overlay" style="display: none;">
-        <div class="modal sm integrity-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6z"></path><path d="m9 12 2 2 4-4"></path></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2>Commitment to Academic Integrity</h2>
-                        <div class="modal-subtitle">Please read before continuing</div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-body integrity-body">
-                <p>Mantiq is built to make Boolean logic easier to see and easier to understand. It exists to help you check your own working, explore how simplification actually happens step by step, and build the kind of intuition that only comes from engaging with a concept directly.</p>
-                <p>It is not built to think through a problem on your behalf, and it should not be used to produce work that you submit as your own for a graded assignment, quiz, or exam. Typing in a problem and copying out the answer skips the part where the actual learning happens.</p>
-                <p>By continuing, you agree to use Mantiq as a study aid rather than a substitute for the effort your coursework is meant to require of you.</p>
-            </div>
-            <div class="modal-footer integrity-footer">
-                <span class="modal-footer-hint">This will only be shown once on this device.</span>
-                <button id="integrity-agree-btn" class="integrity-agree-btn">I Understand and Agree</button>
-            </div>
+    <div class="shot-block shot-block--reverse">
+      <div class="shot-block__copy">
+        <span class="shot-block__tag">KMAP</span>
+        <h3>K-Maps that group themselves.</h3>
+        <p>Prime implicants are detected and colour-coded directly on the grid, with the
+        canonical form, minimal expression, and essential prime implicants listed right
+        beside it.</p>
+      </div>
+      <img class="shot-block__img" src="assets/shots/kmap.jpg" alt="Mantiq's Karnaugh map view with colour-coded groupings and a minimal expression panel" loading="lazy">
+    </div>
+
+    <div class="shot-block">
+      <div class="shot-block__copy">
+        <span class="shot-block__tag">Diagram</span>
+        <h3>Auto-routed, every time.</h3>
+        <p>No manual wiring. Type an expression and Mantiq lays out the gate-level schematic
+        for you, original and simplified, so the difference is obvious at a glance.</p>
+      </div>
+      <img class="shot-block__img" src="assets/shots/diagram.jpg" alt="Mantiq's circuit diagram view showing an original and simplified gate-level schematic" loading="lazy">
+    </div>
+
+    <div class="shot-block shot-block--reverse">
+      <div class="shot-block__copy">
+        <span class="shot-block__tag">Truth Table</span>
+        <h3>Every row, every minterm.</h3>
+        <p>A full truth table with colour-coded output and minterm labels, paired with a
+        waveform diagram that shows how every signal actually behaves over time.</p>
+      </div>
+      <img class="shot-block__img" src="assets/shots/truthtable.jpg" alt="Mantiq's truth table and waveform diagram view" loading="lazy">
+    </div>
+
+    <div class="shot-block">
+      <div class="shot-block__copy">
+        <span class="shot-block__tag">Proofs</span>
+        <h3>See the reasoning, not just the answer.</h3>
+        <p>A step-by-step algebraic proof names the exact law applied at each step,
+        Absorption, Consensus, De Morgan's, next to a full Quine-McCluskey breakdown.</p>
+      </div>
+      <img class="shot-block__img" src="assets/shots/proofs.jpg" alt="Mantiq's algebraic proof and Quine-McCluskey view" loading="lazy">
+    </div>
+
+    <div class="shot-block shot-block--reverse">
+      <div class="shot-block__copy">
+        <span class="shot-block__tag">Verilog</span>
+        <h3>From Boolean algebra to HDL.</h3>
+        <p>Generate clean gate-level or dataflow Verilog straight from your simplified
+        expression, with an optional testbench. Copy it or save it directly.</p>
+      </div>
+      <img class="shot-block__img" src="assets/shots/verilog.jpg" alt="Mantiq's Verilog export view showing gate-level and dataflow HDL code" loading="lazy">
+    </div>
+  </section>
+
+  <!-- ============ ARCHITECTURE ============ -->
+  <section class="arch" id="architecture">
+    <div class="wrap arch__inner">
+      <div class="arch__copy">
+        <p class="eyebrow">How it's built</p>
+        <h2>A real logic engine, not a lookup table.</h2>
+        <p>Expression parsing, Quine-McCluskey minimization, proof search, K-map grouping,
+        and Verilog generation are written in C++ and compiled to WebAssembly with
+        Emscripten, running inside a dedicated Web Worker so the interface never freezes,
+        even on large expressions.</p>
+        <p>The interface itself is dependency-free, framework-free vanilla JavaScript, with
+        no build step. A service worker precaches the entire app shell, including the
+        compiled <code>.wasm</code> binary, so after your first visit Mantiq needs the
+        network for nothing.</p>
+        <a class="text-link" href="https://github.com/usamagulzar/mantiq#-architecture" target="_blank" rel="noopener">
+          Read the full architecture notes
+        </a>
+      </div>
+
+      <div class="arch__diagram" role="img" aria-label="Architecture diagram: an HTML and CSS shell sits above a vanilla JavaScript UI layer, which talks over a postMessage bridge to a C++ logic engine compiled to WebAssembly, running inside a Web Worker">
+        <div class="layer">
+          <span class="layer__tag">index.html + css/</span>
+          <p>Static shell, sidebar, topbar, and views</p>
         </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div id="loading-overlay">
-        <svg class="loading-logo" viewBox="0 0 17.0666 17.0666" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mantiq">
-            <g>
-                <path fill="#878787" d="M3.788 12.6737c-0.0088,0.1224 -0.005,1.3732 0.0097,1.426l0.6156 -0.0033c0.0221,-0.0682 0.0145,-1.4753 -0.0037,-1.5186l0.0007 1.5089 -0.6097 0.0029c0.0019,-0.1632 0.0143,-1.3679 -0.0126,-1.4159zm-1.078 0.005c-0.0297,0.0658 -0.0126,1.2314 -0.0117,1.4088l-0.6079 0.0013c0.0002,-0.175 0.0175,-1.3933 -0.0128,-1.4494 -0.0121,0.2244 0.0024,0.5039 0.0024,0.7356 0,0.1218 -0.0149,0.6455 0.0067,0.7241l0.621 -0.0032 0.0022 -1.4174zm-0.6324 -0.0392c0.0303,0.056 0.013,1.2744 0.0128,1.4494l0.6079 -0.0013c-0.0009,-0.1774 -0.0181,-1.343 0.0117,-1.4088 -0.003,-0.1508 0.0765,-0.3382 0.1485,-0.4123 0.2518,-0.2586 0.647,-0.2113 0.7963,-0.0129 0.0761,0.1011 0.1434,0.2507 0.1331,0.4202 0.0269,0.048 0.0145,1.2528 0.0126,1.4159l0.6097 -0.0029 -0.0007 -1.5089c0.0186,-0.2137 -0.0848,-0.5011 -0.1804,-0.6443 -0.2462,-0.3685 -0.8109,-0.458 -1.2147,-0.3165 -0.3198,0.1121 -0.3622,0.2426 -0.484,0.3337 -0.2498,-0.4024 -0.8652,-0.4853 -1.2352,-0.3093 -0.0762,0.0362 -0.1174,0.0599 -0.1796,0.1073 -0.0908,0.0693 -0.1141,0.1079 -0.1547,0.1371l-0.0011 -0.2828c-0.0525,-0.0174 -0.5154,-0.0149 -0.5874,-0.0047l-0.0007 2.497 0.6224 0.0009c0.0002,-0.3066 -0.0001,-0.6132 0,-0.9198 0.0001,-0.2709 -0.0295,-0.5804 0.0912,-0.807 0.2418,-0.4538 1.0174,-0.3555 0.9922,0.2699zm13.2082 -0.5564c0.2179,-0.0354 0.434,0.0435 0.5503,0.1518 0.1442,0.1343 0.2177,0.276 0.2418,0.4891 0.0506,0.4473 -0.1762,0.8119 -0.5523,0.8753 -0.9605,0.1619 -1.0936,-1.3772 -0.2397,-1.5161zm0.8076 -0.1994c-0.0788,-0.0756 -0.1165,-0.1308 -0.2456,-0.2014 -0.3311,-0.1809 -0.7693,-0.1572 -1.089,0.0023 -0.687,0.3426 -0.8243,1.2862 -0.4846,1.8685 0.2446,0.4192 0.7016,0.6352 1.2046,0.573 0.1272,-0.0157 0.248,-0.0481 0.3504,-0.1029 0.1829,-0.0977 0.1768,-0.1457 0.2474,-0.1975l0.0039 1.177 0.6138 -0.0003 0.0007 -3.4076c-0.0983,-0.001 -0.5301,-0.0104 -0.592,0.0082l-0.0094 0.2806zm-9.5037 1.1316c0.021,0.2589 -0.0225,0.4628 -0.26,0.5917 -0.1863,0.101 -0.5313,0.1238 -0.6782,-0.0287 -0.1876,-0.195 -0.1291,-0.4517 0.1161,-0.5327 0.1186,-0.0393 0.6781,-0.0442 0.8221,-0.0302zm-1.3307 -0.7001c0.052,-0.0256 0.1033,-0.0751 0.1647,-0.1102 0.1946,-0.1111 0.4166,-0.1646 0.6523,-0.143 0.3152,0.029 0.5371,0.2105 0.5089,0.5426 -0.3285,0.0482 -0.7945,-0.0667 -1.2015,0.1009 -0.3496,0.144 -0.5043,0.4722 -0.4269,0.8278 0.1235,0.5678 0.8272,0.6948 1.2864,0.5493 0.2691,-0.0852 0.3437,-0.2285 0.3833,-0.2563l-0.001 0.2696 0.5828 0.0004c0.001,-0.4204 0.0017,-0.8415 -0.0002,-1.2619 -0.002,-0.4436 -0.024,-0.7366 -0.2755,-0.9887 -0.3269,-0.3278 -1.0245,-0.3602 -1.4964,-0.1913 -0.1263,0.0452 -0.3358,0.1417 -0.4117,0.2226l0.2348 0.4382zm3.2408 1.7759c0.003,-0.4255 -0.0133,-0.867 0.0018,-1.2899 0.0072,-0.2033 0.0461,-0.3735 0.1489,-0.5037 0.2052,-0.26 0.7154,-0.2861 0.9029,-0.0159 0.1086,0.1565 0.1199,0.3022 0.1209,0.5198 0.0021,0.4306 0.0002,0.8616 0.0002,1.294l0.6208 0.0008c-0.0022,-0.3944 -0.0003,-0.79 0.001,-1.1845 0.0013,-0.3946 -0.0024,-0.6914 -0.1956,-0.9787 -0.0233,-0.0346 -0.0433,-0.063 -0.0683,-0.0862 -0.088,-0.0822 -0.097,-0.1127 -0.2537,-0.1878 -0.3295,-0.1579 -0.8603,-0.1415 -1.1596,0.0995 -0.031,0.025 -0.0525,0.0423 -0.0761,0.0673 -0.0239,0.0254 -0.0366,0.0535 -0.0692,0.068l-0.0009 -0.2987 -0.5943 0.0056 -0.0001 2.4949 0.6213 -0.0045zm2.1636 -1.9891l0.4041 0.0012c0.0132,0.0807 0.0038,0.7644 0.0039,0.9077 0.0001,0.3043 -0.0216,0.5601 0.1301,0.7889 0.3258,0.4914 1.1487,0.3478 1.3047,0.1598l-0.1579 -0.4446c-0.1365,0.0698 -0.2574,0.1491 -0.4593,0.083 -0.1527,-0.05 -0.1963,-0.1815 -0.2029,-0.3703 -0.0047,-0.1322 -0.0124,-1.0567 0.0019,-1.1267l0.6687 0.0004 -0.0005 -0.4935 -0.6707 -0.002 -0.0043 -0.6002 -0.6107 0.0044 -0.0035 0.5987 -0.4014 -0.0004 -0.0021 0.4934zm2.2857 1.9939l0.6134 -0.0038 0 -2.4972c-0.1385,0.0039 -0.5113,-0.0185 -0.6182,0.0074l0.0048 2.4937zm0.6911 -3.1809c0.0393,-0.229 -0.1276,-0.3957 -0.3201,-0.4219 -0.235,-0.032 -0.4159,0.0998 -0.4524,0.2931 -0.0935,0.4943 0.6894,0.6141 0.7726,0.1287z"/>
-                <path fill="#135494" d="M0.9913 7.4124c0.3991,-0.0867 0.5305,0.5289 0.1272,0.6142 -0.4096,0.0866 -0.5308,-0.5264 -0.1272,-0.6142zm5.0765 -0.46c-0.1034,0.012 -0.366,0.0049 -0.4665,-0.0133 -0.2672,-0.0483 -0.4497,-0.2401 -0.4424,-0.5246 0.0117,-0.4526 0.541,-0.6685 0.7738,-0.2924 0.1366,0.2207 0.137,0.5355 0.1352,0.8303zm1.5256 0.0017c0.0313,-0.1385 0.1956,-0.3769 0.2657,-0.463 0.0531,-0.0652 0.1159,-0.1365 0.1711,-0.193 0.166,-0.1695 0.4158,-0.3582 0.6515,-0.4294 0.2233,-0.0674 0.437,-0.0211 0.5546,0.1066 0.1165,0.1266 0.1752,0.3473 0.097,0.5557 -0.2037,0.5427 -1.1894,0.4255 -1.74,0.4231zm5.3633 -1.2284c0.5999,-0.1589 0.7535,1.0013 0.1007,0.9909 -0.2377,-0.0037 -0.5342,-0.2388 -0.5359,-0.4468 -0.0015,-0.1744 0.1946,-0.4804 0.4353,-0.5441zm-11.9695 -2.0937c0.1765,-0.0388 0.3303,0.1076 0.3576,0.247 0.0374,0.1911 -0.1,0.3353 -0.2467,0.3637 -0.3902,0.0755 -0.5267,-0.5193 -0.1108,-0.6107zm2.0813 0.0354l-1.4 0.0021c-0.2581,-0.6713 -1.3067,-0.5162 -1.3066,0.2736 0.0001,0.5796 0.6098,0.8515 1.0307,0.5969 0.069,-0.0417 0.1153,-0.0872 0.1599,-0.1385 0.0549,-0.0631 0.0726,-0.1136 0.1224,-0.1864l1.3883 -0.0017 0.0052 2.2588c0.0326,-0.0314 0.0889,-0.1271 0.1191,-0.1719 0.0769,-0.1141 0.3159,-0.3918 0.4222,-0.4588l-0.0013 -3.2247c0.3467,0.0009 0.6931,-0.0006 1.0393,-0.0007 0.3272,-0.0002 0.7005,-0.021 1.0115,0.0409 0.5117,0.1019 0.9815,0.4137 1.2625,0.8222 0.3615,0.5254 0.4065,0.9271 0.4049,1.6773 -0.0007,0.3493 -0.0006,0.6987 0.0004,1.048 0.0006,0.1975 -0.0183,0.126 -0.1441,0.3728 -0.0557,0.1092 -0.1208,0.2531 -0.1525,0.3764l-0.4144 -0.0001c-0.0093,-0.3091 0.008,-0.5281 -0.0818,-0.8142 -0.0648,-0.2065 -0.1773,-0.4273 -0.3477,-0.5574 -0.2937,-0.2243 -0.6691,-0.29 -1.0291,-0.0927 -0.2866,0.1571 -0.4927,0.4496 -0.5415,0.8047 -0.0694,0.5052 0.1613,0.951 0.6353,1.1389 0.2894,0.1147 0.5113,0.0602 0.8178,0.0844 -0.0075,0.5436 -0.2276,0.9629 -0.5205,1.1872 -0.9987,0.7648 -2.4102,-0.4287 -1.7489,-1.7152 0.1503,-0.2925 0.3311,-0.4253 0.3668,-0.498l-0.3244 -0.4004c-0.1536,0.0832 -0.3867,0.4104 -0.4822,0.5698 -0.0981,0.1638 -0.1771,0.3657 -0.2251,0.5571 -0.0543,0.217 -0.0013,0.2291 -0.1196,0.2284l-0.2657 -0.0008c-0.3193,0.0003 -0.768,0.0116 -1.0595,-0.0015 -0.0333,-0.0391 -0.0861,-0.2027 -0.2788,-0.3212 -0.4378,-0.2694 -1.0554,0.0385 -1.0414,0.6152 0.0174,0.7174 0.9308,0.9226 1.2695,0.3461 0.0191,-0.0326 0.0278,-0.0761 0.0617,-0.0908l1.4104 0.0002c0.1403,0.6682 0.564,1.1906 1.202,1.4138 0.2399,0.0839 0.4998,0.1138 0.7704,0.0787 0.4584,-0.0595 0.8332,-0.3086 1.0974,-0.6456 0.2724,-0.3474 0.4087,-0.7561 0.4354,-1.3204 0.1068,-0.0164 2.5435,-0.0039 2.8322,-0.004 0.1798,-0 0.3922,0.0101 0.5681,-0.0036 0.2926,-0.0228 0.5037,-0.1065 0.6909,-0.3034 0.0299,-0.0315 0.0393,-0.0494 0.0658,-0.0756 0.3372,0.6454 1.1678,0.3689 1.4581,-0.2562 0.0847,0.0388 0.1359,0.2039 0.4893,0.3485 0.2093,0.0857 0.5017,0.0764 0.709,-0.0088 0.405,-0.1665 0.5998,-0.5169 0.5995,-1.0779l1.5353 -0.0002c0.0679,0.1224 0.13,0.1969 0.2522,0.2644 0.3839,0.2123 0.8888,-0.0557 0.888,-0.5407 -0.0006,-0.3083 -0.2068,-0.5299 -0.4503,-0.5924 -0.2406,-0.0618 -0.4233,0.0202 -0.5753,0.1681 -0.0537,0.0524 -0.0648,0.0933 -0.1112,0.1531l-1.6937 0.003c-0.0319,-0.0368 -0.0504,-0.0731 -0.0778,-0.106 -0.2381,-0.2857 -0.6161,-0.4281 -0.9997,-0.3065 -0.4042,0.1282 -0.6032,0.4206 -0.7613,0.8178 -0.1031,0.2591 -0.2886,0.897 -0.6443,0.922 -0.2699,0.0189 -0.3048,-0.2472 -0.2962,-0.4856 0.0095,-0.263 0.0199,-0.5075 0.0196,-0.7743l-0.5457 -0.0035c0.0048,0.2813 0.0163,0.7342 -0.093,0.9668 -0.0544,0.1158 -0.1427,0.2174 -0.2576,0.2715 -0.1486,0.07 -0.3074,0.0555 -0.484,0.0561 0.0176,-0.0475 0.0679,-0.1169 0.0968,-0.1785 0.0305,-0.065 0.0539,-0.129 0.0727,-0.2031 0.1946,-0.7672 -0.4311,-1.5227 -1.3343,-1.2459 -0.3018,0.0925 -0.4959,0.2661 -0.6948,0.4113 -0.0166,-0.1302 0.0027,-0.8256 -0.0054,-1.0543 -0.0302,-0.8594 -0.4392,-1.6431 -1.0735,-2.1033 -0.4323,-0.3136 -0.9248,-0.5101 -1.6074,-0.51 -0.3531,0.0001 -0.7063,-0.0007 -1.0595,-0.0002 -0.3487,0.0004 -0.7114,-0.0103 -1.0582,0.0006l-0.0022 1.5981zm2.2977 6.1304c0.1779,0.0168 0.4108,0.0034 0.5948,0.0037l2.9688 -0.0002c0.3928,-0.0006 0.7111,-0.0166 1.0777,-0.1032 0.6147,-0.1453 1.2052,-0.4761 1.5713,-0.8013 0.0535,-0.0476 0.1071,-0.0937 0.1597,-0.1387 0.0557,-0.0477 0.093,-0.0999 0.1494,-0.1484 0.2013,-0.173 0.727,-1.0478 0.727,-1.0478 0,0 -0.4181,-0.2505 -0.4181,-0.2505 0,0 -0.2553,0.3681 -0.3552,0.5022 -0.517,0.7569 -1.4148,1.326 -2.3722,1.4233 -0.3594,0.0365 -0.7778,0.0189 -1.1467,0.0187l-1.7548 -0.0002c-0.3405,-0.0012 -0.2498,-0.0417 -0.4522,0.1373 -0.0952,0.0842 -0.221,0.163 -0.3503,0.2342 -0.1962,0.1079 -0.2643,0.1081 -0.3994,0.1707zm2.173 -7.1817l1.5562 0c0.4881,-0.0003 0.7868,0.0481 1.2014,0.2038 0.6311,0.237 1.1933,0.7122 1.5515,1.2613 0.162,0.2483 0.2479,0.428 0.3543,0.7048 0.0244,0.0637 0.0637,0.2162 0.0934,0.2598 0.1656,-0.0819 0.2026,-0.1563 0.4967,-0.2187 -0.0593,-0.2992 -0.3325,-0.8189 -0.5017,-1.0664 -0.66,-0.9654 -1.7356,-1.6917 -3.0631,-1.692 -0.8328,-0.0002 -1.763,-0.0111 -2.5944,-0.0002 0.0243,0.0262 0.1778,0.1085 0.2248,0.1394 0.1879,0.1237 0.2484,0.1823 0.4078,0.3203 0.1235,0.107 0.05,0.0878 0.2732,0.0878zm3.2388 1.9698c-0.4225,0.0794 -0.3477,0.7504 0.1235,0.688 0.1748,-0.0231 0.305,-0.1954 0.2751,-0.3999 -0.0262,-0.1789 -0.1911,-0.3271 -0.3987,-0.288zm-4.8611 -0.1948c-0.4188,0.1183 -0.2602,0.8035 0.1931,0.6719 0.1492,-0.0433 0.2754,-0.2209 0.2255,-0.4238 -0.0409,-0.1663 -0.2001,-0.3098 -0.4186,-0.2481zm-0.803 0.0018c-0.4101,0.1204 -0.2744,0.7875 0.1887,0.6685 0.3985,-0.1024 0.2643,-0.8016 -0.1887,-0.6685z"/>
-            </g>
-        </svg>
-        <p class="loading-subtitle">Initializing Logic Engine...</p>
-        <div class="led-loader"><span></span><span></span><span></span></div>
-    </div>
-
-    <!-- App Root Grid -->
-    <div id="app-root" class="landing">
-        <!-- Sidebar Navigation -->
-        <nav id="sidebar">
-            <div class="nav-links">
-                <button class="nav-btn active" data-view="0" id="btn-view-sim">
-                    <div class="nav-icon-wrapper">
-                        <!-- Lightbulb (Shifted down, padded to avoid cropping) -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 15c.2-.8.5-1.4 1.2-2C17.2 12.1 18 10.7 18 9a6 6 0 0 0-12 0c0 1.7.8 3.1 1.8 4 .7.6 1 1.2 1.2 2"/>
-                            <line x1="9" y1="18" x2="15" y2="18"/>
-                            <line x1="10" y1="21" x2="14" y2="21"/>
-                            <!-- Filament & Glow Rays -->
-                            <path d="M10 9.5l2-2 2 2"/>
-                            <line x1="12" y1="1" x2="12" y2="2.5"/>
-                            <line x1="4.8" y1="2" x2="6.2" y2="3.4"/>
-                            <line x1="19.2" y1="2" x2="17.8" y2="3.4"/>
-                            <line x1="2" y1="9" x2="3.5" y2="9"/>
-                            <line x1="22" y1="9" x2="20.5" y2="9"/>
-                        </svg>
-                    </div>
-                    <span class="tooltip">Simulation</span>
-                </button>
-                <button class="nav-btn" data-view="1" id="btn-view-circuit">
-                    <div class="nav-icon-wrapper">
-                        <!-- AND gate schematic -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="2" y1="9" x2="8" y2="9"/>
-                            <line x1="2" y1="15" x2="8" y2="15"/>
-                            <path d="M8 7h5a5 5 0 0 1 0 10H8z"/>
-                            <line x1="18" y1="12" x2="22" y2="12"/>
-                        </svg>
-                    </div>
-                    <span class="tooltip">Diagram</span>
-                </button>
-                <button class="nav-btn" data-view="4" id="btn-view-verilog">
-                    <div class="nav-icon-wrapper">
-                        <!-- Verilog: </> -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="16 18 22 12 16 6"/>
-                            <polyline points="8 6 2 12 8 18"/>
-                            <line x1="10" y1="18" x2="14" y2="6"/>
-                        </svg>
-                    </div>
-                    <span class="tooltip">Verilog</span>
-                </button>
-                <button class="nav-btn" data-view="2" id="btn-view-kmap">
-                    <div class="nav-icon-wrapper">
-                        <!-- 2x2 K-Map with 0, 1, 1, 0 inside -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="18" height="18" rx="1.5"/>
-                            <line x1="12" y1="3" x2="12" y2="21"/>
-                            <line x1="3" y1="12" x2="21" y2="12"/>
-                            <text x="7.5" y="8.5" font-size="5.5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle" font-family="'Outfit', sans-serif">0</text>
-                            <text x="16.5" y="8.5" font-size="5.5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle" font-family="'Outfit', sans-serif">1</text>
-                            <text x="7.5" y="17.5" font-size="5.5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle" font-family="'Outfit', sans-serif">1</text>
-                            <text x="16.5" y="17.5" font-size="5.5" font-weight="700" fill="currentColor" stroke="none" text-anchor="middle" font-family="'Outfit', sans-serif">0</text>
-                        </svg>
-                    </div>
-                    <span class="tooltip">KMAP</span>
-                </button>
-                <button class="nav-btn" data-view="3" id="btn-view-table">
-                    <div class="nav-icon-wrapper">
-                        <!-- Truth table: 2-col grid with header row -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
-                            <rect x="3" y="3" width="18" height="18" rx="1.5"/>
-                            <line x1="3" y1="9" x2="21" y2="9"/>
-                            <line x1="3" y1="15" x2="21" y2="15"/>
-                            <line x1="12" y1="3" x2="12" y2="21"/>
-                        </svg>
-                    </div>
-                    <span class="tooltip">Truth Table</span>
-                </button>
-                <button class="nav-btn" data-view="5" id="btn-view-solution">
-                    <div class="nav-icon-wrapper">
-                        <!-- Checkmark circle / Proof -->
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="9"/>
-                            <path d="m9 12 2 2 4-4"/>
-                        </svg>
-                    </div>
-                    <span class="tooltip">Proofs</span>
-                </button>
-            </div>
-        </nav>
-
-
-        <!-- Topbar (Input & Results) - spans full width above sidebar+content -->
-        <header id="topbar">
-            <!-- Landing Top-Left Buttons -->
-            <div id="landing-top-left-btns">
-                <button id="landing-install-app-btn" class="landing-link-btn landing-install-btn" type="button" title="Install Mantiq PWA">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                        <polyline points="7 10 12 15 17 10"></polyline>
-                        <line x1="12" y1="15" x2="12" y2="3"></line>
-                    </svg>
-                    <span>Install App</span>
-                </button>
-                <button id="landing-tour-btn" class="landing-link-btn landing-install-btn" type="button" title="Take the Tour">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14">
-                        <circle cx="12" cy="12" r="10"/>
-                        <polygon points="10 8 16 12 10 16 10 8"/>
-                    </svg>
-                    <span>Take a Tour</span>
-                </button>
-            </div>
-
-            <div id="hero-logo-wrap">
-                <svg id="hero-logo" viewBox="0 0 17.0666 17.0666" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mantiq">
-                    <g>
-                        <path fill="#878787" d="M3.788 12.6737c-0.0088,0.1224 -0.005,1.3732 0.0097,1.426l0.6156 -0.0033c0.0221,-0.0682 0.0145,-1.4753 -0.0037,-1.5186l0.0007 1.5089 -0.6097 0.0029c0.0019,-0.1632 0.0143,-1.3679 -0.0126,-1.4159zm-1.078 0.005c-0.0297,0.0658 -0.0126,1.2314 -0.0117,1.4088l-0.6079 0.0013c0.0002,-0.175 0.0175,-1.3933 -0.0128,-1.4494 -0.0121,0.2244 0.0024,0.5039 0.0024,0.7356 0,0.1218 -0.0149,0.6455 0.0067,0.7241l0.621 -0.0032 0.0022 -1.4174zm-0.6324 -0.0392c0.0303,0.056 0.013,1.2744 0.0128,1.4494l0.6079 -0.0013c-0.0009,-0.1774 -0.0181,-1.343 0.0117,-1.4088 -0.003,-0.1508 0.0765,-0.3382 0.1485,-0.4123 0.2518,-0.2586 0.647,-0.2113 0.7963,-0.0129 0.0761,0.1011 0.1434,0.2507 0.1331,0.4202 0.0269,0.048 0.0145,1.2528 0.0126,1.4159l0.6097 -0.0029 -0.0007 -1.5089c0.0186,-0.2137 -0.0848,-0.5011 -0.1804,-0.6443 -0.2462,-0.3685 -0.8109,-0.458 -1.2147,-0.3165 -0.3198,0.1121 -0.3622,0.2426 -0.484,0.3337 -0.2498,-0.4024 -0.8652,-0.4853 -1.2352,-0.3093 -0.0762,0.0362 -0.1174,0.0599 -0.1796,0.1073 -0.0908,0.0693 -0.1141,0.1079 -0.1547,0.1371l-0.0011 -0.2828c-0.0525,-0.0174 -0.5154,-0.0149 -0.5874,-0.0047l-0.0007 2.497 0.6224 0.0009c0.0002,-0.3066 -0.0001,-0.6132 0,-0.9198 0.0001,-0.2709 -0.0295,-0.5804 0.0912,-0.807 0.2418,-0.4538 1.0174,-0.3555 0.9922,0.2699zm13.2082 -0.5564c0.2179,-0.0354 0.434,0.0435 0.5503,0.1518 0.1442,0.1343 0.2177,0.276 0.2418,0.4891 0.0506,0.4473 -0.1762,0.8119 -0.5523,0.8753 -0.9605,0.1619 -1.0936,-1.3772 -0.2397,-1.5161zm0.8076 -0.1994c-0.0788,-0.0756 -0.1165,-0.1308 -0.2456,-0.2014 -0.3311,-0.1809 -0.7693,-0.1572 -1.089,0.0023 -0.687,0.3426 -0.8243,1.2862 -0.4846,1.8685 0.2446,0.4192 0.7016,0.6352 1.2046,0.573 0.1272,-0.0157 0.248,-0.0481 0.3504,-0.1029 0.1829,-0.0977 0.1768,-0.1457 0.2474,-0.1975l0.0039 1.177 0.6138 -0.0003 0.0007 -3.4076c-0.0983,-0.001 -0.5301,-0.0104 -0.592,0.0082l-0.0094 0.2806zm-9.5037 1.1316c0.021,0.2589 -0.0225,0.4628 -0.26,0.5917 -0.1863,0.101 -0.5313,0.1238 -0.6782,-0.0287 -0.1876,-0.195 -0.1291,-0.4517 0.1161,-0.5327 0.1186,-0.0393 0.6781,-0.0442 0.8221,-0.0302zm-1.3307 -0.7001c0.052,-0.0256 0.1033,-0.0751 0.1647,-0.1102 0.1946,-0.1111 0.4166,-0.1646 0.6523,-0.143 0.3152,0.029 0.5371,0.2105 0.5089,0.5426 -0.3285,0.0482 -0.7945,-0.0667 -1.2015,0.1009 -0.3496,0.144 -0.5043,0.4722 -0.4269,0.8278 0.1235,0.5678 0.8272,0.6948 1.2864,0.5493 0.2691,-0.0852 0.3437,-0.2285 0.3833,-0.2563l-0.001 0.2696 0.5828 0.0004c0.001,-0.4204 0.0017,-0.8415 -0.0002,-1.2619 -0.002,-0.4436 -0.024,-0.7366 -0.2755,-0.9887 -0.3269,-0.3278 -1.0245,-0.3602 -1.4964,-0.1913 -0.1263,0.0452 -0.3358,0.1417 -0.4117,0.2226l0.2348 0.4382zm3.2408 1.7759c0.003,-0.4255 -0.0133,-0.867 0.0018,-1.2899 0.0072,-0.2033 0.0461,-0.3735 0.1489,-0.5037 0.2052,-0.26 0.7154,-0.2861 0.9029,-0.0159 0.1086,0.1565 0.1199,0.3022 0.1209,0.5198 0.0021,0.4306 0.0002,0.8616 0.0002,1.294l0.6208 0.0008c-0.0022,-0.3944 -0.0003,-0.79 0.001,-1.1845 0.0013,-0.3946 -0.0024,-0.6914 -0.1956,-0.9787 -0.0233,-0.0346 -0.0433,-0.063 -0.0683,-0.0862 -0.088,-0.0822 -0.097,-0.1127 -0.2537,-0.1878 -0.3295,-0.1579 -0.8603,-0.1415 -1.1596,0.0995 -0.031,0.025 -0.0525,0.0423 -0.0761,0.0673 -0.0239,0.0254 -0.0366,0.0535 -0.0692,0.068l-0.0009 -0.2987 -0.5943 0.0056 -0.0001 2.4949 0.6213 -0.0045zm2.1636 -1.9891l0.4041 0.0012c0.0132,0.0807 0.0038,0.7644 0.0039,0.9077 0.0001,0.3043 -0.0216,0.5601 0.1301,0.7889 0.3258,0.4914 1.1487,0.3478 1.3047,0.1598l-0.1579 -0.4446c-0.1365,0.0698 -0.2574,0.1491 -0.4593,0.083 -0.1527,-0.05 -0.1963,-0.1815 -0.2029,-0.3703 -0.0047,-0.1322 -0.0124,-1.0567 0.0019,-1.1267l0.6687 0.0004 -0.0005 -0.4935 -0.6707 -0.002 -0.0043 -0.6002 -0.6107 0.0044 -0.0035 0.5987 -0.4014 -0.0004 -0.0021 0.4934zm2.2857 1.9939l0.6134 -0.0038 0 -2.4972c-0.1385,0.0039 -0.5113,-0.0185 -0.6182,0.0074l0.0048 2.4937zm0.6911 -3.1809c0.0393,-0.229 -0.1276,-0.3957 -0.3201,-0.4219 -0.235,-0.032 -0.4159,0.0998 -0.4524,0.2931 -0.0935,0.4943 0.6894,0.6141 0.7726,0.1287z"/>
-                        <path fill="#135494" d="M0.9913 7.4124c0.3991,-0.0867 0.5305,0.5289 0.1272,0.6142 -0.4096,0.0866 -0.5308,-0.5264 -0.1272,-0.6142zm5.0765 -0.46c-0.1034,0.012 -0.366,0.0049 -0.4665,-0.0133 -0.2672,-0.0483 -0.4497,-0.2401 -0.4424,-0.5246 0.0117,-0.4526 0.541,-0.6685 0.7738,-0.2924 0.1366,0.2207 0.137,0.5355 0.1352,0.8303zm1.5256 0.0017c0.0313,-0.1385 0.1956,-0.3769 0.2657,-0.463 0.0531,-0.0652 0.1159,-0.1365 0.1711,-0.193 0.166,-0.1695 0.4158,-0.3582 0.6515,-0.4294 0.2233,-0.0674 0.437,-0.0211 0.5546,0.1066 0.1165,0.1266 0.1752,0.3473 0.097,0.5557 -0.2037,0.5427 -1.1894,0.4255 -1.74,0.4231zm5.3633 -1.2284c0.5999,-0.1589 0.7535,1.0013 0.1007,0.9909 -0.2377,-0.0037 -0.5342,-0.2388 -0.5359,-0.4468 -0.0015,-0.1744 0.1946,-0.4804 0.4353,-0.5441zm-11.9695 -2.0937c0.1765,-0.0388 0.3303,0.1076 0.3576,0.247 0.0374,0.1911 -0.1,0.3353 -0.2467,0.3637 -0.3902,0.0755 -0.5267,-0.5193 -0.1108,-0.6107zm2.0813 0.0354l-1.4 0.0021c-0.2581,-0.6713 -1.3067,-0.5162 -1.3066,0.2736 0.0001,0.5796 0.6098,0.8515 1.0307,0.5969 0.069,-0.0417 0.1153,-0.0872 0.1599,-0.1385 0.0549,-0.0631 0.0726,-0.1136 0.1224,-0.1864l1.3883 -0.0017 0.0052 2.2588c0.0326,-0.0314 0.0889,-0.1271 0.1191,-0.1719 0.0769,-0.1141 0.3159,-0.3918 0.4222,-0.4588l-0.0013 -3.2247c0.3467,0.0009 0.6931,-0.0006 1.0393,-0.0007 0.3272,-0.0002 0.7005,-0.021 1.0115,0.0409 0.5117,0.1019 0.9815,0.4137 1.2625,0.8222 0.3615,0.5254 0.4065,0.9271 0.4049,1.6773 -0.0007,0.3493 -0.0006,0.6987 0.0004,1.048 0.0006,0.1975 -0.0183,0.126 -0.1441,0.3728 -0.0557,0.1092 -0.1208,0.2531 -0.1525,0.3764l-0.4144 -0.0001c-0.0093,-0.3091 0.008,-0.5281 -0.0818,-0.8142 -0.0648,-0.2065 -0.1773,-0.4273 -0.3477,-0.5574 -0.2937,-0.2243 -0.6691,-0.29 -1.0291,-0.0927 -0.2866,0.1571 -0.4927,0.4496 -0.5415,0.8047 -0.0694,0.5052 0.1613,0.951 0.6353,1.1389 0.2894,0.1147 0.5113,0.0602 0.8178,0.0844 -0.0075,0.5436 -0.2276,0.9629 -0.5205,1.1872 -0.9987,0.7648 -2.4102,-0.4287 -1.7489,-1.7152 0.1503,-0.2925 0.3311,-0.4253 0.3668,-0.498l-0.3244 -0.4004c-0.1536,0.0832 -0.3867,0.4104 -0.4822,0.5698 -0.0981,0.1638 -0.1771,0.3657 -0.2251,0.5571 -0.0543,0.217 -0.0013,0.2291 -0.1196,0.2284l-0.2657 -0.0008c-0.3193,0.0003 -0.768,0.0116 -1.0595,-0.0015 -0.0333,-0.0391 -0.0861,-0.2027 -0.2788,-0.3212 -0.4378,-0.2694 -1.0554,0.0385 -1.0414,0.6152 0.0174,0.7174 0.9308,0.9226 1.2695,0.3461 0.0191,-0.0326 0.0278,-0.0761 0.0617,-0.0908l1.4104 0.0002c0.1403,0.6682 0.564,1.1906 1.202,1.4138 0.2399,0.0839 0.4998,0.1138 0.7704,0.0787 0.4584,-0.0595 0.8332,-0.3086 1.0974,-0.6456 0.2724,-0.3474 0.4087,-0.7561 0.4354,-1.3204 0.1068,-0.0164 2.5435,-0.0039 2.8322,-0.004 0.1798,-0 0.3922,0.0101 0.5681,-0.0036 0.2926,-0.0228 0.5037,-0.1065 0.6909,-0.3034 0.0299,-0.0315 0.0393,-0.0494 0.0658,-0.0756 0.3372,0.6454 1.1678,0.3689 1.4581,-0.2562 0.0847,0.0388 0.1359,0.2039 0.4893,0.3485 0.2093,0.0857 0.5017,0.0764 0.709,-0.0088 0.405,-0.1665 0.5998,-0.5169 0.5995,-1.0779l1.5353 -0.0002c0.0679,0.1224 0.13,0.1969 0.2522,0.2644 0.3839,0.2123 0.8888,-0.0557 0.888,-0.5407 -0.0006,-0.3083 -0.2068,-0.5299 -0.4503,-0.5924 -0.2406,-0.0618 -0.4233,0.0202 -0.5753,0.1681 -0.0537,0.0524 -0.0648,0.0933 -0.1112,0.1531l-1.6937 0.003c-0.0319,-0.0368 -0.0504,-0.0731 -0.0778,-0.106 -0.2381,-0.2857 -0.6161,-0.4281 -0.9997,-0.3065 -0.4042,0.1282 -0.6032,0.4206 -0.7613,0.8178 -0.1031,0.2591 -0.2886,0.897 -0.6443,0.922 -0.2699,0.0189 -0.3048,-0.2472 -0.2962,-0.4856 0.0095,-0.263 0.0199,-0.5075 0.0196,-0.7743l-0.5457 -0.0035c0.0048,0.2813 0.0163,0.7342 -0.093,0.9668 -0.0544,0.1158 -0.1427,0.2174 -0.2576,0.2715 -0.1486,0.07 -0.3074,0.0555 -0.484,0.0561 0.0176,-0.0475 0.0679,-0.1169 0.0968,-0.1785 0.0305,-0.065 0.0539,-0.129 0.0727,-0.2031 0.1946,-0.7672 -0.4311,-1.5227 -1.3343,-1.2459 -0.3018,0.0925 -0.4959,0.2661 -0.6948,0.4113 -0.0166,-0.1302 0.0027,-0.8256 -0.0054,-1.0543 -0.0302,-0.8594 -0.4392,-1.6431 -1.0735,-2.1033 -0.4323,-0.3136 -0.9248,-0.5101 -1.6074,-0.51 -0.3531,0.0001 -0.7063,-0.0007 -1.0595,-0.0002 -0.3487,0.0004 -0.7114,-0.0103 -1.0582,0.0006l-0.0022 1.5981zm2.2977 6.1304c0.1779,0.0168 0.4108,0.0034 0.5948,0.0037l2.9688 -0.0002c0.3928,-0.0006 0.7111,-0.0166 1.0777,-0.1032 0.6147,-0.1453 1.2052,-0.4761 1.5713,-0.8013 0.0535,-0.0476 0.1071,-0.0937 0.1597,-0.1387 0.0557,-0.0477 0.093,-0.0999 0.1494,-0.1484 0.2013,-0.173 0.727,-1.0478 0.727,-1.0478 0,0 -0.4181,-0.2505 -0.4181,-0.2505 0,0 -0.2553,0.3681 -0.3552,0.5022 -0.517,0.7569 -1.4148,1.326 -2.3722,1.4233 -0.3594,0.0365 -0.7778,0.0189 -1.1467,0.0187l-1.7548 -0.0002c-0.3405,-0.0012 -0.2498,-0.0417 -0.4522,0.1373 -0.0952,0.0842 -0.221,0.163 -0.3503,0.2342 -0.1962,0.1079 -0.2643,0.1081 -0.3994,0.1707zm2.173 -7.1817l1.5562 0c0.4881,-0.0003 0.7868,0.0481 1.2014,0.2038 0.6311,0.237 1.1933,0.7122 1.5515,1.2613 0.162,0.2483 0.2479,0.428 0.3543,0.7048 0.0244,0.0637 0.0637,0.2162 0.0934,0.2598 0.1656,-0.0819 0.2026,-0.1563 0.4967,-0.2187 -0.0593,-0.2992 -0.3325,-0.8189 -0.5017,-1.0664 -0.66,-0.9654 -1.7356,-1.6917 -3.0631,-1.692 -0.8328,-0.0002 -1.763,-0.0111 -2.5944,-0.0002 0.0243,0.0262 0.1778,0.1085 0.2248,0.1394 0.1879,0.1237 0.2484,0.1823 0.4078,0.3203 0.1235,0.107 0.05,0.0878 0.2732,0.0878zm3.2388 1.9698c-0.4225,0.0794 -0.3477,0.7504 0.1235,0.688 0.1748,-0.0231 0.305,-0.1954 0.2751,-0.3999 -0.0262,-0.1789 -0.1911,-0.3271 -0.3987,-0.288zm-4.8611 -0.1948c-0.4188,0.1183 -0.2602,0.8035 0.1931,0.6719 0.1492,-0.0433 0.2754,-0.2209 0.2255,-0.4238 -0.0409,-0.1663 -0.2001,-0.3098 -0.4186,-0.2481zm-0.803 0.0018c-0.4101,0.1204 -0.2744,0.7875 0.1887,0.6685 0.3985,-0.1024 0.2643,-0.8016 -0.1887,-0.6685z"/>
-                    </g>
-                </svg>
-            </div>
-
-            <h1 class="sr-only">Mantiq: Free K-Map Solver &amp; Boolean Algebra Simplifier for Digital Logic Design (DLD) and Discrete Math</h1>
-            <p class="sr-only">Type any Boolean expression, minterm list, or K-Map size to instantly get a simplified SOP/POS result, a step-by-step algebraic and Quine-McCluskey proof, an auto-generated Karnaugh map, a full truth table, an interactive simulated circuit diagram, and exportable gate-level or dataflow Verilog code. Built for Digital Logic Design (DLD) and Discrete Mathematics coursework — free, offline-capable, and running entirely in your browser.</p>
-
-            <div class="topbar-search-area">
-                <div class="input-row">
-                    <div class="input-wrapper" style="position: relative;">
-                        <input type="text" id="expression-input" placeholder="Type an expression" autocomplete="off" spellcheck="false" autofocus>
-                        <button id="circuit-explain-btn" type="button" title="What is this circuit?" style="display: none; z-index: 3;">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="9.5"></circle>
-                                <path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-1 2-2 2.5S12 12.5 12 13.5"></path>
-                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
-                            </svg>
-                        </button>
-                        <button id="expr-status-btn" type="button" style="display: none; z-index: 3;">
-                            <svg id="expr-status-icon-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="9.5"></circle>
-                                <line x1="12" y1="7.5" x2="12" y2="13"></line>
-                                <line x1="12" y1="16.3" x2="12" y2="16.3"></line>
-                            </svg>
-                            <svg id="expr-status-icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" width="18" height="18" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="18" cy="5" r="2.6"></circle>
-                                <circle cx="6" cy="12" r="2.6"></circle>
-                                <circle cx="18" cy="19" r="2.6"></circle>
-                                <line x1="8.3" y1="10.7" x2="15.7" y2="6.3"></line>
-                                <line x1="8.3" y1="13.3" x2="15.7" y2="17.7"></line>
-                            </svg>
-                        </button>
-                        <button id="clear-input-btn" type="button" title="Clear input" style="display: none;">&times;</button>
-                        <div id="syntax-error-line"></div>
-                    </div>
-                    
-                    <div class="topbar-actions">
-
-                        <!-- SOP / POS Pill Toggle -->
-                        <div class="pill-toggle" id="sop-pos-pill" data-state="sop">
-                            <div class="pill-slider"></div>
-                            <button class="pill-option active" data-val="sop">SOP</button>
-                            <button class="pill-option" data-val="pos">POS</button>
-                        </div>
-                        
-                        <!-- Theme Pill Toggle -->
-                        <div class="pill-toggle theme-toggle" id="theme-pill" data-state="light">
-                            <div class="pill-slider"></div>
-                            <button class="pill-option" data-val="dark" title="Dark Mode">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                            </button>
-                            <button class="pill-option active" data-val="light" title="Light Mode">
-                                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="result-row" style="display: none;">
-                    <span id="simplified-label">=</span>
-                    <div id="solutions-carousel" class="draggable-carousel">
-                        <!-- Cards injected by JS -->
-                    </div>
-                    <button id="solutions-overflow-btn" class="solutions-overflow-btn" type="button" title="Show all solutions" style="display: none;">
-                        <span id="solutions-overflow-count"></span>
-                    </button>
-                </div>
-                
-                <div id="error-feedback" class="error-text" style="display: none;"></div>
-            </div>
-
-            <div class="topbar-bottom-links">
-                <div class="quick-presets-group">
-                    <span class="quick-presets-label">Quick K-Map:</span>
-                    <button type="button" class="landing-link-btn quick-preset-btn" data-expr="KMAP(3)">3 Var</button>
-                    <button type="button" class="landing-link-btn quick-preset-btn" data-expr="KMAP(4)">4 Var</button>
-                    <button type="button" class="landing-link-btn quick-preset-btn" data-expr="KMAP(5)">5 Var</button>
-                </div>
-                <span class="quick-presets-divider"></span>
-                <div class="landing-links-group">
-                    <button id="learn-formats-btn" class="landing-link-btn" type="button">Formats</button>
-                    <button id="see-examples-btn" class="landing-link-btn" type="button">Examples</button>
-                    <button id="pro-tips-btn" class="landing-link-btn" type="button">Pro Tips</button>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Workspace -->
-        <main id="main-workspace">
-
-                <!-- Empty State overlay when no expression exists -->
-                <div id="empty-state" style="display: none;"></div>
-                
-                <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" tabindex="-1"></canvas>
-                
-                <!-- Truth Table / Waveform Container -->
-                <div id="truthtable-container" class="view-hidden">
-                    <div class="tt-panel glass-panel">
-                        <div class="panel-header">
-                            <div class="panel-title-group">
-                                <h2>Truth Table</h2>
-                                <button class="concept-info-btn" data-concept="truth_table" aria-label="What is this?">?</button>
-                            </div>
-                            <div class="panel-actions">
-                                <button id="export-csv-btn" class="action-link-btn" title="Export CSV">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                                    <span>Export CSV</span>
-                                </button>
-                                <button id="tt-fullscreen-btn" class="action-link-btn" title="Fullscreen">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
-                                    <span>Fullscreen</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="table-scroll-wrapper">
-                            <table id="html-truth-table">
-                                <!-- Generated Dynamically -->
-                            </table>
-                        </div>
-                    </div>
-                    <div class="wave-panel glass-panel">
-                        <div class="panel-header">
-                            <div class="panel-title-group">
-                                <h2>Waveform Diagram</h2>
-                                <button class="concept-info-btn" data-concept="waveform" aria-label="What is this?">?</button>
-                            </div>
-                            <div class="panel-actions">
-                                <button id="export-wave-btn" class="action-link-btn" title="Export PNG Waveform">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                                    <span>Export PNG</span>
-                                </button>
-                                <button id="wave-fullscreen-btn" class="action-link-btn" title="Fullscreen">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
-                                    <span>Fullscreen</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="wave-scroll-wrapper">
-                            <canvas id="waveform-canvas"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- K-Map Container -->
-                <div id="kmap-container" class="view-hidden">
-                    <div class="kmap-panel glass-panel kmap-panel-noheader">
-                        <div id="kmap-visual-wrapper">
-                            <!-- 2D table grid or 3D canvas injected here -->
-                            <div id="kmap-grid-container"></div>
-                            <svg id="kmap-svg-overlay" style="transform: translateZ(0);"></svg>
-                            <div id="kmap-wrap-container" style="display: none; width: 100%; height: 100%; overflow: hidden; position: relative; cursor: grab; transform: translateZ(0);">
-                                <div id="kmap-wrap-surface" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; transform: translateZ(0);"></div>
-                                <svg id="kmap-wrap-svg-overlay" style="position: absolute; top:0; left:0; width: 100%; height: 100%; overflow: visible; pointer-events:none; transform: translateZ(0);"></svg>
-                            </div>
-<div id="kmap-3d-container" style="display: none;"></div>
-                    </div>
-                    <div class="kmap-controls">
-                        <button id="kmap-export-png-btn" class="kmap-fs-btn" title="Export PNG">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                        </button>
-                        <button id="kmap-view-toggle-btn" class="kmap-fs-btn" title="Toggle View">
-                            <span style="font-family: 'Outfit', sans-serif; font-size: 11px; font-weight: 700;">WRP</span>
-                        </button>
-                        <button id="kmap-fullscreen-btn" class="kmap-fs-btn" title="Fullscreen">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="kmap-analysis-panel glass-panel">
-                    <div class="panel-header">
-                        <div class="panel-title-group">
-                            <h2>Karnaugh Map</h2>
-                            <button class="concept-info-btn" data-concept="kmap" aria-label="What is this?">?</button>
-                        </div>
-                    </div>
-                    <div class="kmap-solutions-wrapper" id="kmap-implicants-list">
-
-                            <!-- Selected solution implicants injected here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Solution Container -->
-                <div id="solution-container" class="view-hidden">
-                    <div class="solution-split-view" id="solution-split-view" data-active-tab="alg">
-                        <div class="solution-panel glass-panel" id="panel-alg">
-                            <div class="panel-header">
-                                <div class="panel-title-group">
-                                    <h2>Algebraic Proof</h2>
-                                    <button class="concept-info-btn" data-concept="algebraic_proof" aria-label="What is this?">?</button>
-                                </div>
-                                <div class="panel-actions">
-                                    <button id="copy-alg-btn" class="action-link-btn" title="Copy proof">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                        <span>Copy</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="solution-content-wrapper" id="alg-body">
-                                <!-- Injected by JS -->
-                            </div>
-                            <div class="alg-note-footer">
-                                <span>This is an experimental feature to help guide you. Since it's computer-generated, the steps might look a bit different from how a human would solve it!</span>
-                            </div>
-                        </div>
-                        <div class="solution-panel glass-panel" id="panel-qm">
-                            <div class="panel-header">
-                                <div class="panel-title-group">
-                                    <h2>Quine-McCluskey</h2>
-                                    <button class="concept-info-btn" data-concept="quine_mccluskey" aria-label="What is this?">?</button>
-                                </div>
-                                <div class="panel-actions">
-                                    <button id="copy-qm-btn" class="action-link-btn" title="Copy steps">
-                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                        <span>Copy</span>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="solution-content-wrapper" id="qm-body">
-                                <!-- Injected by JS -->
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Mobile Tab Toggle -->
-                    <div class="mobile-bottom-tabs" id="solution-mobile-tabs">
-                        <div class="pill-toggle" id="solution-type-pill" data-state="alg">
-                            <div class="pill-slider"></div>
-                            <button class="pill-option active" data-val="alg">Algebraic Proof</button>
-                            <button class="pill-option" data-val="qm">Quine-McCluskey</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Verilog Container -->
-                <div id="verilog-container" class="view-hidden">
-                    <div class="verilog-panel glass-panel">
-                        <div class="panel-header">
-                            <div class="panel-title-group">
-                                <h2>Gate Level Verilog</h2>
-                                <button class="concept-info-btn" data-concept="verilog_gate" aria-label="What is this?">?</button>
-                            </div>
-                            <div class="panel-actions">
-                                <button id="copy-gate-btn" class="action-link-btn" title="Copy code">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    <span>Copy</span>
-                                </button>
-                                <button id="save-gate-btn" class="action-link-btn" title="Save code to device">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                    <span>Save</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="code-scroll-wrapper">
-                            <pre><code id="gate-level-code"></code></pre>
-                        </div>
-                        <div class="panel-footer" style="display: flex; align-items: center; justify-content: flex-end; margin-top: 10px; flex-shrink: 0;">
-                            <div class="pill-toggle verilog-tb-toggle" id="gate-tb-pill" data-state="tb">
-                                <div class="pill-slider"></div>
-                                <button class="pill-option active" data-val="tb" title="Include testbench">Testbench</button>
-                                <button class="pill-option" data-val="no-tb" title="Exclude testbench">No Testbench</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="verilog-panel glass-panel">
-                        <div class="panel-header">
-                            <div class="panel-title-group">
-                                <h2>Dataflow Verilog</h2>
-                                <button class="concept-info-btn" data-concept="verilog_dataflow" aria-label="What is this?">?</button>
-                            </div>
-                            <div class="panel-actions">
-                                <button id="copy-dataflow-btn" class="action-link-btn" title="Copy code">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                                    <span>Copy</span>
-                                </button>
-                                <button id="save-dataflow-btn" class="action-link-btn" title="Save code to device">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                    <span>Save</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="code-scroll-wrapper">
-                            <pre><code id="dataflow-code"></code></pre>
-                        </div>
-                        <div class="panel-footer" style="display: flex; align-items: center; justify-content: flex-end; margin-top: 10px; flex-shrink: 0;">
-                            <div class="pill-toggle verilog-tb-toggle" id="dataflow-tb-pill" data-state="tb">
-                                <div class="pill-slider"></div>
-                                <button class="pill-option active" data-val="tb" title="Include testbench">Testbench</button>
-                                <button class="pill-option" data-val="no-tb" title="Exclude testbench">No Testbench</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- SVG Circuit Container -->
-                <div id="svg-circuit-container" class="view-hidden">
-                    <div class="circuit-panel glass-panel" id="original-circuit-panel" style="position: relative;">
-                        <div class="panel-header">
-                            <div class="panel-title-group">
-                                <h2>Original Circuit</h2>
-                                <button class="concept-info-btn" data-concept="circuit_diagram" aria-label="What is this?">?</button>
-                            </div>
-                            <div class="panel-actions">
-                                <button id="export-circuit-png-orig" class="action-link-btn" title="Export PNG">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                                    <span>Export PNG</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="circuit-scroll-wrapper" id="original-circuit-scroll"></div>
-                        <div class="zoom-controls">
-                            <button class="zoom-btn" id="zoom-in-orig" title="Zoom In">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <button class="zoom-btn" id="zoom-out-orig" title="Zoom Out">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <button class="zoom-btn zoom-btn-fullscreen" id="zoom-fullscreen-orig" title="Fullscreen">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="circuit-panel glass-panel" id="simplified-circuit-panel" style="position: relative;">
-                        <div class="panel-header">
-                            <div class="panel-title-group">
-                                <h2>Simplified Circuit</h2>
-                                <button class="concept-info-btn" data-concept="circuit_diagram" aria-label="What is this?">?</button>
-                            </div>
-                            <div class="panel-actions">
-                                <button id="export-circuit-png-simp" class="action-link-btn" title="Export PNG">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
-                                    <span>Export PNG</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="circuit-scroll-wrapper" id="simplified-circuit-scroll"></div>
-                        <div class="zoom-controls">
-                            <button class="zoom-btn" id="zoom-in-simp" title="Zoom In">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <button class="zoom-btn" id="zoom-out-simp" title="Zoom Out">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <button class="zoom-btn zoom-btn-fullscreen" id="zoom-fullscreen-simp" title="Fullscreen">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3H5a2 2 0 0 0-2 2v3"></path><path d="M21 8V5a2 2 0 0 0-2-2h-3"></path><path d="M3 16v3a2 2 0 0 0 2 2h3"></path><path d="M16 21h3a2 2 0 0 0 2-2v-3"></path></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Interactive PCB Simulation Container -->
-                <div id="simulation-container" class="view-hidden">
-                    <div class="circuit-panel glass-panel" id="original-sim-panel" style="position: relative;">
-                        <div class="panel-header" style="justify-content: space-between;">
-                            <div class="panel-title-group">
-                                <h2>Original PCB Simulation</h2>
-                                <button class="concept-info-btn" data-concept="simulation" aria-label="What is this?">?</button>
-                            </div>
-                            <div class="panel-actions">
-                                <span style="font-size: 12px; color: var(--text-secondary);">Toggle inputs to simulate</span>
-                            </div>
-                        </div>
-                        <div class="circuit-scroll-wrapper" id="original-sim-scroll"></div>
-                        <div class="zoom-controls">
-                            <button class="zoom-btn" id="zoom-in-sim-orig" title="Zoom In">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <button class="zoom-btn" id="zoom-out-sim-orig" title="Zoom Out">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <button class="zoom-btn zoom-btn-fullscreen" id="zoom-fullscreen-sim-orig" title="Fullscreen">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="circuit-panel glass-panel" id="simplified-sim-panel" style="position: relative;">
-                        <div class="panel-header" style="justify-content: space-between;">
-                            <div class="panel-title-group">
-                                <h2>Simplified PCB Simulation</h2>
-                                <button class="concept-info-btn" data-concept="simulation" aria-label="What is this?">?</button>
-                            </div>
-                            <div class="panel-actions">
-                                <span style="font-size: 12px; color: var(--text-secondary);">Toggle inputs to simulate</span>
-                            </div>
-                        </div>
-                        <div class="circuit-scroll-wrapper" id="simplified-sim-scroll"></div>
-                        <div class="zoom-controls">
-                            <button class="zoom-btn" id="zoom-in-sim-simp" title="Zoom In">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <button class="zoom-btn" id="zoom-out-sim-simp" title="Zoom Out">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                            </button>
-                            <button class="zoom-btn zoom-btn-fullscreen" id="zoom-fullscreen-sim-simp" title="Fullscreen">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="14" height="14"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-            </main>
-
-            <!-- Landing Page Footer -->
-            <footer id="landing-footer">
-                <div class="footer-left">
-                    <div class="footer-credit">
-                        Developed by <b>Usama Gulzar</b> (BSCS @ SEECS '29)
-                    </div>
-                    <div class="footer-links">
-                        <a href="https://usamagulzar.com" target="_blank" rel="noopener" class="footer-link" title="Portfolio">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                            <span>Portfolio</span>
-                        </a>
-                        <a href="https://www.linkedin.com/in/usamagulzarpk/" target="_blank" rel="noopener" class="footer-link" title="LinkedIn">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                            <span>LinkedIn</span>
-                        </a>
-                        <a href="https://github.com/usamagulzar" target="_blank" rel="noopener" class="footer-link" title="GitHub">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-                            <span>GitHub</span>
-                        </a>
-                        <a href="mailto:hello@usamagulzar.com" class="footer-link" title="Email">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                            <span>Email</span>
-                        </a>
-                        <a href="https://github.com/usamagulzar/mantiq/issues" target="_blank" rel="noopener" class="footer-link bug-link" title="Report a Bug">
-                            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="14" x="8" y="6" rx="4"></rect><path d="m19 7-3 2"></path><path d="m5 7 3 2"></path><path d="m19 19-3-2"></path><path d="m5 19 3-2"></path><path d="M20 13h-4"></path><path d="M4 13h4"></path><path d="m10 4 1 2"></path><path d="m14 4-1 2"></path></svg>
-                            <span>Report a Bug</span>
-                        </a>
-                    </div>
-                </div>
-                <div class="footer-right">
-                    <nav class="footer-nav-links top-row">
-                        <button class="footer-nav-link" data-action="whats-mantiq">What's Mantiq?</button>
-                        <button class="footer-nav-link" data-action="why-mantiq">Why Mantiq?</button>
-                    </nav>
-                    <nav class="footer-nav-links bottom-row">
-                        <button class="footer-nav-link" data-action="privacy-policy">Privacy Policy</button>
-                        <button class="footer-nav-link" data-action="terms-of-use">Terms of Use</button>
-                        <button class="footer-nav-link" data-action="contact">Contact</button>
-                    </nav>
-                </div>
-            </footer>
-
+        <div class="layer">
+          <span class="layer__tag">js/</span>
+          <p>Vanilla JS for rendering, state, and the PWA install flow</p>
         </div>
-    </div>
-
-    <!-- Format Guide Modal -->
-    <div id="format-guide-popup" class="modal-overlay" style="display: none;">
-        <div class="modal format-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2>Learn Formats</h2>
-                        <div class="modal-subtitle">A simple guide to typing logic</div>
-                    </div>
-                </div>
-                <button class="modal-close" id="format-guide-close">&times;</button>
-            </div>
-            <div class="modal-body format-guide-body">
-                <div class="guide-section">
-                    <h3>1. Boolean Algebra Expressions</h3>
-                    <p>Type logic directly using operators. Standard operator precedence applies.</p>
-                    <div class="table-responsive">
-                        <table class="guide-table">
-                            <tr><th>Gate / Operation</th><th>Supported Symbols</th><th>Examples</th></tr>
-                            <tr><td><strong>AND</strong></td><td><code>*</code>, <code>&amp;</code>, <code>AND</code></td><td><code>AB</code>, <code>A(B+C)</code>, <code>A * B</code></td></tr>
-                            <tr><td><strong>OR</strong></td><td><code>+</code>, <code>|</code>, <code>OR</code></td><td><code>A + B</code>, <code>A | B</code></td></tr>
-                            <tr><td><strong>NOT</strong></td><td><code>'</code> (suffix), <code>!</code>, <code>~</code>, <code>NOT</code></td><td><code>A'</code>, <code>!A</code>, <code>~(A+B)</code></td></tr>
-                            <tr><td><strong>XOR</strong></td><td><code>^</code>, <code>XOR</code></td><td><code>A ^ B</code>, <code>A XOR B</code></td></tr>
-                            <tr><td><strong>XNOR</strong></td><td><code>=</code>, <code>&lt;-&gt;</code>, <code>XNOR</code></td><td><code>A = B</code>, <code>A &lt;-&gt; B</code></td></tr>
-                        </table>
-                    </div>
-                </div>
-                
-                <div class="guide-section">
-                    <h3>2. Canonical Forms</h3>
-                    <p>Directly specify truth table rows using minterms or maxterms, with optional don't cares.</p>
-                    <div class="table-responsive">
-                        <table class="guide-table">
-                            <tr><th>Format</th><th>Syntax</th><th>Examples</th></tr>
-                            <tr><td><strong>Minterms</strong></td><td><code>m(...)</code></td><td><code>m(1,2,3)</code></td></tr>
-                            <tr><td><strong>Maxterms</strong></td><td><code>M(...)</code></td><td><code>M(0,2,4)</code></td></tr>
-                            <tr><td><strong>With Don't Cares</strong></td><td>Add <code>d(...)</code> or <code>D(...)</code></td><td><code>m(1,3) d(5,7)</code>, <code>M(0) D(2)</code></td></tr>
-                            <tr><td><strong>Custom Variables</strong></td><td>Prefix with <code>vars:</code></td><td><code>a,b,c: m(1,2)</code>, <code>w,x,y,z: M(0,15)</code></td></tr>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="guide-section">
-                    <h3>3. Blank K-Map Generation</h3>
-                    <p>Instantly generate an empty Karnaugh map to interactively build expressions.</p>
-                    <div class="table-responsive">
-                        <table class="guide-table">
-                            <tr><th>Format</th><th>Syntax</th><th>Examples</th></tr>
-                            <tr><td><strong>By Variable Count</strong></td><td><code>KMAP(num)</code></td><td><code>KMAP(3)</code>, <code>KMAP(4)</code></td></tr>
-                            <tr><td><strong>By Custom Variables</strong></td><td><code>KMAP(v1, v2...)</code></td><td><code>KMAP(x,y,z)</code></td></tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        <div class="bridge"><span>postMessage bridge</span></div>
+        <div class="layer layer--wasm">
+          <span class="layer__tag">wasm/</span>
+          <p>C++ compiled to WebAssembly with Emscripten, inside a Web Worker</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FORMATS ============ -->
+  <section class="formats wrap" id="formats">
+    <div class="section-head">
+      <p class="eyebrow">Input formats</p>
+      <h2>Write it however you were taught.</h2>
+      <p class="section-sub">Standard operator precedence applies: NOT before AND, then XOR,
+      then OR.</p>
     </div>
 
-    <!-- Examples Modal -->
-    <div id="examples-popup" class="modal-overlay" style="display: none;">
-        <div class="modal format-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><path d="M15 14c.2-.8.5-1.4 1.2-2A6 6 0 1 0 7.8 12c.7.6 1 1.2 1.2 2"/><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="21" x2="14" y2="21"/></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2>Example Expressions</h2>
-                        <div class="modal-subtitle">Select an example to load it into the engine</div>
-                    </div>
-                </div>
-                <button class="modal-close" id="examples-close">&times;</button>
-            </div>
-            <div class="modal-body format-guide-body">
-                <!-- Minimalist Typographic 2x2 Grid -->
-                <div class="empty-state-examples">
-                    <!-- Boolean Expressions (Left Row 1) -->
-                    <div class="example-section">
-                        <h4>Boolean Expressions</h4>
-                        <div class="example-links-column">
-                            <button class="example-link-item" data-expr="ABC + A'BC + AB'C + ABC'">ABC + A'BC + AB'C + ABC'</button>
-                            <button class="example-link-item" data-expr="A XOR AB XOR B">A XOR AB XOR B</button>
-                            <button class="example-link-item" data-expr="A^B -> C">A^B -> C</button>
-                            <button class="example-link-item" data-expr="AB | CD">AB | CD</button>
-                        </div>
-                    </div>
+    <div class="format-table" role="table">
+      <div class="format-row format-row--head" role="row">
+        <span role="columnheader">Gate / Operation</span>
+        <span role="columnheader">Supported symbols</span>
+        <span role="columnheader">Examples</span>
+      </div>
+      <div class="format-row" role="row"><span role="cell">AND</span><span role="cell" class="mono">*&nbsp;&nbsp;&amp;&nbsp;&nbsp;AND</span><span role="cell" class="mono">AB, A(B+C), A * B</span></div>
+      <div class="format-row" role="row"><span role="cell">OR</span><span role="cell" class="mono">+&nbsp;&nbsp;|&nbsp;&nbsp;OR</span><span role="cell" class="mono">A + B, A | B</span></div>
+      <div class="format-row" role="row"><span role="cell">NOT</span><span role="cell" class="mono">' &nbsp; ! &nbsp; ~ &nbsp; NOT</span><span role="cell" class="mono">A', !A, ~(A+B)</span></div>
+      <div class="format-row" role="row"><span role="cell">XOR</span><span role="cell" class="mono">^&nbsp;&nbsp;XOR</span><span role="cell" class="mono">A ^ B, A XOR B</span></div>
+      <div class="format-row" role="row"><span role="cell">XNOR</span><span role="cell" class="mono">=&nbsp;&nbsp;&lt;-&gt;&nbsp;&nbsp;XNOR</span><span role="cell" class="mono">A = B, A &lt;-&gt; B</span></div>
+      <div class="format-row" role="row"><span role="cell">Minterms / Maxterms</span><span role="cell" class="mono">m(...) &nbsp; M(...) &nbsp; d(...)</span><span role="cell" class="mono">m(1,2,3), M(0) D(2)</span></div>
+      <div class="format-row" role="row"><span role="cell">Blank K-Map</span><span role="cell" class="mono">KMAP(n) &nbsp; KMAP(v1,v2...)</span><span role="cell" class="mono">KMAP(4), KMAP(x,y,z)</span></div>
+    </div>
+  </section>
 
-                    <!-- Variables & Terms (Right Row 1) -->
-                    <div class="example-section">
-                        <h4>Variables & Terms</h4>
-                        <div class="example-links-column">
-                            <button class="example-link-item" data-expr="A,B,C: m(1,2,3)">A,B,C: m(1,2,3)</button>
-                            <button class="example-link-item" data-expr="A,B,C,D: m(0,1,3) d(2,4)">A,B,C,D: m(0,1,3) d(2,4)</button>
-                            <button class="example-link-item" data-expr="X,Y,Z: M(0,2,4)">X,Y,Z: M(0,2,4)</button>
-                            <button class="example-link-item" data-expr="X,Y,Z,W: M(1,3,5) D(7)">X,Y,Z,W: M(1,3,5) D(7)</button>
-                        </div>
-                    </div>
+  <!-- ============ COMPARISON ============ -->
+  <section class="compare wrap" id="why">
+    <div class="section-head">
+      <p class="eyebrow">Why Mantiq?</p>
+      <h2>Each tool serves a different purpose.</h2>
+      <p class="section-sub">An honest look at where Mantiq overlaps with other tools students
+      reach for, and where it does not.</p>
+    </div>
 
-                    <!-- Min/Max Terms (Left Row 2) -->
-                    <div class="example-section">
-                        <h4>Min/Max Terms</h4>
-                        <div class="example-links-column">
-                            <button class="example-link-item" data-expr="m(1,2,3)">m(1,2,3)</button>
-                            <button class="example-link-item" data-expr="m(0,1,3) d(2,4)">m(0,1,3) d(2,4)</button>
-                            <button class="example-link-item" data-expr="M(0,2,4)">M(0,2,4)</button>
-                            <button class="example-link-item" data-expr="M(1,3,5) D(7)">M(1,3,5) D(7)</button>
-                        </div>
-                    </div>
+    <div class="compare-table" role="table">
+      <div class="compare-row compare-row--head" role="row">
+        <span role="columnheader">Feature</span>
+        <span role="columnheader" class="compare-row__mantiq">Mantiq</span>
+        <span role="columnheader">Wolfram|Alpha</span>
+        <span role="columnheader">Logisim</span>
+      </div>
+      <div class="compare-row" role="row"><span>Boolean simplification</span><span class="compare-row__mantiq">SOP &amp; POS</span><span>SOP &amp; POS</span><span>SOP &amp; POS</span></div>
+      <div class="compare-row" role="row"><span>K-Map</span><span class="compare-row__mantiq">Up to 6 vars</span><span>No</span><span>Up to 4 vars</span></div>
+      <div class="compare-row" role="row"><span>Step-by-step proof</span><span class="compare-row__mantiq">Yes</span><span>No</span><span>No</span></div>
+      <div class="compare-row" role="row"><span>Truth table</span><span class="compare-row__mantiq">Yes</span><span>Yes</span><span>Yes</span></div>
+      <div class="compare-row" role="row"><span>Circuit diagram</span><span class="compare-row__mantiq">Auto-generated</span><span>Static diagram</span><span>Full editor</span></div>
+      <div class="compare-row" role="row"><span>Runs offline</span><span class="compare-row__mantiq">PWA, in-browser</span><span>No</span><span>Desktop app</span></div>
+    </div>
+    <p class="compare-note">Wolfram|Alpha is a general math engine. Logisim is a full desktop
+    circuit simulator. Mantiq is purpose-built for the Boolean algebra workflow taught in
+    Digital Logic Design courses.</p>
+  </section>
 
-                    <!-- K-Map Formats (Right Row 2) -->
-                    <div class="example-section">
-                        <h4>K-Map Formats</h4>
-                        <div class="example-links-column">
-                            <button class="example-link-item" data-expr="KMAP (3)">KMAP (3)</button>
-                            <button class="example-link-item" data-expr="KMAP (4)">KMAP (4)</button>
-                            <button class="example-link-item" data-expr="KMAP (W,X,Y,Z)">KMAP (W,X,Y,Z)</button>
-                            <button class="example-link-item" data-expr="KMAP (a,b,c,d,e)">KMAP (a,b,c,d,e)</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <!-- ============ PRIVACY BAND ============ -->
+  <section class="privacy" id="privacy">
+    <div class="wrap privacy__inner">
+      <p class="eyebrow">Privacy Policy</p>
+      <h2>Your expressions never leave your device.</h2>
+      <p>No account, no form submissions, no backend. Everything runs client-side in
+      WebAssembly. Mantiq stores only a small local preference for theme and whether you have
+      seen the academic integrity notice, never your logic. This landing page itself sets no
+      cookies and loads no analytics or tracking scripts of any kind.</p>
+      <div class="privacy__badges">
+        <span>No sign-up</span>
+        <span>No server round-trips</span>
+        <span>Installable PWA</span>
+        <span>Open source, MIT</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ ACADEMIC INTEGRITY ============ -->
+  <section class="integrity wrap">
+    <div class="integrity__card">
+      <span class="eyebrow">Commitment to academic integrity</span>
+      <h2>A study aid, not a homework completion service.</h2>
+      <p>Mantiq exists to help you check your own working, explore how simplification
+      happens step by step, and build the kind of intuition that only comes from engaging
+      with a concept directly. Typing in a problem and copying out the answer skips the part
+      where the actual learning happens, so please use it as a study aid rather than a
+      substitute for the effort your coursework is meant to require of you.</p>
+    </div>
+  </section>
+
+  <!-- ============ TERMS ============ -->
+  <section class="terms wrap" id="terms">
+    <div class="section-head">
+      <p class="eyebrow">Terms of Use</p>
+      <h2>What using Mantiq means for you.</h2>
+    </div>
+    <div class="terms__card">
+      <p>Mantiq is provided free of charge, open source under the MIT license, "as is" and
+      without warranty of any kind. You're welcome to use, inspect, fork, and self-host the
+      code, in line with the license terms in the repository.</p>
+      <p>All computation happens locally in your browser, so there is no account to create,
+      no data submitted to a server, and nothing for Mantiq to be responsible for storing or
+      losing on your behalf. You're responsible for how you use the results, including
+      following your own institution's policy on computational tools, as outlined in the
+      academic integrity note above.</p>
+      <p>Links to third-party sites (GitHub, LinkedIn, the support page) are provided for
+      convenience; Mantiq isn't responsible for their content or availability.</p>
+    </div>
+  </section>
+
+  <!-- ============ CONTACT ============ -->
+  <section class="contact wrap" id="contact">
+    <div class="section-head">
+      <p class="eyebrow">Contact</p>
+      <h2>Get in touch.</h2>
+      <p class="section-sub">Bug reports, feature requests, or just questions about Mantiq,
+      pick whichever channel is easiest.</p>
+    </div>
+    <div class="contact__grid">
+      <a class="contact__card" href="mailto:hello@usamagulzar.com">
+        <strong>Email</strong>
+        <span>hello@usamagulzar.com</span>
+      </a>
+      <a class="contact__card" href="https://github.com/usamagulzar/mantiq/issues" target="_blank" rel="noopener">
+        <strong>GitHub Issues</strong>
+        <span>Report a bug or request a feature</span>
+      </a>
+      <a class="contact__card" href="https://www.linkedin.com/in/usamagulzarpk/" target="_blank" rel="noopener">
+        <strong>LinkedIn</strong>
+        <span>Connect with Usama Gulzar</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ============ SUPPORT ============ -->
+  <section class="support wrap" id="support">
+    <div class="support__card">
+      <p class="eyebrow">Support the project</p>
+      <h2>Mantiq is free. Keeping it that way takes work.</h2>
+      <p>One student builds and maintains every part of this: the simplification engine, the
+      K-Maps, the circuit simulator, the Verilog export, all of it, in spare time, with no ads
+      and no paywall, and none planned. If Mantiq has saved you an assignment's worth of
+      hand-drawn K-maps, a small contribution helps keep it free, fast, and actively improved
+      for the next student who needs it.</p>
+      <a class="btn btn--solid btn--lg" href="https://pay.usamagulzar.com/" target="_blank" rel="noopener">Support Mantiq</a>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="faq wrap" id="faq">
+    <div class="section-head">
+      <p class="eyebrow">Questions</p>
+      <h2>Good to know.</h2>
+      <p class="section-sub">The essentials before you dive in. Anything else, reach out
+      through <a href="#contact">the contact section</a> above.</p>
+    </div>
+
+    <div class="faq-list">
+      <details class="faq-item" open>
+        <summary>Does Mantiq send my expressions anywhere?<span class="faq-icon" aria-hidden="true"></span></summary>
+        <p>No. All parsing and computation happens locally in your browser through
+        WebAssembly. Mantiq has no backend, no account system, and makes no network
+        requests once the app shell is cached. Your expressions never touch a server.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Does it work without an internet connection?<span class="faq-icon" aria-hidden="true"></span></summary>
+        <p>Yes. After your first visit, a service worker caches everything needed to run
+        Mantiq fully offline, including the WebAssembly engine itself. You can also install
+        it as a PWA straight from your browser's install prompt, or the option in Mantiq's own menu, for a native, home-screen experience.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>How many variables can Mantiq handle?<span class="faq-icon" aria-hidden="true"></span></summary>
+        <p>The Karnaugh map view supports 2 to 6 variables, which covers virtually every
+        DLD and discrete math course. Expression simplification and simulation can handle
+        larger variable counts too, limited mainly by how readable the output stays at
+        that size.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Can I share a result with a classmate or instructor?<span class="faq-icon" aria-hidden="true"></span></summary>
+        <p>Yes. The share button next to the expression bar copies a direct link to your
+        exact expression and solution. Whoever opens it sees the same result instantly,
+        with nothing to retype.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Is Mantiq suitable for coursework, or is it just a shortcut?<span class="faq-icon" aria-hidden="true"></span></summary>
+        <p>It is built for coursework, with the emphasis on understanding rather than just
+        getting an answer. Every simplification comes with a step-by-step proof that names
+        the law used at each step, so you can check your own working or see where you went
+        wrong. Please read the academic integrity note above, and always follow your
+        course's specific policy on tools like this.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>What does it cost to use?<span class="faq-icon" aria-hidden="true"></span></summary>
+        <p>Nothing. Mantiq is open source under the MIT license, free to use, inspect,
+        fork, and self-host. If it saves you time and you would like to support continued
+        development, you can do so
+        <a href="https://pay.usamagulzar.com/" target="_blank" rel="noopener">here</a>.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary>Who built Mantiq, and can I contribute?<span class="faq-icon" aria-hidden="true"></span></summary>
+        <p>Mantiq is developed by Usama Gulzar, a Computer Science undergraduate at SEECS,
+        NUST. The project is open source on GitHub, and bug reports, feature requests, and
+        pull requests are all welcome.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section class="final-cta wrap">
+    <h2>Stop redrawing K-maps by hand.</h2>
+    <p>Open Mantiq, type an expression, and see the whole picture: proof, map, table,
+    circuit, and Verilog, all in one place.</p>
+    <div class="hero__cta final-cta__actions">
+      <a class="btn btn--solid btn--lg" href="app.html" rel="noopener">Launch Mantiq</a>
+      <a class="btn btn--ghost btn--lg js-apk-download" href="https://raw.githubusercontent.com/usamagulzar/mantiq/refs/heads/main/mantiq-app-release.apk" rel="noopener">Download APK</a>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ FOOTER (mirrors the app's real credit line and legal links) ============ -->
+<footer class="footer">
+  <div class="wrap footer__inner">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <img class="brand__mark" src="assets/logo.svg" alt="" width="28" height="28">
+        <div>
+          <p class="brand__word">mantiq</p>
+          <p class="footer__tag">Developed by <strong>Usama Gulzar</strong> (BSCS @ SEECS '29)</p>
         </div>
+      </div>
+
+      <nav class="footer__links" aria-label="Footer">
+        <a href="#about">About</a>
+        <a href="#why">Why Mantiq?</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#terms">Terms</a>
+        <a href="#contact">Contact</a>
+        <a href="https://github.com/usamagulzar/mantiq" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://pay.usamagulzar.com/" target="_blank" rel="noopener">Support</a>
+      </nav>
     </div>
 
-    <!-- Circuit Explain Modal -->
-    <div id="circuit-explain-popup" class="modal-overlay" style="display: none;">
-        <div class="modal circuit-explain-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon" id="circuit-explain-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-1 2-2 2.5S12 12.5 12 13.5"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2 id="circuit-explain-name">Circuit</h2>
-                        <div class="modal-subtitle" id="circuit-explain-subtitle"></div>
-                    </div>
-                </div>
-                <button class="modal-close" id="circuit-explain-close">&times;</button>
-            </div>
-            <div class="modal-body circuit-explain-body" id="circuit-explain-body">
-            </div>
-        </div>
-    </div>
+    <p class="footer__copy">Mantiq v2.0.0 · Runs 100% client-side · MIT licensed</p>
+  </div>
+</footer>
 
-    <!-- About Mantiq -->
-    <div id="about-popup" class="modal-overlay" style="display: none;">
-        <div class="modal about-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2>About Mantiq</h2>
-                        <div class="modal-subtitle">What it is, and how to get the most out of it</div>
-                    </div>
-                </div>
-                <button class="modal-close" id="about-close">&times;</button>
-            </div>
-            <div class="modal-body about-body">
-                <div class="about-hero">
-                    <div class="about-logo">
-                        <img src="icons/icon-192.png" alt="Mantiq logo" width="56" height="56">
-                    </div>
-                    <div class="about-hero-text">
-                        <h1>Mantiq</h1>
-                        <div class="about-tagline">Turn Your Logic Into Life</div>
-                    </div>
-                </div>
+<div class="toast" id="apkToast" role="status" aria-live="polite">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+  <span>Download starting… check your browser's downloads.</span>
+</div>
 
-                <div class="about-scroll">
-                    <p class="about-lede">
-                        <b>Mantiq</b> is a free, offline digital logic workbench built for Digital Logic Design (DLD) and Discrete Mathematics coursework. It turns abstract Boolean algebra into interactive proofs, K-Maps, and live circuits that you can see, simplify, and simulate right in your browser.
-                    </p>
-
-                    <div class="about-badges">
-                        <span id="app-version-badge" class="about-badge accent">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 2 7l10 5 10-5-10-5Z"></path><path d="m2 17 10 5 10-5"></path><path d="m2 12 10 5 10-5"></path></svg>
-                            Version 2.0.0
-                        </span>
-                        <span class="about-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c6-4 9-7.5 9-13a9 9 0 1 0-18 0c0 5.5 3 9 9 13Z"></path></svg>
-                            Works Fully Offline
-                        </span>
-                        <span class="about-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><path d="M9 9h6v6H9z"></path></svg>
-                            WebAssembly Engine
-                        </span>
-                        <span class="about-badge">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><path d="M14 2v6h6"></path></svg>
-                            100% Free
-                        </span>
-                    </div>
-
-                    <div>
-                        <div class="about-section-title">What You Can Do</div>
-                        <div class="about-feature-grid">
-                            <div class="about-feature-card">
-                                <div class="about-feature-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"></path></svg>
-                                </div>
-                                <div class="about-feature-copy">
-                                    <h4>Minimize Expressions</h4>
-                                    <p>Simplify any Boolean expression to its minimal SOP or POS form using Quine-McCluskey.</p>
-                                </div>
-                            </div>
-                            <div class="about-feature-card">
-                                <div class="about-feature-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="9" x2="20" y2="9"></line><line x1="4" y1="15" x2="20" y2="15"></line><line x1="10" y1="3" x2="8" y2="21"></line><line x1="16" y1="3" x2="14" y2="21"></line></svg>
-                                </div>
-                                <div class="about-feature-copy">
-                                    <h4>Algebraic Proofs</h4>
-                                    <p>See every law—absorption, De Morgan's, and more—applied step by step.</p>
-                                </div>
-                            </div>
-                            <div class="about-feature-card">
-                                <div class="about-feature-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                                </div>
-                                <div class="about-feature-copy">
-                                    <h4>Karnaugh Maps</h4>
-                                    <p>Auto-grouped, color-coded K-Maps for up to 6 variables with prime implicants.</p>
-                                </div>
-                            </div>
-                            <div class="about-feature-card">
-                                <div class="about-feature-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"></path><path d="M18 17V9M13 17V5M8 17v-3"></path></svg>
-                                </div>
-                                <div class="about-feature-copy">
-                                    <h4>Truth Tables</h4>
-                                    <p>Instantly generated truth tables with minterm and maxterm callouts.</p>
-                                </div>
-                            </div>
-                            <div class="about-feature-card">
-                                <div class="about-feature-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="2" y1="9" x2="8" y2="9"></line><line x1="2" y1="15" x2="8" y2="15"></line><path d="M8 7h5a5 5 0 0 1 0 10H8z"></path><line x1="18" y1="12" x2="22" y2="12"></line></svg>
-                                </div>
-                                <div class="about-feature-copy">
-                                    <h4>Live Circuit Simulation</h4>
-                                    <p>An auto-drawn gate diagram you can interact with to test inputs in real time.</p>
-                                </div>
-                            </div>
-                            <div class="about-feature-card">
-                                <div class="about-feature-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
-                                </div>
-                                <div class="about-feature-copy">
-                                    <h4>Verilog Export</h4>
-                                    <p>Generate clean, ready-to-use Verilog HDL from your expression in one click.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="about-callout">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z"></path><path d="M6 12v5c0 1.66 2.5 3 6 3s6-1.34 6-3v-5"></path></svg>
-                        <p>
-                            <b>Built for the classroom and beyond.</b> Whether you're checking DLD or Discrete Math homework, prepping for an exam, or prototyping a circuit, Mantiq makes digital logic intuitive and fast.
-                        </p>
-                    </div>
-
-                    <div>
-                        <div class="about-section-title">Quick Start</div>
-                        <div class="about-steps">
-                            <div class="about-step">
-                                <div class="about-step-num">1</div>
-                                <div class="about-step-copy"><b>Type an expression</b> - like <code>A'B + AC'</code> or <code>KMAP(4)</code> - into the input bar.</div>
-                            </div>
-                            <div class="about-step">
-                                <div class="about-step-num">2</div>
-                                <div class="about-step-copy"><b>Explore the tabs</b> in the sidebar: Simulation, Diagram, Verilog, K-Map, Truth Table, and Proofs.</div>
-                            </div>
-                            <div class="about-step">
-                                <div class="about-step-num">3</div>
-                                <div class="about-step-copy"><b>Share or install</b> - copy a link to your exact result, or add Mantiq to your home screen for offline use.</div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div>
-                        <div class="about-section-title">Origin &amp; Credits</div>
-                        <p style="color: var(--text-secondary); font-size: 14px; line-height: 1.7; margin-bottom: 16px;">
-                            Mantiq's idea was inspired by <strong>Logic++</strong>, a Boolean expression simplifier built by
-                            <strong>Muhammad Bin Shahzad</strong> as a 1st Semester Programming Fundamentals project at
-                            <strong>SEECS, NUST (2025)</strong>.
-                            <strong>Usama Gulzar</strong> took that spark and turned it into something much bigger.
-                        </p>
-                        <p style="color: var(--text-secondary); font-size: 12.5px; font-weight: 600; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em;">
-                            Special Thanks &mdash; Brainstorming &amp; Support
-                        </p>
-                        <ul style="list-style: none; padding: 0; margin: 0 0 12px 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
-                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
-                                Muhammad Bin Shahzad
-                            </li>
-                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
-                                Muhammad Talha
-                            </li>
-                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
-                                Muhammad Abdul Rafay
-                            </li>
-                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
-                                Hamza Ahmed
-                            </li>
-                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
-                                Muhammad Faizan Ali
-                            </li>
-                            <li style="font-size: 13.5px; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
-                                <span style="display: inline-block; width: 4px; height: 4px; border-radius: 50%; background: var(--accent);"></span>
-                                Muhammad Taha Balouch
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div class="about-footer">
-                        <div class="about-footer-meta">
-                            <span>Mantiq v2.0.0</span> &middot; Runs 100% client-side - your expressions never leave your device.
-                        </div>
-                        <div class="about-footer-links">
-                            <button class="about-footer-link" data-action="about-formats">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                                Format Guide
-                            </button>
-                            <a class="about-footer-link" href="https://github.com/usamagulzar/mantiq" target="_blank" rel="noopener noreferrer">
-                                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.57.1.78-.25.78-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.02 1.76 2.68 1.25 3.34.95.1-.74.4-1.25.72-1.54-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.08-.12-.29-.52-1.47.11-3.06 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.64 1.59.24 2.77.12 3.06.74.8 1.19 1.82 1.19 3.08 0 4.41-2.69 5.38-5.25 5.67.41.36.78 1.06.78 2.14 0 1.55-.01 2.79-.01 3.17 0 .3.21.66.79.55A10.99 10.99 0 0 0 23.5 12c0-6.35-5.15-11.5-11.5-11.5Z"></path></svg>
-                                GitHub
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Why Mantiq Modal -->
-    <div id="why-mantiq-popup" class="modal-overlay" style="display: none;">
-        <div class="modal why-mantiq-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2>Why Mantiq?</h2>
-                        <div class="modal-subtitle">How Mantiq compares to other tools</div>
-                    </div>
-                </div>
-                <button class="modal-close" id="why-mantiq-close">&times;</button>
-            </div>
-            <div class="modal-body why-mantiq-body">
-                <div class="comparison-intro">
-                    <p>Each tool serves a different purpose. Here is an honest look at where they overlap and differ.</p>
-                </div>
-                <div class="comparison-table-wrap">
-                    <table class="comparison-table">
-                        <thead>
-                            <tr>
-                                <th class="feat-col">Feature</th>
-                                <th class="mantiq-col">Mantiq</th>
-                                <th>Wolfram|Alpha</th>
-                                <th>Logisim</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td data-label="Feature" class="feat-cell">Boolean Simplification</td>
-                                <td data-label="Mantiq" class="check">SOP &amp; POS</td>
-                                <td data-label="Wolfram|Alpha" class="check">SOP &amp; POS</td>
-                                <td data-label="Logisim" class="check">SOP &amp; POS</td>
-                            </tr>
-                            <tr>
-                                <td data-label="Feature" class="feat-cell">K-Map</td>
-                                <td data-label="Mantiq" class="check">Up to 6 vars</td>
-                                <td data-label="Wolfram|Alpha" class="cross">No</td>
-                                <td data-label="Logisim" class="partial">Up to 4 vars</td>
-                            </tr>
-                            <tr>
-                                <td data-label="Feature" class="feat-cell">Step-by-step Proof</td>
-                                <td data-label="Mantiq" class="check">Yes</td>
-                                <td data-label="Wolfram|Alpha" class="cross">No</td>
-                                <td data-label="Logisim" class="cross">No</td>
-                            </tr>
-                            <tr>
-                                <td data-label="Feature" class="feat-cell">Quine-McCluskey</td>
-                                <td data-label="Mantiq" class="check">Step-by-step</td>
-                                <td data-label="Wolfram|Alpha" class="cross">No</td>
-                                <td data-label="Logisim" class="partial">Internal only</td>
-                            </tr>
-                            <tr>
-                                <td data-label="Feature" class="feat-cell">Truth Table</td>
-                                <td data-label="Mantiq" class="check">Yes</td>
-                                <td data-label="Wolfram|Alpha" class="check">Yes</td>
-                                <td data-label="Logisim" class="check">Yes</td>
-                            </tr>
-                            <tr>
-                                <td data-label="Feature" class="feat-cell">Circuit Diagram</td>
-                                <td data-label="Mantiq" class="check">Auto-generated</td>
-                                <td data-label="Wolfram|Alpha" class="check">Static diagram</td>
-                                <td data-label="Logisim" class="check">Full editor</td>
-                            </tr>
-                            <tr>
-                                <td data-label="Feature" class="feat-cell">Runs Offline</td>
-                                <td data-label="Mantiq" class="check">PWA (Browser)</td>
-                                <td data-label="Wolfram|Alpha" class="cross">No</td>
-                                <td data-label="Logisim" class="check">Desktop app</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-                <div class="comparison-note">
-                    <p><strong>Wolfram|Alpha</strong> is a general math engine. <strong>Logisim</strong> is a full desktop circuit simulator. <strong>Mantiq</strong> is purpose-built specifically for the Boolean algebra workflow taught in Digital Logic Design courses.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Privacy Policy Modal -->
-    <div id="privacy-popup" class="modal-overlay" style="display: none;">
-        <div class="modal legal-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M12 2 3 6v6c0 5 3.8 8.7 9 10 5.2-1.3 9-5 9-10V6z"/></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2>Privacy Policy</h2>
-                        <div class="modal-subtitle">Last updated: July 2026</div>
-                    </div>
-                </div>
-                <button class="modal-close" id="privacy-close">&times;</button>
-            </div>
-            <div class="modal-body legal-body">
-                <div class="legal-section">
-                    <h3>1. No Personal Data Collection</h3>
-                    <p>Mantiq does not collect, store, or transmit any personal information. No account is required. No form submissions are involved. Your Boolean expressions and logic inputs exist only in your browser's memory and are never sent to any server.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>2. Local Storage</h3>
-                    <p>Mantiq stores a small amount of data in your browser's local storage to remember your theme preference (light or dark mode) and whether you have acknowledged the academic integrity notice. This data never leaves your device.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>3. Analytics</h3>
-                    <p>Mantiq uses Google Analytics (GA4) to collect anonymous, aggregated usage statistics, such as page views and general geographic region. No personally identifiable information is collected. You can opt out via your browser's privacy settings or a standard ad-blocker extension.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>4. Third-Party Services</h3>
-                    <p>Mantiq is hosted on GitHub Pages and uses Google Fonts loaded from local files. No third-party login providers, payment processors, or advertising networks are used.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>5. Cookies</h3>
-                    <p>Mantiq does not use tracking cookies. Google Analytics may set its own first-party cookies for session tracking per its standard operation.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>6. Changes to This Policy</h3>
-                    <p>This policy may be updated from time to time. Changes will be reflected by the "Last updated" date shown above. Continued use of the application constitutes acceptance of the updated policy.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>7. Contact</h3>
-                    <p>Questions about this policy can be directed to <a href="mailto:hello@usamagulzar.com" class="legal-link">hello@usamagulzar.com</a>.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Terms of Use Modal -->
-    <div id="terms-popup" class="modal-overlay" style="display: none;">
-        <div class="modal legal-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2>Terms of Use</h2>
-                        <div class="modal-subtitle">Please read before using Mantiq</div>
-                    </div>
-                </div>
-                <button class="modal-close" id="terms-close">&times;</button>
-            </div>
-            <div class="modal-body legal-body">
-                <div class="legal-section">
-                    <h3>1. Acceptance</h3>
-                    <p>By accessing or using Mantiq, you agree to these Terms of Use. If you do not agree, please discontinue use of the application.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>2. Permitted Use</h3>
-                    <p>Mantiq is provided free of charge for educational and personal use. You may use it to learn, study, teach, or prototype Boolean logic and digital circuits. You may share links to specific expressions using the built-in share feature.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>3. Academic Integrity</h3>
-                    <p>Mantiq is a learning aid, not a homework-completion service. Using it to generate answers you submit as your own work in graded assessments, without meaningful personal engagement with the problem, violates the academic integrity policies of most educational institutions. You are solely responsible for ensuring that your use of Mantiq complies with the rules of your course or institution.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>4. No Warranty</h3>
-                    <p>Mantiq is provided "as is" without warranty of any kind. While every effort is made to ensure correctness of results, the developer makes no guarantee that outputs are free from errors. Always verify critical results independently.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>5. Limitation of Liability</h3>
-                    <p>The developer of Mantiq shall not be liable for any damages arising from the use or inability to use this application, including any errors in computed results or service interruptions.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>6. Intellectual Property</h3>
-                    <p>Mantiq's source code is publicly accessible on GitHub for inspection.</p>
-                </div>
-                <div class="legal-section">
-                    <h3>7. Changes</h3>
-                    <p>These terms may be updated at any time. Continued use of the application after changes are posted constitutes acceptance of the revised terms.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Contact Modal -->
-    <div id="contact-popup" class="modal-overlay" style="display: none;">
-        <div class="modal contact-modal">
-            <div class="modal-header">
-                <div class="modal-header-info">
-                    <div class="modal-header-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                    </div>
-                    <div class="modal-header-text">
-                        <h2>Get in Touch</h2>
-                        <div class="modal-subtitle">Questions, feedback, or collaboration</div>
-                    </div>
-                </div>
-                <button class="modal-close" id="contact-close">&times;</button>
-            </div>
-            <div class="modal-body contact-body">
-                <p class="contact-intro">Mantiq is a solo student project, open to feedback, bug reports, and collaboration requests. Reach out through any of the channels below.</p>
-                <div class="contact-cards">
-                    <a href="https://usamagulzar.com" target="_blank" rel="noopener" class="contact-card">
-                        <div class="contact-card-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                        </div>
-                        <div class="contact-card-copy">
-                            <div class="contact-card-label">Portfolio</div>
-                            <div class="contact-card-value">usamagulzar.com</div>
-                            <div class="contact-card-desc">Personal website and portfolio</div>
-                        </div>
-                    </a>
-                    <a href="mailto:hello@usamagulzar.com" class="contact-card">
-                        <div class="contact-card-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                        </div>
-                        <div class="contact-card-copy">
-                            <div class="contact-card-label">Email</div>
-                            <div class="contact-card-value">hello@usamagulzar.com</div>
-                            <div class="contact-card-desc">For bug reports, feature requests, or general feedback</div>
-                        </div>
-                    </a>
-                    <a href="https://www.linkedin.com/in/usamagulzarpk/" target="_blank" rel="noopener" class="contact-card">
-                        <div class="contact-card-icon">
-                            <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
-                        </div>
-                        <div class="contact-card-copy">
-                            <div class="contact-card-label">LinkedIn</div>
-                            <div class="contact-card-value">Usama Gulzar</div>
-                            <div class="contact-card-desc">For professional inquiries and collaboration</div>
-                        </div>
-                    </a>
-                    <a href="https://github.com/usamagulzar/mantiq/issues" target="_blank" rel="noopener" class="contact-card">
-                        <div class="contact-card-icon">
-                            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="14" x="8" y="6" rx="4"/><path d="m19 7-3 2"/><path d="m5 7 3 2"/><path d="m19 19-3-2"/><path d="m5 19 3-2"/><path d="M20 13h-4"/><path d="M4 13h4"/><path d="m10 4 1 2"/><path d="m14 4-1 2"/></svg>
-                        </div>
-                        <div class="contact-card-copy">
-                            <div class="contact-card-label">GitHub Issues</div>
-                            <div class="contact-card-value">github.com/usamagulzar/mantiq</div>
-                            <div class="contact-card-desc">Submit bug reports or feature requests publicly</div>
-                        </div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- PWA Install Prompt -->
-    <div id="pwa-popup" style="display: none;">
-        <div class="pwa-content">
-            <h3>Install mantiq</h3>
-            <p>Add mantiq to your home screen for the offline, native experience.</p>
-            <button id="pwa-install-btn" style="display: none;">Install App</button>
-            <div id="pwa-ios-instructions" style="display: none;">
-                Tap the <b>Share</b> icon ⍗ below, then select <br><b>"Add to Home Screen"</b> ⊞.
-            </div>
-            <button id="pwa-close-btn">Not now</button>
-        </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div id="toast-container"></div>
-
-
-
-    <!-- Modal Dialogs -->
-
-    <div id="alt-popup" class="modal-overlay" style="display: none;">
-        <div class="modal sm">
-            <div class="modal-header">
-                <h2>Alternative Simplified Solutions</h2>
-                <button class="modal-close" id="alt-close">&times;</button>
-            </div>
-            <div class="modal-body" id="alt-body">
-                <!-- Dynamically generated alternative solutions list -->
-            </div>
-        </div>
-    </div>
-
-    <div id="share-popup" class="modal-overlay" style="display: none;">
-        <div class="modal sm share-modal">
-            <div class="modal-header">
-                <h2>Share Expression</h2>
-                <button class="modal-close" id="share-close">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="share-note">Copy this link to share your work. Whoever clicks it gets to see your exact expression and solution right away.</p>                <div class="share-link-row">
-                    <input type="text" id="share-link-input" readonly spellcheck="false">
-                    <button id="share-copy-btn" type="button" title="Copy link">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        <span>Copy</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Panel Fullscreen Overlay -->
-    <div id="panel-fullscreen-overlay" class="panel-fs-overlay" style="display:none;" aria-modal="true" role="dialog">
-        <div class="panel-fs-inner">
-            <div class="panel-fs-scroll-wrapper" id="panel-fs-scroll">
-                <!-- cloned zoom-content-wrapper injected here by JS -->
-            </div>
-            <div class="panel-fs-controls">
-                <button class="zoom-btn panel-fs-btn" id="panel-fs-zoom-in" title="Zoom In">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-                <button class="zoom-btn panel-fs-btn" id="panel-fs-zoom-out" title="Zoom Out">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                </button>
-                <button class="zoom-btn panel-fs-btn panel-fs-exit-btn" id="panel-fs-exit" title="Exit Fullscreen">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><path d="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <script src="js/three.min.js?v=2.2.10"></script>
-    <script src="js/svg-icons.js?v=2.2.10"></script>
-    <script src="js/worker-bridge.js?v=2.2.10"></script>
-    <script src="js/zoom-pan.js?v=2.2.10"></script>
-    <script src="js/xor-detector.js?v=2.2.10"></script>
-    <script src="js/circuit-recognizer.js?v=2.2.10"></script>
-    <script src="js/ui-core.js?v=2.2.10"></script>
-    <script src="js/truth-table.js?v=2.2.10"></script>
-    <script src="js/circuit.js?v=2.2.10"></script>
-    <script src="js/simulation.js?v=2.2.10"></script>
-    <script src="js/kmap.js?v=2.2.10"></script>
-    <script src="js/solution-renderer.js?v=2.2.10"></script>
-    <script src="js/app-core.js?v=2.2.10"></script>
-    <script src="js/rule-modal.js?v=2.2.10"></script>
-    <script src="js/modals-events.js?v=2.2.10"></script>
-    <script src="js/tutorial.js?v=2.2.10"></script>
-    <script src="js/html2canvas.min.js"></script>
-
-    <!-- Register the service worker so the app actually caches assets and works offline -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => console.log('[ServiceWorker] registered:', reg.scope))
-            .catch(err => console.warn('[ServiceWorker] registration failed:', err));
-        });
-      }
-    </script>
-  </body>
+<script src="js/main.js"></script>
+</body>
 </html>

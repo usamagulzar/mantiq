@@ -3,6 +3,9 @@
   "appName": "Mantiq",
   "webDir": "www",
   "backgroundColor": "#ffffff",
+  "server": {
+    "htmlContentPageFilePath": "app.html"
+  },
   "plugins": {
     "CapacitorUpdater": {
       "autoUpdate": false

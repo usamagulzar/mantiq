@@ -5,7 +5,7 @@ const srcDir = __dirname;
 const destDir = path.join(__dirname, 'www');
 
 // List of directories and files to copy
-const dirsToCopy = ['css', 'fonts', 'icons', 'js', 'wasm', 'screenshots'];
+const dirsToCopy = ['css', 'fonts', 'icons', 'js', 'wasm', 'screenshots', 'assets'];
 const fileExtsToCopy = ['.html', '.json', '.js', '.png', '.jpg', '.svg', '.md', '.xml', '.txt'];
 
 function copyRecursiveSync(src, dest) {
@@ -53,10 +53,11 @@ if (fs.existsSync(wrapperSrc)) {
     fs.copyFileSync(wrapperSrc, path.join(destDir, 'js', 'capacitor-wrapper.js'));
 }
 
-// Inject capacitor-wrapper.js into index.html in the www directory
-const indexPath = path.join(destDir, 'index.html');
-if (fs.existsSync(indexPath)) {
-    let html = fs.readFileSync(indexPath, 'utf8');
+// Inject capacitor-wrapper.js into app.html in the www directory
+// (index.html is now the marketing landing page — it must NOT get the app wrapper)
+const appPath = path.join(destDir, 'app.html');
+if (fs.existsSync(appPath)) {
+    let html = fs.readFileSync(appPath, 'utf8');
 
     html = html.replace(
         /<meta name="viewport" content="[^"]*"\s*\/?>/,
@@ -68,10 +69,10 @@ if (fs.existsSync(indexPath)) {
     } else {
         html += '<script src="js/capacitor-wrapper.js"></script>';
     }
-    fs.writeFileSync(indexPath, html);
+    fs.writeFileSync(appPath, html);
 }
 
-console.log('Build complete. Files copied to www/ and Capacitor wrapper injected.');
+console.log('Build complete. Files copied to www/ and Capacitor wrapper injected into app.html.');
 
 // Sync www/ to native Android assets directory
 const androidAssetsDir = path.join(__dirname, 'android', 'app', 'src', 'main', 'assets', 'public');
