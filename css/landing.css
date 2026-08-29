@@ -315,25 +315,25 @@ p{ margin: 0 0 1em; color: var(--text-secondary); }
 
 /* ---------- formats ---------- */
 .formats{ padding: 90px 0; }
-.format-table{ border: 1px solid var(--border); border-radius: var(--r-md); overflow-x: auto; background: var(--bg-secondary); }
-.format-row{ display:grid; grid-template-columns: 170px 200px 1fr; min-width: 600px; padding: 13px 20px; border-bottom: 1px solid var(--border); align-items:center; gap: 10px; }
+.format-table{ border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); }
+.format-row{ display:grid; grid-template-columns: 170px 200px 1fr; padding: 13px 20px; border-bottom: 1px solid var(--border); align-items:center; gap: 10px; }
 .format-row:last-child{ border-bottom:none; }
 .format-row--head{ background: var(--bg-primary); font-size:.74rem; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color: var(--text-muted); }
 .format-row .mono{ font-size:.85rem; color: var(--text-secondary); }
 .format-row > span:first-child{ color: var(--text-primary); font-weight:600; font-size:.92rem; }
-/* formats mobile handling removed in favor of horizontal scroll */
+@media (max-width: 700px) { .format-row--head, .compare-row--head { display: none; } .format-row, .compare-row { grid-template-columns: 1fr; gap: 8px; padding: 16px 20px; } .format-row > span, .compare-row > span { display: flex; justify-content: space-between; align-items: center; text-align: right; } .format-row > span::before, .compare-row > span::before { content: attr(data-label); font-size: .8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; text-align: left; margin-right: 12px; } .format-row > span:first-child, .compare-row > span:first-child { justify-content: flex-start; padding-bottom: 6px; border-bottom: 1px solid var(--border); margin-bottom: 4px; font-size: 1rem; color: var(--accent); } .format-row > span:first-child::before, .compare-row > span:first-child::before { display: none; } }
 
 /* ---------- comparison table ---------- */
 .compare{ padding-bottom: 90px; }
-.compare-table{ border:1px solid var(--border); border-radius: var(--r-md); overflow-x: auto; background: var(--bg-secondary); }
-.compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; min-width: 640px; padding: 13px 20px; border-bottom: 1px solid var(--border); align-items:center; text-align:center; gap:8px; font-size:.9rem; }
+.compare-table{ border:1px solid var(--border); border-radius: var(--r-md); background: var(--bg-secondary); }
+.compare-row{ display:grid; grid-template-columns: 1.3fr 1fr 1fr 1fr; padding: 13px 20px; border-bottom: 1px solid var(--border); align-items:center; text-align:center; gap:8px; font-size:.9rem; }
 .compare-row > span:first-child{ text-align:left; font-weight:600; color: var(--text-primary); }
 .compare-row:last-child{ border-bottom:none; }
 .compare-row--head{ background: var(--bg-primary); font-size:.76rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color: var(--text-muted); }
 .compare-row--head > span:first-child{ color: var(--text-muted); }
 .compare-row__mantiq{ color: var(--accent); font-weight:700; }
 .compare-note{ font-size:.88rem; text-align:center; max-width:640px; margin: 20px auto 0; }
-/* compare table mobile handling removed in favor of horizontal scroll */
+
 
 /* ---------- privacy band ---------- */
 .privacy{ background: var(--text-primary); padding: 90px 0; text-align:center; }

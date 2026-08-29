@@ -317,13 +317,13 @@
         <span role="columnheader">Supported symbols</span>
         <span role="columnheader">Examples</span>
       </div>
-      <div class="format-row" role="row"><span role="cell">AND</span><span role="cell" class="mono">*&nbsp;&nbsp;&amp;&nbsp;&nbsp;AND</span><span role="cell" class="mono">AB, A(B+C), A * B</span></div>
-      <div class="format-row" role="row"><span role="cell">OR</span><span role="cell" class="mono">+&nbsp;&nbsp;|&nbsp;&nbsp;OR</span><span role="cell" class="mono">A + B, A | B</span></div>
-      <div class="format-row" role="row"><span role="cell">NOT</span><span role="cell" class="mono">' &nbsp; ! &nbsp; ~ &nbsp; NOT</span><span role="cell" class="mono">A', !A, ~(A+B)</span></div>
-      <div class="format-row" role="row"><span role="cell">XOR</span><span role="cell" class="mono">^&nbsp;&nbsp;XOR</span><span role="cell" class="mono">A ^ B, A XOR B</span></div>
-      <div class="format-row" role="row"><span role="cell">XNOR</span><span role="cell" class="mono">=&nbsp;&nbsp;&lt;-&gt;&nbsp;&nbsp;XNOR</span><span role="cell" class="mono">A = B, A &lt;-&gt; B</span></div>
-      <div class="format-row" role="row"><span role="cell">Minterms / Maxterms</span><span role="cell" class="mono">m(...) &nbsp; M(...) &nbsp; d(...)</span><span role="cell" class="mono">m(1,2,3), M(0) D(2)</span></div>
-      <div class="format-row" role="row"><span role="cell">Blank K-Map</span><span role="cell" class="mono">KMAP(n) &nbsp; KMAP(v1,v2...)</span><span role="cell" class="mono">KMAP(4), KMAP(x,y,z)</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">AND</span><span role="cell" class="mono" data-label="Supported symbols">*&nbsp;&nbsp;&amp;&nbsp;&nbsp;AND</span><span role="cell" class="mono" data-label="Examples">AB, A(B+C), A * B</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">OR</span><span role="cell" class="mono" data-label="Supported symbols">+&nbsp;&nbsp;|&nbsp;&nbsp;OR</span><span role="cell" class="mono" data-label="Examples">A + B, A | B</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">NOT</span><span role="cell" class="mono" data-label="Supported symbols">' &nbsp; ! &nbsp; ~ &nbsp; NOT</span><span role="cell" class="mono" data-label="Examples">A', !A, ~(A+B)</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">XOR</span><span role="cell" class="mono" data-label="Supported symbols">^&nbsp;&nbsp;XOR</span><span role="cell" class="mono" data-label="Examples">A ^ B, A XOR B</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">XNOR</span><span role="cell" class="mono" data-label="Supported symbols">=&nbsp;&nbsp;&lt;-&gt;&nbsp;&nbsp;XNOR</span><span role="cell" class="mono" data-label="Examples">A = B, A &lt;-&gt; B</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">Minterms / Maxterms</span><span role="cell" class="mono" data-label="Supported symbols">m(...) &nbsp; M(...) &nbsp; d(...)</span><span role="cell" class="mono" data-label="Examples">m(1,2,3), M(0) D(2)</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">Blank K-Map</span><span role="cell" class="mono" data-label="Supported symbols">KMAP(n) &nbsp; KMAP(v1,v2...)</span><span role="cell" class="mono" data-label="Examples">KMAP(4), KMAP(x,y,z)</span></div>
     </div>
   </section>
 
@@ -343,12 +343,12 @@
         <span role="columnheader">Wolfram|Alpha</span>
         <span role="columnheader">Logisim</span>
       </div>
-      <div class="compare-row" role="row"><span>Boolean simplification</span><span class="compare-row__mantiq">SOP &amp; POS</span><span>SOP &amp; POS</span><span>SOP &amp; POS</span></div>
-      <div class="compare-row" role="row"><span>K-Map</span><span class="compare-row__mantiq">Up to 6 vars</span><span>No</span><span>Up to 4 vars</span></div>
-      <div class="compare-row" role="row"><span>Step-by-step proof</span><span class="compare-row__mantiq">Yes</span><span>No</span><span>No</span></div>
-      <div class="compare-row" role="row"><span>Truth table</span><span class="compare-row__mantiq">Yes</span><span>Yes</span><span>Yes</span></div>
-      <div class="compare-row" role="row"><span>Circuit diagram</span><span class="compare-row__mantiq">Auto-generated</span><span>Static diagram</span><span>Full editor</span></div>
-      <div class="compare-row" role="row"><span>Runs offline</span><span class="compare-row__mantiq">PWA, in-browser</span><span>No</span><span>Desktop app</span></div>
+      <div class="compare-row" role="row"><span data-label="Feature">Boolean simplification</span><span class="compare-row__mantiq" data-label="Mantiq">SOP &amp; POS</span><span data-label="Wolfram|Alpha">SOP &amp; POS</span><span data-label="Logisim">SOP &amp; POS</span></div>
+      <div class="compare-row" role="row"><span data-label="Feature">K-Map</span><span class="compare-row__mantiq" data-label="Mantiq">Up to 6 vars</span><span data-label="Wolfram|Alpha">No</span><span data-label="Logisim">Up to 4 vars</span></div>
+      <div class="compare-row" role="row"><span data-label="Feature">Step-by-step proof</span><span class="compare-row__mantiq" data-label="Mantiq">Yes</span><span data-label="Wolfram|Alpha">No</span><span data-label="Logisim">No</span></div>
+      <div class="compare-row" role="row"><span data-label="Feature">Truth table</span><span class="compare-row__mantiq" data-label="Mantiq">Yes</span><span data-label="Wolfram|Alpha">Yes</span><span data-label="Logisim">Yes</span></div>
+      <div class="compare-row" role="row"><span data-label="Feature">Circuit diagram</span><span class="compare-row__mantiq" data-label="Mantiq">Auto-generated</span><span data-label="Wolfram|Alpha">Static diagram</span><span data-label="Logisim">Full editor</span></div>
+      <div class="compare-row" role="row"><span data-label="Feature">Runs offline</span><span class="compare-row__mantiq" data-label="Mantiq">PWA, in-browser</span><span data-label="Wolfram|Alpha">No</span><span data-label="Logisim">Desktop app</span></div>
     </div>
     <p class="compare-note">Wolfram|Alpha is a general math engine. Logisim is a full desktop
     circuit simulator. Mantiq is purpose-built for the Boolean algebra workflow taught in
