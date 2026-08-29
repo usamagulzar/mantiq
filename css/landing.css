@@ -454,5 +454,5 @@ p{ margin: 0 0 1em; color: var(--text-secondary); }
   .support__card { padding: 40px 24px; }
   .view-card { padding: 22px 18px; }
   .hero { padding: 50px 20px 40px; }
-  .wrap { padding: 0 20px; }
+  .wrap { padding-left: 20px; padding-right: 20px; }
 }
