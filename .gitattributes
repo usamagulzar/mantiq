@@ -1,0 +1,7 @@
+# Treat binary files as binary to prevent merge conflicts
+update.zip binary
+*.apk binary
+*.wasm binary
+*.png binary
+*.jpg binary
+*.svg text eol=lf
