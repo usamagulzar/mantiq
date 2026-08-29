@@ -101,9 +101,11 @@ window.onMantiqInit = function() {
     }
 
     // Initial load from Hash
+    let loadedFromHash = false;
     if (window.location.hash.startsWith('#expr=')) {
         const initialExpr = decodeURIComponent(window.location.hash.substring(6));
         if (initialExpr.trim() !== '') {
+            loadedFromHash = true;
             elements.input.value = initialExpr;
             const appRoot = document.getElementById('app-root');
             if (appRoot) {
@@ -113,12 +115,18 @@ window.onMantiqInit = function() {
             if (clearBtn) {
                 clearBtn.style.display = 'flex';
             }
+            const isKmap = initialExpr.toUpperCase().includes('KMAP');
+            const targetView = isKmap ? 2 : 0;
+            Module.ccall('mantiq_setView', null, ['number'], [targetView]);
             Module.ccall('mantiq_setExpression', null, ['string'], [initialExpr]);
+            updateFrontend();
         }
     }
 
-    // Set Default active view
-    Module.ccall('mantiq_setView', null, ['number'], [0]); // Simulation
+    if (!loadedFromHash) {
+        // Set Default active view
+        Module.ccall('mantiq_setView', null, ['number'], [0]); // Simulation
+    }
     
     // ── FORCE INITIAL LAYOUT REFLOW ON STARTUP ──
     requestAnimationFrame(() => {

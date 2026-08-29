@@ -493,6 +493,14 @@ Object.values(HASH_MODALS).forEach(id => {
 
 window.addEventListener('hashchange', () => {
     const hash = window.location.hash;
+
+    if (hash.startsWith('#expr=')) {
+        const expr = decodeURIComponent(hash.substring(6));
+        if (typeof elements !== 'undefined' && elements.input && elements.input.value !== expr) {
+            elements.input.value = expr;
+            elements.input.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+    }
     
     Object.values(HASH_MODALS).forEach(id => {
         const el = document.getElementById(id);
