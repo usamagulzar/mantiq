@@ -57,7 +57,7 @@
     </nav>
 
     <div class="nav__cta">
-      <a class="btn btn--support" href="https://pay.usamagulzar.com/" target="_blank" rel="noopener">
+      <a class="btn btn--support" href="#support">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         Support
       </a>
@@ -74,8 +74,13 @@
     <a href="#showcase">See it in action</a>
     <a href="#formats">Formats</a>
     <a href="#faq">FAQ</a>
-    <a href="https://pay.usamagulzar.com/" target="_blank" rel="noopener">Support the project</a>
-    <a class="btn btn--solid" href="app" rel="noopener">Launch Mantiq</a>
+    <div style="display:flex; flex-direction:column; gap:8px; padding-top:4px;">
+      <a class="btn btn--support" href="#support" style="align-self: stretch; text-align: center; justify-content: center;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        Support
+      </a>
+      <a class="btn btn--solid" href="app" rel="noopener">Launch Mantiq</a>
+    </div>
   </div>
 </header>
 
@@ -277,16 +282,16 @@
     <div class="format-table" role="table">
       <div class="format-row format-row--head" role="row">
         <span role="columnheader">Gate / Operation</span>
-        <span role="columnheader">Supported symbols</span>
+        <span role="columnheader">Symbols</span>
         <span role="columnheader">Examples</span>
       </div>
-      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">AND</span><span role="cell" class="mono" data-label="Supported symbols">*&nbsp;&nbsp;&amp;&nbsp;&nbsp;AND</span><span role="cell" class="mono" data-label="Examples">AB, A(B+C), A * B</span></div>
-      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">OR</span><span role="cell" class="mono" data-label="Supported symbols">+&nbsp;&nbsp;|&nbsp;&nbsp;OR</span><span role="cell" class="mono" data-label="Examples">A + B, A | B</span></div>
-      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">NOT</span><span role="cell" class="mono" data-label="Supported symbols">' &nbsp; ! &nbsp; ~ &nbsp; NOT</span><span role="cell" class="mono" data-label="Examples">A', !A, ~(A+B)</span></div>
-      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">XOR</span><span role="cell" class="mono" data-label="Supported symbols">^&nbsp;&nbsp;XOR</span><span role="cell" class="mono" data-label="Examples">A ^ B, A XOR B</span></div>
-      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">XNOR</span><span role="cell" class="mono" data-label="Supported symbols">=&nbsp;&nbsp;&lt;-&gt;&nbsp;&nbsp;XNOR</span><span role="cell" class="mono" data-label="Examples">A = B, A &lt;-&gt; B</span></div>
-      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">Minterms / Maxterms</span><span role="cell" class="mono" data-label="Supported symbols">m(...) &nbsp; M(...) &nbsp; d(...)</span><span role="cell" class="mono" data-label="Examples">m(1,2,3), M(0) D(2)</span></div>
-      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">Blank K-Map</span><span role="cell" class="mono" data-label="Supported symbols">KMAP(n) &nbsp; KMAP(v1,v2...)</span><span role="cell" class="mono" data-label="Examples">KMAP(4), KMAP(x,y,z)</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">AND</span><span role="cell" class="mono" data-label="Symbols">*&nbsp;&nbsp;&amp;&nbsp;&nbsp;AND</span><span role="cell" class="mono" data-label="Examples">AB, A(B+C), A * B</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">OR</span><span role="cell" class="mono" data-label="Symbols">+&nbsp;&nbsp;|&nbsp;&nbsp;OR</span><span role="cell" class="mono" data-label="Examples">A + B, A | B</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">NOT</span><span role="cell" class="mono" data-label="Symbols">' &nbsp; ! &nbsp; ~ &nbsp; NOT</span><span role="cell" class="mono" data-label="Examples">A', !A, ~(A+B)</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">XOR</span><span role="cell" class="mono" data-label="Symbols">^&nbsp;&nbsp;XOR</span><span role="cell" class="mono" data-label="Examples">A ^ B, A XOR B</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">XNOR</span><span role="cell" class="mono" data-label="Symbols">=&nbsp;&nbsp;&lt;-&gt;&nbsp;&nbsp;XNOR</span><span role="cell" class="mono" data-label="Examples">A = B, A &lt;-&gt; B</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">Minterms / Maxterms</span><span role="cell" class="mono" data-label="Symbols">m(...) &nbsp; M(...) &nbsp; d(...)</span><span role="cell" class="mono" data-label="Examples">m(1,2,3), M(0) D(2)</span></div>
+      <div class="format-row" role="row"><span role="cell" data-label="Gate / Operation">Blank K-Map</span><span role="cell" class="mono" data-label="Symbols">KMAP(n) &nbsp; KMAP(v1,v2...)</span><span role="cell" class="mono" data-label="Examples">KMAP(4), KMAP(x,y,z)</span></div>
     </div>
   </section>
 
@@ -508,8 +513,6 @@
         <a href="https://pay.usamagulzar.com/" target="_blank" rel="noopener">Support</a>
       </nav>
     </div>
-
-    <p class="footer__copy">Mantiq v2.0.0 · Runs 100% client-side · MIT licensed</p>
   </div>
 </footer>
 
