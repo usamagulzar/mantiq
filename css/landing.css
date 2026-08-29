@@ -447,3 +447,12 @@ p{ margin: 0 0 1em; color: var(--text-secondary); }
 .footer__links a:hover{ color: var(--accent); }
 .footer__copy{ font-size:.76rem; color: var(--text-muted); margin:0; text-align:center; }
 @media (min-width:860px){ .footer__copy{ text-align:left; } }
+
+/* ---------- mobile padding adjustments ---------- */
+@media (max-width: 600px) {
+  .integrity__card, .terms__card { padding: 30px 20px; }
+  .support__card { padding: 40px 24px; }
+  .view-card { padding: 22px 18px; }
+  .hero { padding: 50px 20px 40px; }
+  .wrap { padding: 0 20px; }
+}
