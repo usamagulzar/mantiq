@@ -265,43 +265,6 @@
     </div>
   </section>
 
-  <!-- ============ ARCHITECTURE ============ -->
-  <section class="arch" id="architecture">
-    <div class="wrap arch__inner">
-      <div class="arch__copy">
-        <p class="eyebrow">How it's built</p>
-        <h2>A real logic engine, not a lookup table.</h2>
-        <p>Expression parsing, Quine-McCluskey minimization, proof search, K-map grouping,
-        and Verilog generation are written in C++ and compiled to WebAssembly with
-        Emscripten, running inside a dedicated Web Worker so the interface never freezes,
-        even on large expressions.</p>
-        <p>The interface itself is dependency-free, framework-free vanilla JavaScript, with
-        no build step. A service worker precaches the entire app shell, including the
-        compiled <code>.wasm</code> binary, so after your first visit Mantiq needs the
-        network for nothing.</p>
-        <a class="text-link" href="https://github.com/usamagulzar/mantiq#-architecture" target="_blank" rel="noopener">
-          Read the full architecture notes
-        </a>
-      </div>
-
-      <div class="arch__diagram" role="img" aria-label="Architecture diagram: an HTML and CSS shell sits above a vanilla JavaScript UI layer, which talks over a postMessage bridge to a C++ logic engine compiled to WebAssembly, running inside a Web Worker">
-        <div class="layer">
-          <span class="layer__tag">index.html + css/</span>
-          <p>Static shell, sidebar, topbar, and views</p>
-        </div>
-        <div class="layer">
-          <span class="layer__tag">js/</span>
-          <p>Vanilla JS for rendering, state, and the PWA install flow</p>
-        </div>
-        <div class="bridge"><span>postMessage bridge</span></div>
-        <div class="layer layer--wasm">
-          <span class="layer__tag">wasm/</span>
-          <p>C++ compiled to WebAssembly with Emscripten, inside a Web Worker</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ============ FORMATS ============ -->
   <section class="formats wrap" id="formats">
     <div class="section-head">
