@@ -1,8 +1,6 @@
-const CACHE_NAME = 'mantiq-cache-v2.2.57'; // bumped for landing page split
+const CACHE_NAME = 'mantiq-cache-v2.2.58'; // bumped to drop marketing page from cache
 
 const urlsToCache = [
-  './',
-  './index.html',
   './app.html',
   './manifest.json',
   './icons/icon-16.png',
@@ -31,18 +29,6 @@ const urlsToCache = [
   './css/about.css',
   './css/responsive.css',
   './css/integrity.css',
-  // Landing CSS + JS
-  './css/landing.css',
-  './js/landing.js',
-  // Landing assets
-  './assets/logo.svg',
-  './assets/shots/diagram.jpg',
-  './assets/shots/kmap.jpg',
-  './assets/shots/landing.jpg',
-  './assets/shots/proofs.jpg',
-  './assets/shots/simulation.jpg',
-  './assets/shots/truthtable.jpg',
-  './assets/shots/verilog.jpg',
   // App JS
   './js/integrity-gate.js',
   './js/three.min.js',
@@ -68,7 +54,6 @@ self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      // Cache each file individually — if one fails, the rest still get cached
       return Promise.allSettled(
         urlsToCache.map(url =>
           cache.add(url).catch(err => {
@@ -96,21 +81,17 @@ self.addEventListener('activate', event => {
   );
 });
 
-// 3. Fetch event - Cache First (ignoring query strings) with Network Fallback
+// 3. Fetch event - Cache First with Network Fallback
+// The SW only intercepts requests for app assets. The marketing page (index.html)
+// is intentionally not cached — it's a normal webpage, not part of the PWA shell.
 self.addEventListener('fetch', event => {
   event.respondWith(
-    // ignoreSearch: true so "css/fonts.css?v=2.0.1" matches the cached
-    // "css/fonts.css" entry — this is the fix for the "You're Offline" bug.
     caches.match(event.request, { ignoreSearch: true })
       .then(response => {
-        // If the file is in the cache, return it (offline mode)
         if (response) {
           return response;
         }
-        // Otherwise, try to fetch from network
         return fetch(event.request).catch(() => {
-          // No cache hit and no network — fall back to the app shell
-          // (not the marketing page) so users can still use the app offline.
           if (event.request.mode === 'navigate') {
             return caches.match('./app.html');
           }
