@@ -93,7 +93,7 @@ const VIEW_FIELDS_JS = {
 const _freshFields = new Set();
 
 /** Spawn the worker that hosts the WASM engine. */
-const _worker = new Worker('wasm/mantiq-worker.js?v=1.6.0');
+const _worker = new Worker('wasm/mantiq-worker.js?v=1.6.1');
 
 _worker.onmessage = function (event) {
     const msg = event.data;
