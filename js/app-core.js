@@ -356,6 +356,20 @@ if (elements.sopPosPill) {
     });
 }
 
+document.querySelectorAll('.fanin-select').forEach(select => {
+    select.addEventListener('change', (e) => {
+        const fanIn = parseInt(e.target.value, 10);
+        // Sync all other dropdowns
+        document.querySelectorAll('.fanin-select').forEach(s => {
+            if (s !== e.target) s.value = e.target.value;
+        });
+        if (wasmReady) {
+            Module.ccall('mantiq_setMaxFanIn', null, ['number'], [fanIn]);
+            updateFrontend();
+        }
+    });
+});
+
 // Theme Manager & Persistence (localStorage 'mantiq_theme')
 const THEME_STORAGE_KEY = 'mantiq_theme';
 

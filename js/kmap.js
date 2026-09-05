@@ -1441,7 +1441,10 @@ function renderKMapAnalysis(solution, isSOP, variables) {
     // 3. Prime Implicants
     const activePIs = isSOP ? primeImplicants : primeImplicantsPOS;
     const activeEPIs = isSOP ? essentialPrimeImplicants : essentialPrimeImplicantsPOS;
+    let nonEPIs = activePIs ? activePIs.filter(pi => !activeEPIs.includes(pi)) : [];
 
+    let piHtml = '';
+    
     if (activeEPIs && activeEPIs.length > 0) {
         const epiHtml = activeEPIs.map(epi => {
             const literal = binaryToVariables(epi, variables, !isSOP);
@@ -1450,12 +1453,10 @@ function renderKMapAnalysis(solution, isSOP, variables) {
             const cls = `term-box selectable-implicant${isSelected ? ' selected' : ''}${isDimmed ? ' dimmed' : ''}`;
             return `<span class="${cls}" data-term="${epi}" style="border:1px solid #AF52DE; color:#AF52DE;">${literal}</span>`;
         }).join('');
-        cardsHtml += card('epi', 'EPI', 'Essential Prime Implicants', activeEPIs.length, `<div class="term-boxes-container">${epiHtml}</div>`);
-    }
-
-    let nonEPIs = [];
-    if (activePIs) {
-        nonEPIs = activePIs.filter(pi => !activeEPIs.includes(pi));
+        piHtml += `<div class="pi-subsection">
+            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Essential</div>
+            <div class="term-boxes-container">${epiHtml}</div>
+        </div>`;
     }
 
     if (nonEPIs && nonEPIs.length > 0) {
@@ -1463,7 +1464,14 @@ function renderKMapAnalysis(solution, isSOP, variables) {
             const literal = binaryToVariables(nepi, variables, !isSOP);
             return `<span class="term-box" style="border:1px solid #007AFF; color:#007AFF;">${literal}</span>`;
         }).join('');
-        cardsHtml += card('nepi', 'PI', 'Non-Essential Prime Implicants', nonEPIs.length, `<div class="term-boxes-container">${nepiHtml}</div>`);
+        piHtml += `<div class="pi-subsection" style="${piHtml ? 'margin-top: 12px;' : ''}">
+            <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 600; text-transform: uppercase;">Non-Essential</div>
+            <div class="term-boxes-container">${nepiHtml}</div>
+        </div>`;
+    }
+
+    if (piHtml) {
+        cardsHtml += card('pi', 'PI', 'Prime Implicants', (activeEPIs.length + nonEPIs.length), piHtml);
     }
 
     list.innerHTML = `<div class="kmap-analysis-board">${cardsHtml}</div>`;

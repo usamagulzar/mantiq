@@ -6,3 +6,4 @@ android/build/
 android/local.properties
 .capacitor/
 update.zip
+wasm/src/

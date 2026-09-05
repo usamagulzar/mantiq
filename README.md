@@ -9,7 +9,6 @@
 **A fast, offline-first digital logic workbench — expression simplification, Karnaugh maps,
 truth tables, interactive circuit simulation, and Verilog export, all in your browser.**
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8)](#-progressive-web-app)
 [![WebAssembly](https://img.shields.io/badge/engine-WebAssembly-654FF0)](#-architecture)
 [![Made with vanilla JS](https://img.shields.io/badge/frontend-vanilla%20JS-f7df1e)](#-tech-stack)
@@ -328,10 +327,6 @@ simplification is valid, not just the final answer. Always confirm with your cou
 requirements before submitting generated proofs as your own work.
 
 <br/>
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see [LICENSE](LICENSE) for the full text.
 
 <br/>
 

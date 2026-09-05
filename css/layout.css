@@ -348,3 +348,28 @@ button, input, select, textarea {
 .theme-toggle-btn[data-state="dark"] .icon-light { display: none !important; }
 .theme-toggle-btn[data-state="dark"] .icon-dark { display: block !important; }
 
+
+.fanin-select {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 4px 8px;
+    font-size: 12px;
+    cursor: pointer;
+    outline: none;
+    transition: var(--transition-fast);
+}
+.fanin-select:hover {
+    border-color: var(--accent);
+}
+
+
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+button, .nav-btn, .action-btn, .pill-option, .faq-question {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
