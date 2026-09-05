@@ -35,3 +35,4 @@ jobs:
         with:
           commit_message: "chore: auto-generate update.zip for OTA [skip ci]"
           file_pattern: 'update.zip'
+          add_options: '-f'
