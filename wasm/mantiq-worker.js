@@ -222,6 +222,11 @@ function handleAggregate(fn, args, view) {
             Module.ccall('mantiq_setSOP', null, ['number'], [sop]);
             return buildSnapshot(view);
         }
+        case '_setMaxFanInAndSnapshot': {
+            const fanIn = (args && args[0]) || 0;
+            Module.ccall('mantiq_setMaxFanIn', null, ['number'], [fanIn]);
+            return buildSnapshot(view);
+        }
         case '_setSelectedSolutionAndSnapshot': {
             const idx = (args && args[0]) || 0;
             Module.ccall('mantiq_setSelectedSolution', null, ['number'], [idx]);

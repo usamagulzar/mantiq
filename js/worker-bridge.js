@@ -336,6 +336,12 @@ const Module = {
                 return undefined;
             }
 
+            case 'mantiq_setMaxFanIn': {
+                const fanIn = (args && args[0]) || 0;
+                _workerWriteCall('_setMaxFanInAndSnapshot', [fanIn]);
+                return undefined;
+            }
+
             case 'mantiq_setView': {
                 const view = (args && args[0]) || 0;
                 _state.currentView = view;

@@ -365,7 +365,6 @@ document.querySelectorAll('.fanin-select').forEach(select => {
         });
         if (wasmReady) {
             Module.ccall('mantiq_setMaxFanIn', null, ['number'], [fanIn]);
-            updateFrontend();
         }
     });
 });
