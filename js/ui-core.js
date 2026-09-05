@@ -38,10 +38,11 @@ window.getLoadingOrEmptyMsg = function(msg) {
 
 // DOM Elements
 const elements = {
+    // Input Area Elements
     input: document.getElementById('expression-input'),
     syntaxErrorLine: document.getElementById('syntax-error-line'),
-    sopPosPill: document.getElementById('sop-pos-pill'),
-    themePill: document.getElementById('theme-pill'),
+    sopPosPill: document.getElementById('sop-pos-btn'),
+    themePill: document.getElementById('theme-btn'),
     resultRow: document.getElementById('result-row'),
     solutionsCarousel: document.getElementById('solutions-carousel'),
     errorFeedback: document.getElementById('error-feedback'),

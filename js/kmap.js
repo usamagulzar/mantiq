@@ -170,7 +170,7 @@ function renderHTMLKMap() {
         return;
     }
 
-    const sopPosEl = document.getElementById('sop-pos-pill');
+    const sopPosEl = document.getElementById('sop-pos-btn');
     const isSOP = sopPosEl ? sopPosEl.getAttribute('data-state') === 'sop' : true;
     const activeSolutions = isSOP ? solutions : solutionsPOS;
     let selectedIdx = typeof selectedSolutionIndex !== 'undefined' ? selectedSolutionIndex : 0;
@@ -2725,12 +2725,9 @@ function drawWrapSVGLoops(solution, numVars, rowsBits, colsBits, rowGray, colGra
 document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key.toLowerCase() === 'm') {
         e.preventDefault();
-        const sopPosPill = document.getElementById('sop-pos-pill');
+        const sopPosPill = document.getElementById('sop-pos-btn');
         if (sopPosPill) {
-            const current = sopPosPill.getAttribute('data-state');
-            const targetVal = current === 'sop' ? 'pos' : 'sop';
-            const btn = sopPosPill.querySelector(`.pill-option[data-val="${targetVal}"]`);
-            if (btn) btn.click();
+            sopPosPill.click();
         }
     }
 });

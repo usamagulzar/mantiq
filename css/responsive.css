@@ -266,35 +266,34 @@
     /* Scoped to the active workspace only — the landing/empty-state screen
        has its own centered column layout (handled elsewhere) and must not
        be affected by this restructuring. */
-    #app-root:not(.landing):not(.showing-examples) #topbar .topbar-search-area,
-    #app-root:not(.landing):not(.showing-examples) #topbar .input-row {
-        display: contents;
+    
+    /* Topbar on mobile shrinks to just the search row */
+    #app-root:not(.landing):not(.showing-examples) #topbar {
+        padding: 8px 12px;
     }
 
-    #app-root:not(.landing):not(.showing-examples) #hero-logo-wrap {
-        order: 1;
-        flex-shrink: 0;
-        margin-bottom: 0;
-        padding-left: 10px;
+    /* Hide desktop logo and theme button in topbar on mobile */
+    #app-root:not(.landing):not(.showing-examples) #hero-logo-wrap,
+    #app-root:not(.landing):not(.showing-examples) #theme-btn {
+        display: none !important;
+    }
+    
+    #app-root:not(.landing):not(.showing-examples) .topbar-search-area {
+        margin-left: 0;
+        margin-right: 0;
     }
 
     #app-root:not(.landing):not(.showing-examples) .topbar-actions {
-        order: 2;
-        margin-left: auto;
-        gap: 8px;
+        margin-left: 0;
     }
 
     #app-root:not(.landing):not(.showing-examples) .input-wrapper {
-        order: 3;
-        flex: 1 1 100%;
-        width: 100%;
+        flex: 1;
+        min-width: 0;
     }
 
     #app-root:not(.landing):not(.showing-examples) #result-row {
-        order: 4;
-        flex: 1 1 100%;
-        min-width: 0;
-        max-width: 100%;
+        width: 100%;
     }
 
     #app-root:not(.landing):not(.showing-examples) #error-feedback {
@@ -981,3 +980,27 @@ body.tour-active #hero-logo {
 .tour-tooltip {
     pointer-events: auto;
 }
+
+/* Mobile / Desktop Visibility Utility Classes */
+.mobile-only { display: none !important; }
+@media (max-width: 768px) {
+    .mobile-only { display: flex !important; }
+    .desktop-only { display: none !important; }
+}
+
+/* Sidebar Mobile Theme and Logo specific styling */
+.mobile-sidebar-logo {
+    width: 32px;
+    height: 32px;
+    margin-right: auto;
+}
+.mobile-sidebar-logo svg {
+    width: 100%;
+    height: 100%;
+}
+.theme-toggle-btn.mobile-only {
+    width: 48px;
+    height: 48px;
+    margin-left: auto;
+}
+

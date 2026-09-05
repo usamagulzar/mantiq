@@ -66,7 +66,7 @@ function renderSolutionView() {
     }
 
     const selectedIndex = window.globalSelectedSolutionIndex || 0;
-    const pill = document.getElementById('sop-pos-pill');
+    const pill = document.getElementById('sop-pos-btn');
     const format = pill && pill.getAttribute('data-state') === 'pos' ? 'pos' : 'sop';
 
     const parts = rawSteps.split('=== POS Minimization ===');

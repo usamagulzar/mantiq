@@ -290,9 +290,8 @@ if (clearBtn) {
 }
 
 // Logo click to return to landing page
-const heroLogoWrap = document.getElementById('hero-logo-wrap');
-if (heroLogoWrap) {
-    heroLogoWrap.addEventListener('click', (e) => {
+document.querySelectorAll('#hero-logo-wrap, #sidebar-mobile-logo').forEach(logoWrap => {
+    logoWrap.addEventListener('click', (e) => {
         e.preventDefault();
         if (document.body.classList.contains('tour-active')) {
             return;
@@ -320,7 +319,7 @@ if (heroLogoWrap) {
             // Intentionally not calling focus() here so the mobile keyboard doesn't randomly pop up
         }
     });
-}
+});
 
 // Keyboard escape handlers
 window.addEventListener('keydown', (e) => {
@@ -342,9 +341,7 @@ if (elements.sopPosPill) {
         const newState = isSop ? 'pos' : 'sop';
         
         elements.sopPosPill.setAttribute('data-state', newState);
-        elements.sopPosPill.querySelectorAll('.pill-option').forEach(opt => {
-            opt.classList.toggle('active', opt.getAttribute('data-val') === newState);
-        });
+        elements.sopPosPill.textContent = newState === 'sop' ? 'SOP' : 'POS';
         
         // Mantiq setSOP API: 1 = SOP, 0 = POS
         if (wasmReady) {
@@ -381,12 +378,13 @@ function applyTheme(theme) {
     document.documentElement.classList.toggle('dark-mode', isDark);
     document.documentElement.classList.toggle('light-mode', !isDark);
 
-    if (elements.themePill) {
-        elements.themePill.setAttribute('data-state', isDark ? 'dark' : 'light');
-        elements.themePill.querySelectorAll('.pill-option').forEach(opt => {
-            opt.classList.toggle('active', opt.getAttribute('data-val') === (isDark ? 'dark' : 'light'));
-        });
-    }
+    // Update all theme toggles instead of just one
+    document.querySelectorAll('.theme-toggle-btn').forEach(pill => {
+        pill.setAttribute('data-state', isDark ? 'dark' : 'light');
+    });
+    document.querySelectorAll('.theme-toggle .pill-option').forEach(opt => {
+        opt.classList.toggle('active', opt.getAttribute('data-val') === (isDark ? 'dark' : 'light'));
+    });
 }
 
 // Initial theme resolution: check localStorage first, then fallback to OS preference
@@ -408,9 +406,9 @@ if (window.matchMedia) {
 }
 
 // Theme Toggle Pill Click Handler
-if (elements.themePill) {
-    elements.themePill.addEventListener('click', () => {
-        const isDark = elements.themePill.getAttribute('data-state') === 'dark';
+document.querySelectorAll('.theme-toggle-btn').forEach(pill => {
+    pill.addEventListener('click', () => {
+        const isDark = pill.getAttribute('data-state') === 'dark';
         const newTheme = isDark ? 'light' : 'dark';
         setSavedTheme(newTheme);
         applyTheme(newTheme);
@@ -419,7 +417,7 @@ if (elements.themePill) {
             renderHTMLWaveform(lastTruthTableData);
         }
     });
-}
+});
 
 // Automatically repaint waveform canvas whenever theme classes change on document.body
 if (typeof window !== 'undefined' && window.MutationObserver) {
@@ -481,7 +479,7 @@ function resizeKMapView() {
     const { variables, minterms, dontCares, solutions, solutionsPOS } = lastKMapData;
     const numVars = variables.length;
 
-    const sopPosEl = document.getElementById('sop-pos-pill');
+    const sopPosEl = document.getElementById('sop-pos-btn');
     const isSOP = sopPosEl ? sopPosEl.getAttribute('data-state') === 'sop' : true;
     const activeSolutions = isSOP ? solutions : solutionsPOS;
     let selectedIdx = typeof selectedSolutionIndex !== 'undefined' ? selectedSolutionIndex : 0;

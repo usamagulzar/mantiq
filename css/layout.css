@@ -341,3 +341,10 @@ button, input, select, textarea {
         display: none;
     }
 }
+
+/* Theme Toggle Icon Switching */
+.theme-toggle-btn[data-state="light"] .icon-dark { display: none !important; }
+.theme-toggle-btn[data-state="light"] .icon-light { display: block !important; }
+.theme-toggle-btn[data-state="dark"] .icon-light { display: none !important; }
+.theme-toggle-btn[data-state="dark"] .icon-dark { display: block !important; }
+

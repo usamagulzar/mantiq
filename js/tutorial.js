@@ -51,7 +51,7 @@ const TOUR_STEPS = [
     }
   },
   {
-    selector: '#sop-pos-pill',
+    selector: '#sop-pos-btn',
     title: 'SOP and POS: two ways to write the same logic',
     body: `Every Boolean function can be written as a <b>Sum of Products</b> (an OR of AND terms) or a <b>Product of Sums</b> (an AND of OR terms). Flip this toggle and every other view updates to match.`
   },
@@ -203,7 +203,7 @@ const TOUR_STEPS = [
     body: `Every cell is now a cube placed in 3D space. A group that spans rows, columns, and layers appears as one connected shape you can rotate and look at from any angle.`
   },
   {
-    selector: '#theme-pill',
+    selector: '.theme-toggle-btn',
     title: 'You are all set up',
     body: `Switch between light and dark mode anytime. You can replay this tour, open the Concept guide, or browse Pro Tips from the Help button in the corner.`
   }
@@ -858,7 +858,10 @@ const TourEngine = {
     const step = this.steps[i];
     if (step.onEnter) step.onEnter();
     
-    const targets = document.querySelectorAll(step.selector);
+    let targets = Array.from(document.querySelectorAll(step.selector)).filter(t => {
+        return window.getComputedStyle(t).display !== 'none';
+    });
+    
     if (!targets.length) {
         // graceful skip if a view is hidden on this device
         if (i < this.steps.length - 1) {
