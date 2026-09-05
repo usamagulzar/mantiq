@@ -31,8 +31,9 @@ jobs:
         run: node build.js
         
       - name: Commit update.zip
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: auto-generate update.zip for OTA [skip ci]"
-          file_pattern: 'update.zip'
-          add_options: '-f'
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add -f update.zip
+          git commit -m "chore: auto-generate update.zip for OTA [skip ci]" || echo "No changes to commit"
+          git push
