@@ -192,7 +192,93 @@
     <link rel="stylesheet" href="css/about.css?v=2.0.3">
     <link rel="stylesheet" href="css/responsive.css?v=2.0.3">
     <link rel="stylesheet" href="css/integrity.css?v=1.0.2">
-  </head>
+  
+<style id="circuit-settings-styles">
+.circuit-settings-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  border-radius: 6px;
+  padding: 4px 6px;
+  cursor: pointer;
+  color: var(--text-secondary, #aaa);
+  transition: background 0.15s, color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+.circuit-settings-btn:hover {
+  background: var(--glass-bg, rgba(255,255,255,0.06));
+  color: var(--text-primary, #fff);
+}
+.circuit-settings-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 9999;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+}
+.circuit-settings-overlay.open {
+  display: flex;
+}
+.circuit-settings-modal {
+  width: min(340px, 90vw);
+  border-radius: 14px;
+  padding: 20px 22px 24px;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.circuit-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.circuit-settings-header h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0;
+}
+.circuit-settings-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--text-secondary, #aaa);
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+.circuit-settings-close:hover { color: var(--text-primary, #fff); }
+.circuit-settings-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary, #aaa);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 6px;
+}
+.circuit-settings-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
+  background: var(--input-bg, rgba(255,255,255,0.06));
+  color: var(--text-primary, #fff);
+  font-size: 14px;
+  cursor: pointer;
+}
+</style>
+
+</head>
 
   <body>
 
@@ -665,16 +751,7 @@
                                 <button class="concept-info-btn" data-concept="circuit_diagram" aria-label="What is this?">?</button>
                             </div>
                             <div class="panel-actions">
-                                <select class="impl-select" title="Gate Implementation">
-                                    <option value="0" selected>Implementation: Default</option>
-                                    <option value="1">Implementation: NAND-NAND</option>
-                                    <option value="2">Implementation: NOR-NOR</option>
-                                </select>
-                                <select class="fanin-select" title="Max Fan-In Allowed">
-                                    <option value="2">Max Fan-In: 2 Inputs</option>
-                                    <option value="3">Max Fan-In: 3 Inputs</option>
-                                    <option value="4" selected>Max Fan-In: 4 Inputs</option>
-                                </select>
+                                <button class="circuit-settings-btn" id="btn-settings-orig" title="Circuit Settings" aria-label="Circuit Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
                                 <button id="export-circuit-png-orig" class="action-link-btn" title="Export PNG">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                                     <span>Export PNG</span>
@@ -701,16 +778,7 @@
                                 <button class="concept-info-btn" data-concept="circuit_diagram" aria-label="What is this?">?</button>
                             </div>
                             <div class="panel-actions">
-                                <select class="impl-select" title="Gate Implementation">
-                                    <option value="0" selected>Implementation: Default</option>
-                                    <option value="1">Implementation: NAND-NAND</option>
-                                    <option value="2">Implementation: NOR-NOR</option>
-                                </select>
-                                <select class="fanin-select" title="Max Fan-In Allowed">
-                                    <option value="2">Max Fan-In: 2 Inputs</option>
-                                    <option value="3">Max Fan-In: 3 Inputs</option>
-                                    <option value="4" selected>Max Fan-In: 4 Inputs</option>
-                                </select>
+                                <button class="circuit-settings-btn" id="btn-settings-simp" title="Circuit Settings" aria-label="Circuit Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
                                 <button id="export-circuit-png-simp" class="action-link-btn" title="Export PNG">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                                     <span>Export PNG</span>
@@ -741,18 +809,8 @@
                                 <button class="concept-info-btn" data-concept="simulation" aria-label="What is this?">?</button>
                             </div>
                             <div class="panel-actions">
-                                <select class="impl-select" title="Gate Implementation">
-                                    <option value="0" selected>Implementation: Default</option>
-                                    <option value="1">Implementation: NAND-NAND</option>
-                                    <option value="2">Implementation: NOR-NOR</option>
-                                </select>
-                                <select class="fanin-select" title="Max Fan-In Allowed">
-                                    <option value="2">Max Fan-In: 2 Inputs</option>
-                                    <option value="3">Max Fan-In: 3 Inputs</option>
-                                    <option value="4" selected>Max Fan-In: 4 Inputs</option>
-                                </select>
-                                <span style="font-size: 12px; color: var(--text-secondary);">Toggle inputs to simulate</span>
-                            </div>
+                                <button class="circuit-settings-btn" id="btn-settings-sim-orig" title="Circuit Settings" aria-label="Circuit Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+                                </div>
                         </div>
                         <div class="circuit-scroll-wrapper" id="original-sim-scroll"></div>
                         <div class="zoom-controls">
@@ -774,18 +832,8 @@
                                 <button class="concept-info-btn" data-concept="simulation" aria-label="What is this?">?</button>
                             </div>
                             <div class="panel-actions">
-                                <select class="impl-select" title="Gate Implementation">
-                                    <option value="0" selected>Implementation: Default</option>
-                                    <option value="1">Implementation: NAND-NAND</option>
-                                    <option value="2">Implementation: NOR-NOR</option>
-                                </select>
-                                <select class="fanin-select" title="Max Fan-In Allowed">
-                                    <option value="2">Max Fan-In: 2 Inputs</option>
-                                    <option value="3">Max Fan-In: 3 Inputs</option>
-                                    <option value="4" selected>Max Fan-In: 4 Inputs</option>
-                                </select>
-                                <span style="font-size: 12px; color: var(--text-secondary);">Toggle inputs to simulate</span>
-                            </div>
+                                <button class="circuit-settings-btn" id="btn-settings-sim-simp" title="Circuit Settings" aria-label="Circuit Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+                                </div>
                         </div>
                         <div class="circuit-scroll-wrapper" id="simplified-sim-scroll"></div>
                         <div class="zoom-controls">
@@ -1529,5 +1577,30 @@
         });
       }
     </script>
-  </body>
+  
+<!-- Circuit Settings Dialog -->
+<div id="circuit-settings-dialog" class="circuit-settings-overlay" aria-hidden="true">
+  <div class="circuit-settings-modal glass-panel">
+    <div class="circuit-settings-header">
+      <h3>Circuit Settings</h3>
+      <button class="circuit-settings-close" id="circuit-settings-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="circuit-settings-body">
+      <label class="circuit-settings-label">Gate Implementation</label>
+      <select class="impl-select circuit-settings-select" id="dialog-impl-select">
+        <option value="0" selected>Default (AND / OR / NOT)</option>
+        <option value="1">NAND-NAND</option>
+        <option value="2">NOR-NOR</option>
+      </select>
+      <label class="circuit-settings-label" style="margin-top:14px;">Max Fan-In</label>
+      <select class="fanin-select circuit-settings-select" id="dialog-fanin-select">
+        <option value="2">2 Inputs</option>
+        <option value="3">3 Inputs</option>
+        <option value="4" selected>4 Inputs</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+</body>
 </html>
