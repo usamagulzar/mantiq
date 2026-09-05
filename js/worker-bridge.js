@@ -93,7 +93,7 @@ const VIEW_FIELDS_JS = {
 const _freshFields = new Set();
 
 /** Spawn the worker that hosts the WASM engine. */
-const _worker = new Worker('wasm/mantiq-worker.js?v=1.5.1');
+const _worker = new Worker('wasm/mantiq-worker.js?v=1.6.0');
 
 _worker.onmessage = function (event) {
     const msg = event.data;
@@ -339,6 +339,12 @@ const Module = {
             case 'mantiq_setMaxFanIn': {
                 const fanIn = (args && args[0]) || 0;
                 _workerWriteCall('_setMaxFanInAndSnapshot', [fanIn]);
+                return undefined;
+            }
+
+            case 'mantiq_setImplementation': {
+                const impl = (args && args[0]) || 0;
+                _workerWriteCall('_setImplementationAndSnapshot', [impl]);
                 return undefined;
             }
 

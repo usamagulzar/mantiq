@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mantiq-cache-v2.2.59'; // bumped to drop marketing page from cache
+const CACHE_NAME = 'mantiq-cache-v2.2.60'; // bumped to drop marketing page from cache
 
 const urlsToCache = [
   './app.html',

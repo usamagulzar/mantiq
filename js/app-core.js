@@ -749,3 +749,15 @@ if (exportKmapPngBtn) {
     });
 }
 
+
+document.querySelectorAll('.impl-select').forEach(select => {
+    select.addEventListener('change', (e) => {
+        const impl = parseInt(e.target.value, 10);
+        document.querySelectorAll('.impl-select').forEach(s => {
+            if (s !== e.target) s.value = e.target.value;
+        });
+        if (wasmReady) {
+            Module.ccall('mantiq_setImplementation', null, ['number'], [impl]);
+        }
+    });
+});

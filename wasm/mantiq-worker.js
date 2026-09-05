@@ -68,8 +68,8 @@ var Module = {
 
     locateFile: function (path) {
         if (path.endsWith('.wasm')) {
-            return path + '?v=1.5.1';
-            return path + '?v=1.5.1';
+            return path + '?v=1.6.0';
+            return path + '?v=1.6.0';
         }
         return path;
     }
@@ -77,7 +77,7 @@ var Module = {
 
 // Load the Emscripten-generated glue.
 // Path is relative to the worker location (mantiq-main/wasm/).
-importScripts('./index.js?v=1.5.1');
+importScripts('./index.js?v=1.6.0');
 
 let g_addTestbenchGate = true;
 let g_addTestbenchDataflow = true;
@@ -225,6 +225,11 @@ function handleAggregate(fn, args, view) {
         case '_setMaxFanInAndSnapshot': {
             const fanIn = (args && args[0]) || 0;
             Module.ccall('mantiq_setMaxFanIn', null, ['number'], [fanIn]);
+            return buildSnapshot(view);
+        }
+        case '_setImplementationAndSnapshot': {
+            const impl = (args && args[0]) || 0;
+            Module.ccall('mantiq_setImplementation', null, ['number'], [impl]);
             return buildSnapshot(view);
         }
         case '_setSelectedSolutionAndSnapshot': {
