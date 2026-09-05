@@ -572,8 +572,9 @@ function generateSVGForCircuit(root, panelType = 'orig') {
             node.children.forEach(child => {
                 layoutNode(child, depth + 1);
                 sumY += child.y;
-                const childR = !child.isGate ? 20 : (child.children.length === 3 ? 25 : (child.children.length === 4 ? 30 : (child.children.length > 4 ? 35 : 20)));
-                const childOutputOffset = (child.type === 'XNOR' || child.type === 'NAND' || child.type === 'NOR') ? 10 : 0;
+                const childIsNotLike = (child.type === 'NOT') || (((child.type === 'NAND' || child.type === 'NOR')) && child.children && child.children.length === 1);
+                const childR = !child.isGate ? 20 : childIsNotLike ? 20 : (child.children.length === 3 ? 25 : (child.children.length === 4 ? 30 : (child.children.length > 4 ? 35 : 20)));
+                const childOutputOffset = (!childIsNotLike && (child.type === 'XNOR' || child.type === 'NAND' || child.type === 'NOR')) ? 10 : 0;
                 const childOutputX = child.x + childR + childOutputOffset;
                 if (childOutputX > maxX) maxX = childOutputX;
             });
@@ -643,8 +644,9 @@ function generateSVGForCircuit(root, panelType = 'orig') {
         if (node.children) {
             // Sort children so wires don't criss-cross weirdly, though tree layout naturally handles it somewhat
             node.children.forEach((child, idx) => {
-                const childR = !child.isGate ? 20 : (child.children.length === 3 ? 25 : (child.children.length === 4 ? 30 : (child.children.length > 4 ? 35 : 20)));
-                const childOutputOffset = (child.type === 'XNOR' || child.type === 'NAND' || child.type === 'NOR') ? 10 : 0;
+                const childIsNotLike = (child.type === 'NOT') || ((child.type === 'NAND' || child.type === 'NOR') && child.children && child.children.length === 1);
+                const childR = !child.isGate ? 20 : childIsNotLike ? 20 : (child.children.length === 3 ? 25 : (child.children.length === 4 ? 30 : (child.children.length > 4 ? 35 : 20)));
+                const childOutputOffset = (!childIsNotLike && (child.type === 'XNOR' || child.type === 'NAND' || child.type === 'NOR')) ? 10 : 0;
                 const cx = child.x + childR + childOutputOffset; // output of child
                 
                 // input of current node
@@ -652,6 +654,7 @@ function generateSVGForCircuit(root, panelType = 'orig') {
                 if (node.type === 'OR') nx = node.x - 15;
                 if (node.type === 'NOT') nx = node.x - 15;
                 if (node.type === 'XOR' || node.type === 'XNOR') nx = node.x - 21;
+                if ((node.type === 'NAND' || node.type === 'NOR') && node.children && node.children.length === 1) nx = node.x - 15;
                 
                 let ny = node.y;
                 if (node.children.length > 1) {
@@ -691,9 +694,10 @@ function generateSVGForCircuit(root, panelType = 'orig') {
     drawNode(root);
     
     // Output wire
-    const rootR = !root.isGate ? 20 : (root.children.length === 3 ? 25 : (root.children.length === 4 ? 30 : (root.children.length > 4 ? 35 : 20)));
-    const rootOutputOffset = (root.type === 'XNOR' || root.type === 'NAND' || root.type === 'NOR') ? 10 : 0;
-    const finalOutX = root.x + rootR + rootOutputOffset;
+    const rootIsNotLike = (root.type === 'NOT') || ((root.type === 'NAND' || root.type === 'NOR') && root.children && root.children.length === 1);
+    const rootR = !root.isGate ? 20 : rootIsNotLike ? 20 : (root.children.length === 3 ? 25 : (root.children.length === 4 ? 30 : (root.children.length > 4 ? 35 : 20)));
+    const rootOutputOffset = (!rootIsNotLike && (root.type === 'XNOR' || root.type === 'NAND' || root.type === 'NOR')) ? 10 : 0;
+    const finalOutX = rootIsNotLike ? root.x + 20 : root.x + rootR + rootOutputOffset;
     wires += `<path class="circuit-wire" d="M ${finalOutX} ${root.y} L ${finalOutX + 35} ${root.y}" />`;
     gates += `<text class="var-text" x="${finalOutX + 45}" y="${root.y}" text-anchor="start" dominant-baseline="central">OUTPUT</text>`;
     svg += wires;
@@ -704,6 +708,14 @@ function generateSVGForCircuit(root, panelType = 'orig') {
 
 function getGateSVG(type, x, y, numInputs = 2) {
     let svg = '';
+
+    // Single-input NAND/NOR acts as NOT — draw same size as NOT gate
+    if ((type === 'NAND' || type === 'NOR') && numInputs === 1) {
+        svg += `<path class="gate-shape" d="M ${x-15} ${y-15} L ${x+10} ${y} L ${x-15} ${y+15} Z" />`;
+        svg += `<circle class="gate-shape" cx="${x+15}" cy="${y}" r="5" />`;
+        return svg;
+    }
+
     let r = 20;
     if (numInputs === 3) r = 25;
     else if (numInputs === 4) r = 30;
@@ -723,6 +735,12 @@ function getGateSVG(type, x, y, numInputs = 2) {
     } else if (type === 'NOT') {
         svg += `<path class="gate-shape" d="M ${x-15} ${y-15} L ${x+10} ${y} L ${x-15} ${y+15} Z" />`;
         svg += `<circle class="gate-shape" cx="${x+15}" cy="${y}" r="5" />`;
+    } else if (type === 'NAND') {
+        svg += `<path class="gate-shape" d="M ${x-20} ${y-r} L ${x} ${y-r} A ${r} ${r} 0 0 1 ${x} ${y+r} L ${x-20} ${y+r} Z" />`;
+        svg += `<circle class="gate-shape" cx="${x+r+5}" cy="${y}" r="5" />`;
+    } else if (type === 'NOR') {
+        svg += `<path class="gate-shape" d="M ${x-20} ${y-r} Q ${x-5} ${y} ${x-20} ${y+r} Q ${x+10} ${y+r} ${x+r} ${y} Q ${x+10} ${y-r} ${x-20} ${y-r} Z" />`;
+        svg += `<circle class="gate-shape" cx="${x+r+5}" cy="${y}" r="5" />`;
     }
     return svg;
 }
@@ -1261,7 +1279,8 @@ function renderHTMLSimulation(resetZoom = true) {
 }
 
 function getGateOutputPinRange(type, x, numInputs = 2) {
-    if (type === 'NOT') {
+    const isNotLike = (type === 'NOT') || ((type === 'NAND' || type === 'NOR') && numInputs === 1);
+    if (isNotLike) {
         return { startX: x + 22, endX: x + 34 };
     }
     let r = 25;
@@ -1278,6 +1297,14 @@ function getGateOutputPinRange(type, x, numInputs = 2) {
 function getSimGateSilkscreen(type, x, y, panelId = 'p', numInputs = 2) {
     let inner = '';
     const offset = 2.5; // Offset to draw silkscreen slightly outside the gate body
+
+    // Single-input NAND/NOR acts as NOT
+    if ((type === 'NAND' || type === 'NOR') && numInputs === 1) {
+        inner = `<path d="M ${x-20-offset} ${y-20-offset} L ${x+10+offset} ${y} L ${x-20-offset} ${y+20+offset} Z" />
+                 <circle cx="${x+16}" cy="${y}" r="${6+offset}" />`;
+        return `<g fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.6" filter="url(#silkscreen-${panelId})">${inner}</g>`;
+    }
+
     let r = 25;
     if (numInputs === 3) r = 30;
     else if (numInputs === 4) r = 35;
@@ -1313,6 +1340,14 @@ function getSimGateSilkscreen(type, x, y, panelId = 'p', numInputs = 2) {
 
 function getSimGateShape(type, x, y, panelId = 'p', numInputs = 2) {
     let inner = '';
+
+    // Single-input NAND/NOR acts as NOT
+    if ((type === 'NAND' || type === 'NOR') && numInputs === 1) {
+        inner = `<path d="M ${x-20} ${y-20} L ${x+10} ${y} L ${x-20} ${y+20} Z" />
+                 <circle cx="${x+16}" cy="${y}" r="6" />`;
+        return `<g fill="#111111" filter="url(#plastic-3d-${panelId})">${inner}</g>`;
+    }
+
     let r = 25;
     if (numInputs === 3) r = 30;
     else if (numInputs === 4) r = 35;
