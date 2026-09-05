@@ -68,7 +68,8 @@ var Module = {
 
     locateFile: function (path) {
         if (path.endsWith('.wasm')) {
-            return path + '?v=1.4.0';
+            return path + '?v=1.5.1';
+            return path + '?v=1.5.1';
         }
         return path;
     }
@@ -76,7 +77,7 @@ var Module = {
 
 // Load the Emscripten-generated glue.
 // Path is relative to the worker location (mantiq-main/wasm/).
-importScripts('./index.js?v=1.4.0');
+importScripts('./index.js?v=1.5.1');
 
 let g_addTestbenchGate = true;
 let g_addTestbenchDataflow = true;
