@@ -762,7 +762,7 @@ document.querySelectorAll('.impl-select').forEach(select => {
 });
 
 // ── Circuit Settings Dialog ──────────────────────────────────────────────────
-(function () {
+document.addEventListener('DOMContentLoaded', () => {
     const overlay = document.getElementById('circuit-settings-dialog');
     if (!overlay) return;
 
@@ -792,4 +792,4 @@ document.querySelectorAll('.impl-select').forEach(select => {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && overlay.classList.contains('open')) closeDialog();
     });
-}());
+});
