@@ -156,12 +156,16 @@ function _applySnapshot(snap) {
                 : [snap.circuitJSON];
 
             let simpResult = runASTProver(seedCandidates, family, maxFanIn);
-            let origResult = runASTProver(data.original, family, maxFanIn);
 
-            if (origResult && origResult.ast) data.original = origResult.ast;
-            if (simpResult && simpResult.ast) data.simplified = simpResult.ast;
+            if (simpResult && simpResult.ast) {
+                data.simplified = simpResult.ast;
+                // Replace original with dummy node so ONLY the new minimal circuit is formed and displayed
+                data.original = { type: 'VAR', value: 'dummy', isGate: false, children: [] };
+            }
 
-            _state.circuitJSON = JSON.stringify(data);
+            const newJsonStr = JSON.stringify(data);
+            snap.circuitJSON = newJsonStr;
+            _state.circuitJSON = newJsonStr;
 
             // Expose the IC breakdown globally so UI can show it
             window._mantiqICBreakdown = simpResult ? { cost: simpResult.cost, family: family, breakdown: simpResult.breakdown } : null;

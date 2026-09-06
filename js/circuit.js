@@ -1152,8 +1152,8 @@ function updateSimulationColors(panelId, scrollElId) {
 function evaluateSimLogic(node) {
     if (!node) return false;
     if (!node.isGate) {
-        if (node.value === '1') return true;
-        if (node.value === '0') return false;
+        if (node.value === '1' || node.value === 'VCC') return true;
+        if (node.value === '0' || node.value === 'GND') return false;
         return !!simInputStates[node.value];
     }
     const gateType = node.type;
@@ -1217,7 +1217,7 @@ function renderHTMLSimulation(resetZoom = true) {
     }
     
     const initializeInputs = (n) => {
-        if (!n.isGate && n.value !== '0' && n.value !== '1') {
+        if (!n.isGate && n.value !== '0' && n.value !== '1' && n.value !== 'VCC' && n.value !== 'GND') {
             if (simInputStates[n.value] === undefined) simInputStates[n.value] = false;
         }
         if (n.children) n.children.forEach(initializeInputs);
