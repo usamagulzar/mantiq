@@ -78,7 +78,12 @@ function renderHTMLCircuit() {
             const fam = window._mantiqICBreakdown.family || 'TTL';
             const numEl = b.querySelector('.ic-count-num');
             if (numEl) numEl.textContent = n;
-            b.title = `${n} IC package${n !== 1 ? 's' : ''} (${fam})`;
+            let tooltip = `${n} IC package${n !== 1 ? 's' : ''} (${fam})`;
+            if (window._mantiqICBreakdown.breakdown && window._mantiqICBreakdown.breakdown.length > 0) {
+                const parts = window._mantiqICBreakdown.breakdown.map(x => `${x.part} ×${x.pkgs} (${x.gatesUsed}/${x.capacity} gates)`).join(', ');
+                tooltip += `: ${parts}`;
+            }
+            b.title = tooltip;
         }
     });
     eyeBtns.forEach(b => { b.style.display = isMinimal ? 'inline-flex' : 'none'; });

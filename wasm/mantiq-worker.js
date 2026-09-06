@@ -81,6 +81,7 @@ importScripts('./index.js?v=1.6.1');
 
 let g_addTestbenchGate = true;
 let g_addTestbenchDataflow = true;
+let g_implementationMode = 0;
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -165,7 +166,34 @@ function buildSnapshot(view) {
     needed.add('kMapJSON'); // Always marshal kMapJSON for Circuit Recognizer
     if (needed.has('truthTableJSON'))  snapshot.truthTableJSON  = wasmStr('mantiq_getTruthTableJSON') || '';
     if (needed.has('kMapJSON'))        snapshot.kMapJSON        = wasmStr('mantiq_getKMapJSON')       || '';
-    if (needed.has('circuitJSON'))     snapshot.circuitJSON     = wasmStr('mantiq_getCircuitJSON')    || '';
+    if (needed.has('circuitJSON')) {
+        if (g_implementationMode === 3) {
+            // Collect all candidate trees across SOP (0, 1, 2) and POS (0, 1, 2)
+            const allTrees = [];
+            // Try SOP
+            Module.ccall('mantiq_setSOP', null, ['number'], [1]);
+            for (const implVal of [0, 1, 2]) {
+                Module.ccall('mantiq_setImplementation', null, ['number'], [implVal]);
+                const json = wasmStr('mantiq_getCircuitJSON') || '';
+                if (json) allTrees.push({ sop: 1, impl: implVal, json: json });
+            }
+            // Try POS
+            Module.ccall('mantiq_setSOP', null, ['number'], [0]);
+            for (const implVal of [0, 1, 2]) {
+                Module.ccall('mantiq_setImplementation', null, ['number'], [implVal]);
+                const json = wasmStr('mantiq_getCircuitJSON') || '';
+                if (json) allTrees.push({ sop: 0, impl: implVal, json: json });
+            }
+            // Restore default C++ state (impl=0, sop=1)
+            Module.ccall('mantiq_setImplementation', null, ['number'], [0]);
+            Module.ccall('mantiq_setSOP', null, ['number'], [1]);
+
+            snapshot.circuitJSON = allTrees.length > 0 ? allTrees[0].json : (wasmStr('mantiq_getCircuitJSON') || '');
+            snapshot._allImplTrees = allTrees;
+        } else {
+            snapshot.circuitJSON = wasmStr('mantiq_getCircuitJSON') || '';
+        }
+    }
     if (needed.has('verilogGate'))     snapshot.verilogGate     = wasmStr('mantiq_getVerilogCode', ['number', 'number'], [1, g_addTestbenchGate ? 1 : 0]) || '';
     if (needed.has('verilogDataflow')) snapshot.verilogDataflow = wasmStr('mantiq_getVerilogCode', ['number', 'number'], [0, g_addTestbenchDataflow ? 1 : 0]) || '';
     snapshot.computedFields = Array.from(needed);
@@ -229,8 +257,24 @@ function handleAggregate(fn, args, view) {
         }
         case '_setImplementationAndSnapshot': {
             const impl = (args && args[0]) || 0;
-            Module.ccall('mantiq_setImplementation', null, ['number'], [impl]);
+            g_implementationMode = impl;
+            Module.ccall('mantiq_setImplementation', null, ['number'], [impl === 3 ? 0 : impl]);
             return buildSnapshot(view);
+        }
+        case '_getAllImplTreesAndSnapshot': {
+            // Collect circuitJSON for all 3 implementations + unsimplified (impl=0 is default/unsimplified)
+            // Then restore to impl=0 for clean base AST (JS AST Prover takes it from there)
+            const allTrees = {};
+            for (const implVal of [0, 1, 2]) {
+                Module.ccall('mantiq_setImplementation', null, ['number'], [implVal]);
+                const json = wasmStr('mantiq_getCircuitJSON') || '';
+                allTrees[implVal] = json;
+            }
+            // Always restore to 0 so C++ is in default state; JS Prover transforms from there
+            Module.ccall('mantiq_setImplementation', null, ['number'], [0]);
+            const snap = buildSnapshot(view);
+            snap._allImplTrees = allTrees; // attach all seeds to snapshot
+            return snap;
         }
         case '_setSelectedSolutionAndSnapshot': {
             const idx = (args && args[0]) || 0;

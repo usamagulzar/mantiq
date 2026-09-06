@@ -746,6 +746,11 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.display = 'flex';
         overlay.classList.add('active');
         setTimeout(() => overlay.style.opacity = '1', 10);
+        const implSelect = document.getElementById('dialog-impl-select');
+        const familyGroup = document.getElementById('dialog-ic-family-group');
+        if (implSelect && familyGroup) {
+            familyGroup.style.display = (implSelect.value === '3') ? 'block' : 'none';
+        }
     }
     
     function closeDialog() {

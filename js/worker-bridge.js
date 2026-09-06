@@ -147,27 +147,31 @@ function _applySnapshot(snap) {
     if (snap.circuitJSON && window.mantiqImplementationMode === 3 && window.runASTProver) {
         try {
             let data = JSON.parse(snap.circuitJSON);
-            
-            // Run prover on orig and simp separately
             let maxFanIn = window.mantiqMaxFanIn || 4;
             let family = window.mantiqICFamily || 'TTL';
-            
-            let origResult = runASTProver(JSON.stringify(data.original), family, maxFanIn);
-            let simpResult = runASTProver(JSON.stringify(data.simplified), family, maxFanIn);
-            
-            if (origResult) data.original = origResult.ast;
-            if (simpResult) data.simplified = simpResult.ast;
-            
+
+            // All candidate forms collected by worker (SOP & POS across Default, NAND, NOR, and original)
+            const seedCandidates = (snap._allImplTrees && snap._allImplTrees.length > 0)
+                ? snap._allImplTrees
+                : [snap.circuitJSON];
+
+            let simpResult = runASTProver(seedCandidates, family, maxFanIn);
+            let origResult = runASTProver(data.original, family, maxFanIn);
+
+            if (origResult && origResult.ast) data.original = origResult.ast;
+            if (simpResult && simpResult.ast) data.simplified = simpResult.ast;
+
             _state.circuitJSON = JSON.stringify(data);
-            
+
             // Expose the IC breakdown globally so UI can show it
-            window._mantiqICBreakdown = simpResult ? { cost: simpResult.cost, family: family } : null;
+            window._mantiqICBreakdown = simpResult ? { cost: simpResult.cost, family: family, breakdown: simpResult.breakdown } : null;
         } catch (e) {
             console.error('AST Prover failed:', e);
         }
     } else {
         window._mantiqICBreakdown = null; // Clear if not Minimal
     }
+
     if (snap.expression !== undefined) _state.computedForExpr = snap.expression;
     // computedFields lists which heavy fields (truthTableJSON/kMapJSON/circuitJSON/
     // verilogGate/verilogDataflow) this snapshot actually refreshed. A field left out
