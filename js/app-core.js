@@ -356,12 +356,6 @@ if (elements.sopPosPill) {
     });
 }
 
-if (wasmReady) {
-            Module.ccall('mantiq_setMaxFanIn', null, ['number'], [fanIn]);
-        }
-    });
-});
-
 // Theme Manager & Persistence (localStorage 'mantiq_theme')
 const THEME_STORAGE_KEY = 'mantiq_theme';
 
@@ -742,11 +736,6 @@ if (exportKmapPngBtn) {
     });
 }
 
-if (wasmReady) {
-            Module.ccall('mantiq_setImplementation', null, ['number'], [impl]);
-        }
-    });
-});
 
 // ── Circuit Settings Dialog ──────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
