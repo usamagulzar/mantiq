@@ -142,6 +142,32 @@ function _applySnapshot(snap) {
 
     
     Object.assign(_state, snap);
+    
+    // AST Prover hook
+    if (snap.circuitJSON && window.mantiqImplementationMode === 3 && window.runASTProver) {
+        try {
+            let data = JSON.parse(snap.circuitJSON);
+            
+            // Run prover on orig and simp separately
+            let maxFanIn = window.mantiqMaxFanIn || 4;
+            let family = window.mantiqICFamily || 'TTL';
+            
+            let origResult = runASTProver(JSON.stringify(data.original), family, maxFanIn);
+            let simpResult = runASTProver(JSON.stringify(data.simplified), family, maxFanIn);
+            
+            if (origResult) data.original = origResult.ast;
+            if (simpResult) data.simplified = simpResult.ast;
+            
+            _state.circuitJSON = JSON.stringify(data);
+            
+            // Expose the IC breakdown globally so UI can show it
+            window._mantiqICBreakdown = simpResult ? { cost: simpResult.cost, family: family } : null;
+        } catch (e) {
+            console.error('AST Prover failed:', e);
+        }
+    } else {
+        window._mantiqICBreakdown = null; // Clear if not Minimal
+    }
     if (snap.expression !== undefined) _state.computedForExpr = snap.expression;
     // computedFields lists which heavy fields (truthTableJSON/kMapJSON/circuitJSON/
     // verilogGate/verilogDataflow) this snapshot actually refreshed. A field left out
@@ -337,14 +363,17 @@ const Module = {
             }
 
             case 'mantiq_setMaxFanIn': {
+                window.mantiqMaxFanIn = (args && args[0]) || 4;
                 const fanIn = (args && args[0]) || 0;
                 _workerWriteCall('_setMaxFanInAndSnapshot', [fanIn]);
                 return undefined;
             }
 
             case 'mantiq_setImplementation': {
+                window.mantiqImplementationMode = (args && args[0]) || 0;
                 const impl = (args && args[0]) || 0;
-                _workerWriteCall('_setImplementationAndSnapshot', [impl]);
+                // If 3, we still set C++ to 0 (default) so we have a clean AST to start from
+                _workerWriteCall('_setImplementationAndSnapshot', [impl === 3 ? 0 : impl]);
                 return undefined;
             }
 

@@ -774,6 +774,35 @@ document.addEventListener('DOMContentLoaded', () => {
         if (e.key === 'Escape' && overlay.style.display !== 'none') closeDialog();
     });
 
+    // Toggle family dropdown visibility
+    document.querySelectorAll('.impl-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const familyGroup = document.getElementById('dialog-ic-family-group');
+            if (familyGroup) {
+                familyGroup.style.display = (e.target.value === '3') ? 'block' : 'none';
+            }
+        });
+    });
+
+    // Family change
+    document.getElementById('dialog-family-select')?.addEventListener('change', (e) => {
+        window.mantiqICFamily = e.target.value;
+        if (window.mantiqImplementationMode === 3 && typeof wasmReady !== 'undefined' && wasmReady && typeof Module !== 'undefined') {
+            // Trigger a re-eval by setting mode again
+            Module.ccall('mantiq_setImplementation', null, ['number'], [3]);
+        }
+    });
+
+    // Eye icon toggle logic
+    let labelsVisible = true;
+    document.querySelectorAll('.toggle-ic-labels-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            labelsVisible = !labelsVisible;
+            document.body.classList.toggle('hide-ic-labels', !labelsVisible);
+            btn.style.opacity = labelsVisible ? '1' : '0.5';
+        });
+    });
+
     // Bind setting changes
     document.querySelectorAll('.impl-select').forEach(select => {
         select.addEventListener('change', (e) => {

@@ -67,6 +67,22 @@ function renderHTMLCircuit() {
         simpScroll.innerHTML = getLoadingOrEmptyMsg('No simplified circuit');
     }
     
+    // ── IC Badges (Minimal IC mode) ──────────────────────────────────────────
+    const isMinimal = window.mantiqImplementationMode === 3;
+    const icBadges = document.querySelectorAll('.ic-badge');
+    const eyeBtns = document.querySelectorAll('.toggle-ic-labels-btn');
+    icBadges.forEach(b => {
+        b.style.display = isMinimal ? 'inline-flex' : 'none';
+        if (isMinimal && window._mantiqICBreakdown) {
+            const n = window._mantiqICBreakdown.cost;
+            const fam = window._mantiqICBreakdown.family || 'TTL';
+            const numEl = b.querySelector('.ic-count-num');
+            if (numEl) numEl.textContent = n;
+            b.title = `${n} IC package${n !== 1 ? 's' : ''} (${fam})`;
+        }
+    });
+    eyeBtns.forEach(b => { b.style.display = isMinimal ? 'inline-flex' : 'none'; });
+    
     // Wire PNG Export
     const exportBtnOrig = document.getElementById('export-circuit-png-orig');
     if (exportBtnOrig) {
@@ -688,6 +704,12 @@ function generateSVGForCircuit(root, panelType = 'orig') {
             gates += `<text class="var-text" x="${node.x}" y="${node.y}" text-anchor="middle" dy="0.244em">${typeof formatSubscriptUnicode === 'function' ? formatSubscriptUnicode(node.value) : escapeHtml(node.value)}</text>`;
         } else {
             gates += getGateSVG(node.type, node.x, node.y, node.children ? node.children.length : 2);
+            // IC label (shown in Minimal IC mode)
+            if (node.icLabel) {
+                const isNotLike = (node.type === 'NOT') || ((node.type === 'NAND' || node.type === 'NOR') && node.children && node.children.length === 1);
+                const r = isNotLike ? 20 : (node.children.length === 3 ? 25 : (node.children.length === 4 ? 30 : 20));
+                gates += `<text class="ic-label" x="${node.x}" y="${node.y - r - 6}" text-anchor="middle" dominant-baseline="auto">${escapeHtml(node.icLabel)}</text>`;
+            }
         }
     }
     
