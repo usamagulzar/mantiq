@@ -709,10 +709,23 @@ function generateSVGForCircuit(root, panelType = 'orig') {
 function getGateSVG(type, x, y, numInputs = 2) {
     let svg = '';
 
-    // Single-input NAND/NOR acts as NOT — draw same size as NOT gate
+    // Single-input NAND/NOR acts as NOT — draw a small shorted NAND/NOR gate
     if ((type === 'NAND' || type === 'NOR') && numInputs === 1) {
-        svg += `<path class="gate-shape" d="M ${x-15} ${y-15} L ${x+10} ${y} L ${x-15} ${y+15} Z" />`;
-        svg += `<circle class="gate-shape" cx="${x+15}" cy="${y}" r="5" />`;
+        let sr = 15;
+        if (type === 'NAND') {
+            let c = x - 5;
+            svg += `<path class="gate-shape" d="M ${x-20} ${y-sr} L ${c} ${y-sr} A ${sr} ${sr} 0 0 1 ${c} ${y+sr} L ${x-20} ${y+sr} Z" />`;
+            svg += `<circle class="gate-shape" cx="${x+15}" cy="${y}" r="5" />`;
+            // Shorted input wires
+            svg += `<path class="circuit-wire" d="M ${x-15} ${y} L ${x-15} ${y-7} L ${x-20} ${y-7}" />`;
+            svg += `<path class="circuit-wire" d="M ${x-15} ${y} L ${x-15} ${y+7} L ${x-20} ${y+7}" />`;
+        } else {
+            svg += `<path class="gate-shape" d="M ${x-20} ${y-sr} Q ${x-10} ${y} ${x-20} ${y+sr} Q ${x-1} ${y+sr} ${x+10} ${y} Q ${x-1} ${y-sr} ${x-20} ${y-sr} Z" />`;
+            svg += `<circle class="gate-shape" cx="${x+15}" cy="${y}" r="5" />`;
+            // Shorted input wires
+            svg += `<path class="circuit-wire" d="M ${x-15} ${y} L ${x-15} ${y-7} L ${x-18} ${y-7}" />`;
+            svg += `<path class="circuit-wire" d="M ${x-15} ${y} L ${x-15} ${y+7} L ${x-18} ${y+7}" />`;
+        }
         return svg;
     }
 
@@ -1299,9 +1312,22 @@ function getSimGateSilkscreen(type, x, y, panelId = 'p', numInputs = 2) {
     const offset = 2.5; // Offset to draw silkscreen slightly outside the gate body
 
     // Single-input NAND/NOR acts as NOT
+    // Single-input NAND/NOR acts as NOT — draw a small shorted NAND/NOR gate
     if ((type === 'NAND' || type === 'NOR') && numInputs === 1) {
-        inner = `<path d="M ${x-20-offset} ${y-20-offset} L ${x+10+offset} ${y} L ${x-20-offset} ${y+20+offset} Z" />
-                 <circle cx="${x+16}" cy="${y}" r="${6+offset}" />`;
+        let sr = 15; // smaller base radius
+        let sro = sr + offset;
+        if (type === 'NAND') {
+            let c = x - 5;
+            inner = `<path d="M ${x-20-offset} ${y-sro} L ${c} ${y-sro} A ${sro} ${sro} 0 0 1 ${c} ${y+sro} L ${x-20-offset} ${y+sro} Z" />
+                     <circle cx="${x+15}" cy="${y}" r="${5+offset}" />
+                     <path d="M ${x-15} ${y} L ${x-15} ${y-7} L ${x-20} ${y-7}" stroke-linejoin="round" />
+                     <path d="M ${x-15} ${y} L ${x-15} ${y+7} L ${x-20} ${y+7}" stroke-linejoin="round" />`;
+        } else {
+            inner = `<path d="M ${x-20-offset} ${y-sro} Q ${x-10} ${y} ${x-20-offset} ${y+sro} Q ${x-1+offset} ${y+sro} ${x+10+offset} ${y} Q ${x-1+offset} ${y-sro} ${x-20-offset} ${y-sro} Z" />
+                     <circle cx="${x+15}" cy="${y}" r="${5+offset}" />
+                     <path d="M ${x-15} ${y} L ${x-15} ${y-7} L ${x-18} ${y-7}" stroke-linejoin="round" />
+                     <path d="M ${x-15} ${y} L ${x-15} ${y+7} L ${x-18} ${y+7}" stroke-linejoin="round" />`;
+        }
         return `<g fill="none" stroke="#ffffff" stroke-width="1.2" opacity="0.6" filter="url(#silkscreen-${panelId})">${inner}</g>`;
     }
 
@@ -1341,10 +1367,21 @@ function getSimGateSilkscreen(type, x, y, panelId = 'p', numInputs = 2) {
 function getSimGateShape(type, x, y, panelId = 'p', numInputs = 2) {
     let inner = '';
 
-    // Single-input NAND/NOR acts as NOT
+    // Single-input NAND/NOR acts as NOT — draw a small shorted NAND/NOR gate
     if ((type === 'NAND' || type === 'NOR') && numInputs === 1) {
-        inner = `<path d="M ${x-20} ${y-20} L ${x+10} ${y} L ${x-20} ${y+20} Z" />
-                 <circle cx="${x+16}" cy="${y}" r="6" />`;
+        let sr = 15;
+        if (type === 'NAND') {
+            let c = x - 5;
+            inner = `<path d="M ${x-20} ${y-sr} L ${c} ${y-sr} A ${sr} ${sr} 0 0 1 ${c} ${y+sr} L ${x-20} ${y+sr} Z" />
+                     <circle cx="${x+15}" cy="${y}" r="5" />
+                     <path d="M ${x-15} ${y} L ${x-15} ${y-7} L ${x-20} ${y-7}" stroke="#111111" stroke-width="2" fill="none" />
+                     <path d="M ${x-15} ${y} L ${x-15} ${y+7} L ${x-20} ${y+7}" stroke="#111111" stroke-width="2" fill="none" />`;
+        } else {
+            inner = `<path d="M ${x-20} ${y-sr} Q ${x-10} ${y} ${x-20} ${y+sr} Q ${x-1} ${y+sr} ${x+10} ${y} Q ${x-1} ${y-sr} ${x-20} ${y-sr} Z" />
+                     <circle cx="${x+15}" cy="${y}" r="5" />
+                     <path d="M ${x-15} ${y} L ${x-15} ${y-7} L ${x-18} ${y-7}" stroke="#111111" stroke-width="2" fill="none" />
+                     <path d="M ${x-15} ${y} L ${x-15} ${y+7} L ${x-18} ${y+7}" stroke="#111111" stroke-width="2" fill="none" />`;
+        }
         return `<g fill="#111111" filter="url(#plastic-3d-${panelId})">${inner}</g>`;
     }
 
