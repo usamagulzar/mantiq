@@ -356,14 +356,7 @@ if (elements.sopPosPill) {
     });
 }
 
-document.querySelectorAll('.fanin-select').forEach(select => {
-    select.addEventListener('change', (e) => {
-        const fanIn = parseInt(e.target.value, 10);
-        // Sync all other dropdowns
-        document.querySelectorAll('.fanin-select').forEach(s => {
-            if (s !== e.target) s.value = e.target.value;
-        });
-        if (wasmReady) {
+if (wasmReady) {
             Module.ccall('mantiq_setMaxFanIn', null, ['number'], [fanIn]);
         }
     });
@@ -749,13 +742,7 @@ if (exportKmapPngBtn) {
     });
 }
 
-document.querySelectorAll('.impl-select').forEach(select => {
-    select.addEventListener('change', (e) => {
-        const impl = parseInt(e.target.value, 10);
-        document.querySelectorAll('.impl-select').forEach(s => {
-            if (s !== e.target) s.value = e.target.value;
-        });
-        if (wasmReady) {
+if (wasmReady) {
             Module.ccall('mantiq_setImplementation', null, ['number'], [impl]);
         }
     });
@@ -767,12 +754,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!overlay) return;
 
     function openDialog() {
-        overlay.classList.add('open');
-        overlay.setAttribute('aria-hidden', 'false');
+        overlay.style.display = 'flex';
+        overlay.classList.add('active');
+        setTimeout(() => overlay.style.opacity = '1', 10);
     }
+    
     function closeDialog() {
-        overlay.classList.remove('open');
-        overlay.setAttribute('aria-hidden', 'true');
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+            overlay.classList.remove('active');
+            overlay.style.display = 'none';
+        }, 200);
     }
 
     // Gear buttons on all 4 panels open the shared dialog
@@ -790,6 +782,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && overlay.classList.contains('open')) closeDialog();
+        if (e.key === 'Escape' && overlay.style.display !== 'none') closeDialog();
+    });
+
+    // Bind setting changes
+    document.querySelectorAll('.impl-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const impl = parseInt(e.target.value, 10);
+            document.querySelectorAll('.impl-select').forEach(s => {
+                if (s !== e.target) s.value = e.target.value;
+            });
+            if (typeof wasmReady !== 'undefined' && wasmReady && typeof Module !== 'undefined') {
+                Module.ccall('mantiq_setImplementation', null, ['number'], [impl]);
+            }
+        });
+    });
+
+    document.querySelectorAll('.fanin-select').forEach(select => {
+        select.addEventListener('change', (e) => {
+            const fanIn = parseInt(e.target.value, 10);
+            document.querySelectorAll('.fanin-select').forEach(s => {
+                if (s !== e.target) s.value = e.target.value;
+            });
+            if (typeof wasmReady !== 'undefined' && wasmReady && typeof Module !== 'undefined') {
+                Module.ccall('mantiq_setMaxFanIn', null, ['number'], [fanIn]);
+            }
+        });
     });
 });

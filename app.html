@@ -212,70 +212,6 @@
   background: var(--glass-bg, rgba(255,255,255,0.06));
   color: var(--text-primary, #fff);
 }
-.circuit-settings-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  z-index: 9999;
-  align-items: center;
-  justify-content: center;
-  backdrop-filter: blur(4px);
-}
-.circuit-settings-overlay.open {
-  display: flex;
-}
-.circuit-settings-modal {
-  width: min(340px, 90vw);
-  border-radius: 14px;
-  padding: 20px 22px 24px;
-  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.circuit-settings-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 14px;
-}
-.circuit-settings-header h3 {
-  font-size: 15px;
-  font-weight: 600;
-  margin: 0;
-}
-.circuit-settings-close {
-  background: transparent;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: var(--text-secondary, #aaa);
-  line-height: 1;
-  padding: 2px 4px;
-  border-radius: 4px;
-  -webkit-tap-highlight-color: transparent;
-}
-.circuit-settings-close:hover { color: var(--text-primary, #fff); }
-.circuit-settings-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text-secondary, #aaa);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  display: block;
-  margin-bottom: 6px;
-}
-.circuit-settings-select {
-  width: 100%;
-  padding: 8px 10px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color, rgba(255,255,255,0.12));
-  background: var(--input-bg, rgba(255,255,255,0.06));
-  color: var(--text-primary, #fff);
-  font-size: 14px;
-  cursor: pointer;
-}
 </style>
 
 </head>
@@ -1579,25 +1515,36 @@
     </script>
   
 <!-- Circuit Settings Dialog -->
-<div id="circuit-settings-dialog" class="circuit-settings-overlay" aria-hidden="true">
-  <div class="circuit-settings-modal glass-panel">
-    <div class="circuit-settings-header">
-      <h3>Circuit Settings</h3>
-      <button class="circuit-settings-close" id="circuit-settings-close" aria-label="Close">&times;</button>
+<div id="circuit-settings-dialog" class="modal-overlay" style="display: none;">
+  <div class="modal sm">
+    <div class="modal-header">
+      <div class="modal-header-info">
+        <div class="modal-header-icon">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </div>
+        <h3>Circuit Settings</h3>
+      </div>
+      <button class="modal-close" id="circuit-settings-close" aria-label="Close">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
     </div>
-    <div class="circuit-settings-body">
-      <label class="circuit-settings-label">Gate Implementation</label>
-      <select class="impl-select circuit-settings-select" id="dialog-impl-select">
-        <option value="0" selected>Default (AND / OR / NOT)</option>
-        <option value="1">NAND-NAND</option>
-        <option value="2">NOR-NOR</option>
-      </select>
-      <label class="circuit-settings-label" style="margin-top:14px;">Max Fan-In</label>
-      <select class="fanin-select circuit-settings-select" id="dialog-fanin-select">
-        <option value="2">2 Inputs</option>
-        <option value="3">3 Inputs</option>
-        <option value="4" selected>4 Inputs</option>
-      </select>
+    <div class="modal-body" style="display:flex; flex-direction:column; gap:16px;">
+      <div class="input-group">
+        <label style="font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; display: block;">Gate Implementation</label>
+        <select class="impl-select" id="dialog-impl-select" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-primary); outline: none; cursor: pointer;">
+          <option value="0" selected>Default (AND / OR / NOT)</option>
+          <option value="1">NAND-NAND</option>
+          <option value="2">NOR-NOR</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label style="font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 6px; display: block;">Max Fan-In</label>
+        <select class="fanin-select" id="dialog-fanin-select" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-primary); outline: none; cursor: pointer;">
+          <option value="2">2 Inputs</option>
+          <option value="3">3 Inputs</option>
+          <option value="4" selected>4 Inputs</option>
+        </select>
+      </div>
     </div>
   </div>
 </div>
